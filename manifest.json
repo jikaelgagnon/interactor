@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Greenstick Test",
+    "version": "1.0",
+    "description": "Logs the current tab's URL to the console",
+    "permissions": ["activeTab", "tabs"],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["interactor.js","content.js"]
+      }
+    ],
+    "background": {
+      "service_worker": "background.js"
+    }
+  }
