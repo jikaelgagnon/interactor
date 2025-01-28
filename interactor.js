@@ -41,7 +41,7 @@ Interactor.prototype = {
         // Argument Assignment          // Type Checks                                                                          // Default Values
         interactor.interactions       = typeof(config.interactions)               == "boolean"    ? config.interactions        : true,
         interactor.interactionElement = typeof(config.interactionElement)         == "string"     ? config.interactionElement :'interaction',
-        interactor.interactionEvents  = Array.isArray(config.interactionEvents)   === true        ? config.interactionEvents  : ['mouseup', 'touchend'],
+        interactor.interactionEvents  = Array.isArray(config.interactionEvents)   === true        ? config.interactionEvents  : ['click'],
         interactor.conversions        = typeof(config.conversions)                == "boolean"    ? config.conversions        : true,
         interactor.conversionElement  = typeof(config.conversionElement)          == "string"     ? config.conversionElement  : 'conversion',
         interactor.conversionEvents   = Array.isArray(config.conversionEvents)    === true        ? config.conversionEvents   : ['mouseup', 'touchend'],
@@ -51,6 +51,7 @@ Interactor.prototype = {
         interactor.records            = [],
         interactor.session            = {},
         interactor.loadTime           = new Date();
+        interactor.cssSelectors       = Array.isArray(config.cssSelectors)   === true        ? config.cssSelectors       : [],
         
         // Initialize Session
         interactor.__initializeSession__();
@@ -62,38 +63,58 @@ Interactor.prototype = {
 
     // Create Events to Track
     __bindEvents__: function () {
-        console.log(`binding events for ${this.interactionElement}`);
         var interactor  = this;
+        console.log(interactor.cssSelectors);
+        const selectorString = this.cssSelectors.join(", ");
+        console.log(selectorString);
 
         // Set Interaction Capture
-        /*
+
+                /*
         Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
         and adds an event listener to the body of the document for each. Once these events are triggered,
         the code checks whether the element has class "interaction". If it does, the event is stored
         */
-        if (interactor.interactions === true) {
+        if (this.cssSelectors) {
+            console.log("css selectors detected. starting binding")
             for (var i = 0; i < interactor.interactionEvents.length; i++) {
                 document.querySelector('body').addEventListener(interactor.interactionEvents[i], function (e) {
                     e.stopPropagation();
-                    if (e.target.classList.contains(interactor.interactionElement) 
-                        || e.target.id === interactor.interactionElement) {
+                    if (e.target.matches(selectorString)) {
                         interactor.__addInteraction__(e, "interaction");
                     }
                 });
             }   
         }
 
-        // Set Conversion Capture
-        if (interactor.conversions === true) {
-            for (var i = 0; i < interactor.conversionEvents.length; i++) {
-                document.querySelector('body').addEventListener(interactor.conversionEvents[i], function (e) {
-                    e.stopPropagation();
-                    if (e.target.classList.contains(interactor.conversionElement)) {
-                        interactor.__addInteraction__(e, "conversion");
-                    }
-                });
-            }   
-        }
+        // /*
+        // Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
+        // and adds an event listener to the body of the document for each. Once these events are triggered,
+        // the code checks whether the element has class "interaction". If it does, the event is stored
+        // */
+        // if (interactor.interactions === true) {
+        //     for (var i = 0; i < interactor.interactionEvents.length; i++) {
+        //         document.querySelector('body').addEventListener(interactor.interactionEvents[i], function (e) {
+        //             e.stopPropagation();
+        //             if (e.target.classList.contains(interactor.interactionElement) 
+        //                 || e.target.id === interactor.interactionElement) {
+        //                 interactor.__addInteraction__(e, "interaction");
+        //             }
+        //         });
+        //     }   
+        // }
+
+        // // Set Conversion Capture
+        // if (interactor.conversions === true) {
+        //     for (var i = 0; i < interactor.conversionEvents.length; i++) {
+        //         document.querySelector('body').addEventListener(interactor.conversionEvents[i], function (e) {
+        //             e.stopPropagation();
+        //             if (e.target.classList.contains(interactor.conversionElement)) {
+        //                 interactor.__addInteraction__(e, "conversion");
+        //             }
+        //         });
+        //     }   
+        // }
 
         // Bind onbeforeunload Event
         window.onbeforeunload = function (e) {
