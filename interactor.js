@@ -64,7 +64,6 @@ Interactor.prototype = {
     // Create Events to Track
     __bindEvents__: function () {
         var interactor  = this;
-        console.log(interactor.cssSelectors);
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
