@@ -1,3 +1,4 @@
+console.log('this page was updated!');
 let selectors;
 
 const url = chrome.runtime.getURL('selectors.json');

@@ -30,56 +30,52 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Implement DB functionality
 // Change interactor.endpoint to be a DB
 
-var Interactor = function (config) {
-    // Call Initialization on Interactor Call
-    this.__init__(config);
-};
-
-Interactor.prototype = {
-
+class Interactor {
+    constructor(config) {
+        // Call Initialization on Interactor Call
+        this.__init__(config);
+    }
     // Initialization
-    __init__: function (config) {
+    __init__(config) {
 
         var interactor = this;
-        
+
         // Argument Assignment          // Type Checks                                                                          // Default Values
-        interactor.interactions       = typeof(config.interactions)               == "boolean"    ? config.interactions        : true,
-        interactor.interactionElement = typeof(config.interactionElement)         == "string"     ? config.interactionElement :'interaction',
-        interactor.interactionEvents  = Array.isArray(config.interactionEvents)   === true        ? config.interactionEvents  : ['click'],
-        interactor.conversions        = typeof(config.conversions)                == "boolean"    ? config.conversions        : true,
-        interactor.conversionElement  = typeof(config.conversionElement)          == "string"     ? config.conversionElement  : 'conversion',
-        interactor.conversionEvents   = Array.isArray(config.conversionEvents)    === true        ? config.conversionEvents   : ['mouseup', 'touchend'],
-        interactor.endpoint           = typeof(config.endpoint)                   == "string"     ? config.endpoint           : 'https://webhook.site/f7128e87-57cc-42b7-80db-ca4a56e25451',
-        interactor.async              = typeof(config.async)                      == "boolean"    ? config.async              : true,
-        interactor.debug              = typeof(config.debug)                      == "boolean"    ? config.debug              : true,
-        interactor.records            = [],
-        interactor.session            = {},
-        interactor.loadTime           = new Date();
-        interactor.cssSelectors       = Array.isArray(config.cssSelectors)   === true        ? config.cssSelectors       : [],
-        
-        // Initialize Session
-        interactor.__initializeSession__();
+        interactor.interactions = typeof (config.interactions) == "boolean" ? config.interactions : true,
+            interactor.interactionElement = typeof (config.interactionElement) == "string" ? config.interactionElement : 'interaction',
+            interactor.interactionEvents = Array.isArray(config.interactionEvents) === true ? config.interactionEvents : ['click'],
+            interactor.conversions = typeof (config.conversions) == "boolean" ? config.conversions : true,
+            interactor.conversionElement = typeof (config.conversionElement) == "string" ? config.conversionElement : 'conversion',
+            interactor.conversionEvents = Array.isArray(config.conversionEvents) === true ? config.conversionEvents : ['mouseup', 'touchend'],
+            interactor.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'https://webhook.site/f7128e87-57cc-42b7-80db-ca4a56e25451',
+            interactor.async = typeof (config.async) == "boolean" ? config.async : true,
+            interactor.debug = typeof (config.debug) == "boolean" ? config.debug : true,
+            interactor.records = [],
+            interactor.session = {},
+            interactor.loadTime = new Date();
+        interactor.cssSelectors = Array.isArray(config.cssSelectors) === true ? config.cssSelectors : [],
+
+            // Initialize Session
+            interactor.__initializeSession__();
         // Call Event Binding Method
         interactor.__bindEvents__();
-        
-        return interactor;
-    },
 
+        return interactor;
+    }
     // Create Events to Track
-    __bindEvents__: function () {
-        var interactor  = this;
+    __bindEvents__() {
+        var interactor = this;
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
         // Set Interaction Capture
-
-                /*
-        Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
-        and adds an event listener to the body of the document for each. Once these events are triggered,
-        the code checks whether the element has class "interaction". If it does, the event is stored
-        */
+        /*
+Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
+and adds an event listener to the body of the document for each. Once these events are triggered,
+the code checks whether the element has class "interaction". If it does, the event is stored
+*/
         if (this.cssSelectors) {
-            console.log("css selectors detected. starting binding")
+            console.log("css selectors detected. starting binding");
             for (var i = 0; i < interactor.interactionEvents.length; i++) {
                 document.querySelector('body').addEventListener(interactor.interactionEvents[i], function (e) {
                     e.stopPropagation();
@@ -87,39 +83,37 @@ Interactor.prototype = {
                         interactor.__addInteraction__(e, "interaction");
                     }
                 });
-            }   
+            }
         }
 
 
         // Send interactions on unload
         window.addEventListener("beforeunload", e => interactor.__sendInteractions__());
-        
+
         return interactor;
-    },
-
+    }
     // Add Interaction Object Triggered By Events to Records Array
-    __addInteraction__: function (e, type) {
-            
-        var interactor  = this,
+    __addInteraction__(e, type) {
 
+        var interactor = this,
             // Interaction Object
-            interaction     = {
-                type            : type,
-                event           : e.type,
-                targetTag       : e.target.nodeName,
-                targetClasses   : e.target.className,
-                content         : e.target.innerText,
-                clientPosition  : {
-                    x               : e.clientX,
-                    y               : e.clientY
+            interaction = {
+                type: type,
+                event: e.type,
+                targetTag: e.target.nodeName,
+                targetClasses: e.target.className,
+                content: e.target.innerText,
+                clientPosition: {
+                    x: e.clientX,
+                    y: e.clientY
                 },
-                screenPosition  : {
-                    x               : e.screenX,
-                    y               : e.screenY
+                screenPosition: {
+                    x: e.screenX,
+                    y: e.screenY
                 },
-                createdAt       : new Date()
+                createdAt: new Date()
             };
-        
+
         // Insert into Records Array
         interactor.records.push(interaction);
 
@@ -131,64 +125,59 @@ Interactor.prototype = {
         }
 
         return interactor;
-    },
-
+    }
     // Generate Session Object & Assign to Session Property
-    __initializeSession__: function () {
+    __initializeSession__() {
         var interactor = this;
 
         // Assign Session Property
-        interactor.session  = {
-            loadTime        : interactor.loadTime,
-            unloadTime      : new Date(),
-            language        : window.navigator.language,
-            platform        : window.navigator.platform,
-            port            : window.location.port,
-            clientStart     : {
-                name            : window.navigator.appVersion,
-                innerWidth      : window.innerWidth,
-                innerHeight     : window.innerHeight,
-                outerWidth      : window.outerWidth,
-                outerHeight     : window.outerHeight
+        interactor.session = {
+            loadTime: interactor.loadTime,
+            unloadTime: new Date(),
+            language: window.navigator.language,
+            platform: window.navigator.platform,
+            port: window.location.port,
+            clientStart: {
+                name: window.navigator.appVersion,
+                innerWidth: window.innerWidth,
+                innerHeight: window.innerHeight,
+                outerWidth: window.outerWidth,
+                outerHeight: window.outerHeight
             },
-            page            : {
-                location        : window.location.pathname,
-                href            : window.location.href,
-                origin          : window.location.origin,
-                title           : document.title
+            page: {
+                location: window.location.pathname,
+                href: window.location.href,
+                origin: window.location.origin,
+                title: document.title
             },
-            endpoint        : interactor.endpoint
+            endpoint: interactor.endpoint
         };
 
         return interactor;
-    },
-
+    }
     // Insert End of Session Values into Session Property
-    __closeSession__: function () {
+    __closeSession__() {
 
         var interactor = this;
 
         // Assign Session Properties
-        interactor.session.unloadTime   = new Date();
+        interactor.session.unloadTime = new Date();
         interactor.session.interactions = interactor.records;
-        interactor.session.clientEnd    = {
-            name            : window.navigator.appVersion,
-            innerWidth      : window.innerWidth,
-            innerHeight     : window.innerHeight,
-            outerWidth      : window.outerWidth,
-            outerHeight     : window.outerHeight
+        interactor.session.clientEnd = {
+            name: window.navigator.appVersion,
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            outerWidth: window.outerWidth,
+            outerHeight: window.outerHeight
         };
 
         return interactor;
-    },
-
-
-
+    }
     // Gather Additional Data and Send Interaction(s) to Server
-    __sendInteractions__: function () {
-    
-        var interactor  = this;
-            
+    __sendInteractions__() {
+
+        var interactor = this;
+
         // Close Session
         interactor.__closeSession__();
 
@@ -196,8 +185,9 @@ Interactor.prototype = {
             type: 'text/plain; charset=UTF-8'
         });
         navigator.sendBeacon(interactor.endpoint, blob);
-        
+
         return interactor;
     }
+}
 
-};
+
