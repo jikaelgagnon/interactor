@@ -26,6 +26,10 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// TODO:
+// Implement DB functionality
+// Change interactor.endpoint to be a DB
+
 var Interactor = function (config) {
     // Call Initialization on Interactor Call
     this.__init__(config);
@@ -45,7 +49,7 @@ Interactor.prototype = {
         interactor.conversions        = typeof(config.conversions)                == "boolean"    ? config.conversions        : true,
         interactor.conversionElement  = typeof(config.conversionElement)          == "string"     ? config.conversionElement  : 'conversion',
         interactor.conversionEvents   = Array.isArray(config.conversionEvents)    === true        ? config.conversionEvents   : ['mouseup', 'touchend'],
-        interactor.endpoint           = typeof(config.endpoint)                   == "string"     ? config.endpoint           : '/interactions',
+        interactor.endpoint           = typeof(config.endpoint)                   == "string"     ? config.endpoint           : 'https://webhook.site/f7128e87-57cc-42b7-80db-ca4a56e25451',
         interactor.async              = typeof(config.async)                      == "boolean"    ? config.async              : true,
         interactor.debug              = typeof(config.debug)                      == "boolean"    ? config.debug              : true,
         interactor.records            = [],
@@ -86,39 +90,9 @@ Interactor.prototype = {
             }   
         }
 
-        // /*
-        // Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
-        // and adds an event listener to the body of the document for each. Once these events are triggered,
-        // the code checks whether the element has class "interaction". If it does, the event is stored
-        // */
-        // if (interactor.interactions === true) {
-        //     for (var i = 0; i < interactor.interactionEvents.length; i++) {
-        //         document.querySelector('body').addEventListener(interactor.interactionEvents[i], function (e) {
-        //             e.stopPropagation();
-        //             if (e.target.classList.contains(interactor.interactionElement) 
-        //                 || e.target.id === interactor.interactionElement) {
-        //                 interactor.__addInteraction__(e, "interaction");
-        //             }
-        //         });
-        //     }   
-        // }
 
-        // // Set Conversion Capture
-        // if (interactor.conversions === true) {
-        //     for (var i = 0; i < interactor.conversionEvents.length; i++) {
-        //         document.querySelector('body').addEventListener(interactor.conversionEvents[i], function (e) {
-        //             e.stopPropagation();
-        //             if (e.target.classList.contains(interactor.conversionElement)) {
-        //                 interactor.__addInteraction__(e, "conversion");
-        //             }
-        //         });
-        //     }   
-        // }
-
-        // Bind onbeforeunload Event
-        window.onbeforeunload = function (e) {
-            interactor.__sendInteractions__();
-        };
+        // Send interactions on unload
+        window.addEventListener("beforeunload", e => interactor.__sendInteractions__());
         
         return interactor;
     },
@@ -209,21 +183,20 @@ Interactor.prototype = {
     },
 
 
+
     // Gather Additional Data and Send Interaction(s) to Server
     __sendInteractions__: function () {
-        
-        var interactor  = this,
-            // Initialize Cross Header Request
-            xhr         = new XMLHttpRequest();
+    
+        var interactor  = this;
             
         // Close Session
         interactor.__closeSession__();
 
-        // Post Session Data Serialized as JSON
-        xhr.open('POST', interactor.endpoint, interactor.async);
-        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-        xhr.send(JSON.stringify(interactor.session));
-
+        const blob = new Blob([JSON.stringify(interactor.session)], {
+            type: 'text/plain; charset=UTF-8'
+        });
+        navigator.sendBeacon(interactor.endpoint, blob);
+        
         return interactor;
     }
 
