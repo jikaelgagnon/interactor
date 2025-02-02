@@ -27,8 +27,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // TODO:
-// Implement DB functionality
-// Change interactor.endpoint to be a DB
+// Figure out why certain elements on youtube don't log events...
+// Seems to be dynamically loaded elements (ie. shadow dom...)
+
+
 
 class Interactor {
     constructor(config) {
@@ -52,8 +54,38 @@ class Interactor {
             // Call Event Binding Method
             this.__bindEvents__();
     }
+
+    
     // Create Events to Track
     __bindEvents__() {
+
+
+        // NOTE: Trying to figure out why certain elements on YT don't log events...
+        // const observerConfig = {
+        //     attributes: true,
+        //     childList: true,
+        //     subtree: true,
+        //   };
+
+        // const observerCallback = (mutationsList, observer) => {
+        //     for (var mutation of mutationsList) {
+        //       if (mutation.type === 'childList') {
+        //         console.log('A child node has been added or removed.');
+        //         mutation.addedNodes.forEach((node) => {
+        //             if (node.nodeType == 1 &&  node.matches(selectorString))
+        //             {
+        //                 console.log('a node of interest was loaded dynamically');
+        //             }
+        //         })
+        //       }
+        //     }
+        //   };
+
+        // const observer = new MutationObserver(observerCallback);
+
+        // observer.observe(document.body, observerConfig);
+        // console.log('observing');
+
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
