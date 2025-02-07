@@ -4,12 +4,12 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-    origin: 'http://localhost:5500', // Set to your frontend's origin
-    credentials: true // Allow cookies and authorization headers
+    origin: 'http://localhost:5500', 
+    credentials: true 
 }));
 
 // app.use(cors({
-//     origin: '*',  // ⚠️ This will not work with credentials: true
+//     origin: '*',  
 //     credentials: false
 // }));
 

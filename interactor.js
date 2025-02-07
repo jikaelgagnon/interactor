@@ -59,42 +59,26 @@ class Interactor {
     // Create Events to Track
     __bindEvents__() {
 
-
-        // NOTE: Trying to figure out why certain elements on YT don't log events...
-        // const observerConfig = {
-        //     attributes: true,
-        //     childList: true,
-        //     subtree: true,
-        //   };
-
-        // const observerCallback = (mutationsList, observer) => {
-        //     for (var mutation of mutationsList) {
-        //       if (mutation.type === 'childList') {
-        //         console.log('A child node has been added or removed.');
-        //         mutation.addedNodes.forEach((node) => {
-        //             if (node.nodeType == 1 &&  node.matches(selectorString))
-        //             {
-        //                 console.log('a node of interest was loaded dynamically');
-        //             }
-        //         })
-        //       }
-        //     }
-        //   };
-
-        // const observer = new MutationObserver(observerCallback);
-
-        // observer.observe(document.body, observerConfig);
-        // console.log('observing');
-
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
+        navigation.addEventListener("navigate", event => {
+            // Get the navigation type (reload, push, replace, etc.)
+            console.log(event.navigationType);
+            
+            // Get destination info
+            console.log(event.destination.url);
+            console.log(event.destination.sameDocument);
+
+            this.__addNavigation__(event);
+        });
+
         // Set Interaction Capture
         /*
-Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
-and adds an event listener to the body of the document for each. Once these events are triggered,
-the code checks whether the element has class "interaction". If it does, the event is stored
-*/
+        Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
+        and adds an event listener to the body of the document for each. Once these events are triggered,
+        the code checks whether the element has class "interaction". If it does, the event is stored
+        */
         if (this.cssSelectors) {
             console.log("css selectors detected. starting binding");
             for (let i = 0; i < this.interactionEvents.length; i++) {
@@ -111,6 +95,29 @@ the code checks whether the element has class "interaction". If it does, the eve
         // Send interactions on unload
         window.addEventListener("beforeunload", e => this.__sendInteractions__());
     }
+
+        __addNavigation__(nEvent) {
+            // Interaction Object
+            const navigation = {
+                type: nEvent.type,
+                destinationURL: nEvent.destination.url,
+                sameDocument: nEvent.destination.url,
+                createdAt: new Date()
+            };
+    
+            // Insert into Records Array
+            this.records.push(navigation);
+    
+            // Log Interaction if Debugging
+            if (this.debug) {
+                // Close Session & Log to Console
+                this.__closeSession__();
+                console.log("Session:\n", this.session);
+            }
+    
+        }
+        // 
+
     // Add Interaction Object Triggered By Events to Records Array
     __addInteraction__(e, type) {
         // Interaction Object
@@ -133,6 +140,9 @@ the code checks whether the element has class "interaction". If it does, the eve
 
         // Insert into Records Array
         this.records.push(interaction);
+
+        console.log("Logging all records");
+        console.log(this.records);
 
         // Log Interaction if Debugging
         if (this.debug) {
