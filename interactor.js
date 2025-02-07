@@ -27,8 +27,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // TODO:
-// Figure out why certain elements on youtube don't log events...
-// Seems to be dynamically loaded elements (ie. shadow dom...)
+// 1. Prevent duplicate navigations on yt shorts
+// 2. Prevent cases when a navigation and an interaction are logged for the same event
 
 
 
@@ -62,15 +62,9 @@ class Interactor {
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
-        navigation.addEventListener("navigate", event => {
-            // Get the navigation type (reload, push, replace, etc.)
-            console.log(event.navigationType);
-            
-            // Get destination info
-            console.log(event.destination.url);
-            console.log(event.destination.sameDocument);
-
-            this.__addNavigation__(event);
+        // Detects navigation events...
+        navigation.addEventListener("navigate", navEvent => {
+            this.__addRecord__(this.__createNavigationRecord__(navEvent));
         });
 
         // Set Interaction Capture
@@ -85,7 +79,7 @@ class Interactor {
                 document.querySelector('body').addEventListener(this.interactionEvents[i], function (e) {
                     e.stopPropagation();
                     if (e.target.matches(selectorString)) {
-                        this.__addInteraction__(e, "interaction");
+                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
                     }
                 }.bind(this));
             }
@@ -96,30 +90,25 @@ class Interactor {
         window.addEventListener("beforeunload", e => this.__sendInteractions__());
     }
 
-        __addNavigation__(nEvent) {
-            // Interaction Object
+    __debuggingLog__(record){
+         // Log Interaction if Debugging
+         if (this.debug) {
+            console.log(record);
+        }
+    }
+
+    __createNavigationRecord__(navEvent) {
+            // Navigation Object
             const navigation = {
-                type: nEvent.type,
-                destinationURL: nEvent.destination.url,
-                sameDocument: nEvent.destination.url,
+                type: navEvent.type,
+                destinationURL: navEvent.destination.url,
                 createdAt: new Date()
             };
-    
-            // Insert into Records Array
-            this.records.push(navigation);
-    
-            // Log Interaction if Debugging
-            if (this.debug) {
-                // Close Session & Log to Console
-                this.__closeSession__();
-                console.log("Session:\n", this.session);
-            }
-    
-        }
-        // 
 
-    // Add Interaction Object Triggered By Events to Records Array
-    __addInteraction__(e, type) {
+            return navigation;
+    }
+
+    __createInteractionRecord__(e, type) {
         // Interaction Object
         const interaction = {
             type: type,
@@ -138,19 +127,13 @@ class Interactor {
             createdAt: new Date()
         };
 
-        // Insert into Records Array
-        this.records.push(interaction);
+        return interaction;
+    }
 
-        console.log("Logging all records");
-        console.log(this.records);
-
-        // Log Interaction if Debugging
-        if (this.debug) {
-            // Close Session & Log to Console
-            this.__closeSession__();
-            console.log("Session:\n", this.session);
-        }
-
+    __addRecord__(record)
+    {
+        this.records.push(record);
+        this.__debuggingLog__(record);
     }
     // Generate Session Object & Assign to Session Property
     __initializeSession__() {
@@ -195,6 +178,8 @@ class Interactor {
     __sendInteractions__() {
         // Close Session
         this.__closeSession__();
+
+        console.log("Sending events to endpoint...");
 
         const blob = new Blob([JSON.stringify(this.session)], {
             type: 'application/json'
