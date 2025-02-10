@@ -70,62 +70,39 @@ class Interactor {
     // }
 
     
-    // Instead of doing this in increments, do it all at once...
-    addAllInteractions() {
-        let numFound = 0;
-
-        for (const s of this.cssSelectors){
-            let elements = document.querySelectorAll(s);
-            if (elements.length > 0){
-                numFound++;
+    addListenersToMutations() {
+        const selectorString = this.cssSelectors.join(", ");
+        const elements = document.querySelectorAll(selectorString);
+        elements.forEach(e => e.style.border = '2px solid red');
+        elements.forEach(element => {
+            for (let i = 0; i < this.interactionEvents.length; i++) {
+                element.addEventListener(this.interactionEvents[i], function (e) {
+                    // e.stopPropagation();
+                    console.log("You clicked an element of interest");
+                    this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+                }.bind(this));
             }
-        }
-
-        let allDetected = numFound === this.cssSelectors.length;
-
-        if (allDetected){
-            const selectorString = this.cssSelectors.join(", ");
-            const elements = document.querySelectorAll(selectorString);
-            elements.forEach(e => e.style.border = '2px solid red');
-            elements.forEach(element => {
-                for (let i = 0; i < this.interactionEvents.length; i++) {
-                    element.addEventListener(this.interactionEvents[i], function (e) {
-                        // e.stopPropagation();
-                        console.log("You clicked an element of interest");
-                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
-                    }.bind(this));
-                }
-            });
-            
-        }
-
-        return allDetected;
+        });
     }
       
     
     // Create Events to Track
     __bindEvents__() {
 
-             // Initial check
-        if (!this.addAllInteractions()) {
-            const observer = new MutationObserver(function(mutations, obs){
-            if (this.addAllInteractions()) {
-                console.log("disconnecting mutation observer");
-                obs.disconnect(); // Stop observing once all elements found
-            }
-            }.bind(this));
-        
-            // Start observing the entire document body for added nodes
-            observer.observe(document.body, {
-            childList: true,
-            subtree: true
-            });
-        }
-          
-          
 
-        const selectorString = this.cssSelectors.join(", ");
-        console.log(selectorString);
+        const observer = new MutationObserver(function(mutations, obs){
+            this.addListenersToMutations();
+        }.bind(this));
+        
+        // Start observing the entire document body for added nodes
+        observer.observe(document.body, {
+        childList: true,
+        subtree: true
+        });
+
+
+        // const selectorString = this.cssSelectors.join(", ");
+        // console.log(selectorString);
 
         // Detects navigation events...
         // navigation.addEventListener("navigate", navEvent => {

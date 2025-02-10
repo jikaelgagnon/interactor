@@ -1,5 +1,6 @@
 [
     "#chip-container",
     "#endpoint",
-    "#logo-icon"
+    "#logo-icon",
+    "#content"
 ]
