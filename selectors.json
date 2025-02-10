@@ -1,3 +1,7 @@
 [
-    ":not(a)"
+    "#chip-container",
+    "#endpoint",
+    "#logo-icon",
+    "a",
+    "#endpoint"
 ]

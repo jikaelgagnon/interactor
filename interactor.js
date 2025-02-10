@@ -52,18 +52,72 @@ class Interactor {
             // Initialize Session
             this.__initializeSession__();
             // Call Event Binding Method
+            console.log("binding events");
             this.__bindEvents__();
+            console.log("done binding events");
+            // this.__showInteractions__();
     }
 
+    // __showInteractions__(){
+    //     console.log(document.querySelectorAll('#endpoint'));
+    //     console.log("showing interactions")
+    //     const selectorString = this.cssSelectors.join(", ");
+    //     const interactionElements = document.querySelectorAll(selectorString);
+    //     // console.log(interactionElements);
+    //     // for (const e of interactionElements){
+    //     //     e.style.border = "thick solid #00FF00";
+    //     // }
+    // }
+
+    
+    addBorders() {
+        console.log(this.cssSelectors);
+        let tmp = []
+        if (this.cssSelectors.length > 0){
+            console.log("selectors exist");
+            for (const s of this.cssSelectors){
+                console.log(s);
+                let elements = document.querySelectorAll(s);
+                if (elements.length > 0){
+                    elements.forEach(e => e.style.border = '2px solid red');
+                }
+                else{
+                    tmp.push(s);
+                }
+            }
+        }
+        this.cssSelectors = tmp;
+        return this.cssSelectors.length === 0;
+    }
+      
     
     // Create Events to Track
     __bindEvents__() {
+
+             // Initial check
+        if (!this.addBorders()) {
+            const observer = new MutationObserver(function(mutations, obs){
+            if (this.addBorders()) {
+                console.log("disconnecting mutation observer");
+                obs.disconnect(); // Stop observing once all elements found
+            }
+            }.bind(this));
+        
+            // Start observing the entire document body for added nodes
+            observer.observe(document.body, {
+            childList: true,
+            subtree: true
+            });
+        }
+          
+          
 
         const selectorString = this.cssSelectors.join(", ");
         console.log(selectorString);
 
         // Detects navigation events...
         navigation.addEventListener("navigate", navEvent => {
+            console.log("You navigated");
             this.__addRecord__(this.__createNavigationRecord__(navEvent));
         });
 
@@ -79,6 +133,7 @@ class Interactor {
                 document.querySelector('body').addEventListener(this.interactionEvents[i], function (e) {
                     e.stopPropagation();
                     if (e.target.matches(selectorString)) {
+                        console.log("You clicked an element of interest");
                         this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
                     }
                 }.bind(this));
