@@ -70,24 +70,36 @@ class Interactor {
     // }
 
     
-    addBorders() {
-        console.log(this.cssSelectors);
-        let tmp = []
-        if (this.cssSelectors.length > 0){
-            console.log("selectors exist");
-            for (const s of this.cssSelectors){
-                console.log(s);
-                let elements = document.querySelectorAll(s);
-                if (elements.length > 0){
-                    elements.forEach(e => e.style.border = '2px solid red');
-                }
-                else{
-                    tmp.push(s);
-                }
+    // Instead of doing this in increments, do it all at once...
+    addAllInteractions() {
+        let numFound = 0;
+
+        for (const s of this.cssSelectors){
+            let elements = document.querySelectorAll(s);
+            if (elements.length > 0){
+                numFound++;
             }
         }
-        this.cssSelectors = tmp;
-        return this.cssSelectors.length === 0;
+
+        let allDetected = numFound === this.cssSelectors.length;
+
+        if (allDetected){
+            const selectorString = this.cssSelectors.join(", ");
+            const elements = document.querySelectorAll(selectorString);
+            elements.forEach(e => e.style.border = '2px solid red');
+            elements.forEach(element => {
+                for (let i = 0; i < this.interactionEvents.length; i++) {
+                    element.addEventListener(this.interactionEvents[i], function (e) {
+                        // e.stopPropagation();
+                        console.log("You clicked an element of interest");
+                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+                    }.bind(this));
+                }
+            });
+            
+        }
+
+        return allDetected;
     }
       
     
@@ -95,9 +107,9 @@ class Interactor {
     __bindEvents__() {
 
              // Initial check
-        if (!this.addBorders()) {
+        if (!this.addAllInteractions()) {
             const observer = new MutationObserver(function(mutations, obs){
-            if (this.addBorders()) {
+            if (this.addAllInteractions()) {
                 console.log("disconnecting mutation observer");
                 obs.disconnect(); // Stop observing once all elements found
             }
@@ -116,10 +128,10 @@ class Interactor {
         console.log(selectorString);
 
         // Detects navigation events...
-        navigation.addEventListener("navigate", navEvent => {
-            console.log("You navigated");
-            this.__addRecord__(this.__createNavigationRecord__(navEvent));
-        });
+        // navigation.addEventListener("navigate", navEvent => {
+        //     console.log("You navigated");
+        //     this.__addRecord__(this.__createNavigationRecord__(navEvent));
+        // });
 
         // Set Interaction Capture
         /*
@@ -127,18 +139,18 @@ class Interactor {
         and adds an event listener to the body of the document for each. Once these events are triggered,
         the code checks whether the element has class "interaction". If it does, the event is stored
         */
-        if (this.cssSelectors) {
-            console.log("css selectors detected. starting binding");
-            for (let i = 0; i < this.interactionEvents.length; i++) {
-                document.querySelector('body').addEventListener(this.interactionEvents[i], function (e) {
-                    e.stopPropagation();
-                    if (e.target.matches(selectorString)) {
-                        console.log("You clicked an element of interest");
-                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
-                    }
-                }.bind(this));
-            }
-        }
+        // if (this.cssSelectors) {
+        //     console.log("css selectors detected. starting binding");
+        //     for (let i = 0; i < this.interactionEvents.length; i++) {
+        //         document.querySelector('body').addEventListener(this.interactionEvents[i], function (e) {
+        //             e.stopPropagation();
+        //             if (e.target.matches(selectorString)) {
+        //                 console.log("You clicked an element of interest");
+        //                 this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+        //             }
+        //         }.bind(this));
+        //     }
+        // }
 
 
         // Send interactions on unload
