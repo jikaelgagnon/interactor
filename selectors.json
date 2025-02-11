@@ -1,5 +1,7 @@
 [
     "#chip-container",
     "#endpoint",
-    "#logo-icon"
+    "#logo-icon",
+    "#content.ytd-rich-item-renderer",
+    "#thumbnail"
 ]

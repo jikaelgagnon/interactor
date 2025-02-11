@@ -48,7 +48,7 @@ class Interactor {
             this.session = {},
             this.loadTime = new Date();
             this.cssSelectors = Array.isArray(config.cssSelectors) === true ? config.cssSelectors : [],
-            this.elementsOfInterest = new Set();
+            this.lastInteractionElement;
 
             // Initialize Session
             this.__initializeSession__();
@@ -74,29 +74,25 @@ class Interactor {
     addListenersToMutations() {
         const filteredSelectors = this.cssSelectors.map(selector => `${selector}:not([data-listener-attached])`);
         const selectorString = filteredSelectors.join(", ");
-        let elements = new Set(document.querySelectorAll(selectorString));
-
-        // console.log("interactionEvents:");
-        // console.log(this.interactionEvents);
+        let elements = document.querySelectorAll(selectorString);
 
         elements.forEach(element => {
             element.style.border = '2px solid red';
             element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
-                    console.log("You clicked an element of interest");
-                    this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
-                }.bind(this));
+                    if (e.currentTarget.closest('[data-listener-attached]')) {
+                        console.log("You clicked an element of interest");
+                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+                    }
+                }.bind(this), true);
             }
         });
     }
-      
-      
+       
     
     // Create Events to Track
     __bindEvents__() {
-
-
         const observer = new MutationObserver(function(mutations, obs){
             this.addListenersToMutations();
         }.bind(this));
@@ -107,36 +103,12 @@ class Interactor {
             subtree: true
         });
 
-
-        // const selectorString = this.cssSelectors.join(", ");
-        // console.log(selectorString);
-
         // Detects navigation events...
-        // navigation.addEventListener("navigate", navEvent => {
-        //     console.log("You navigated");
-        //     this.__addRecord__(this.__createNavigationRecord__(navEvent));
-        // });
-
-        // Set Interaction Capture
-        /*
-        Iterates over each type of event (eg. ["click", "mousedown", "mouseup", "touchstart", "touchend"])
-        and adds an event listener to the body of the document for each. Once these events are triggered,
-        the code checks whether the element has class "interaction". If it does, the event is stored
-        */
-        // if (this.cssSelectors) {
-        //     console.log("css selectors detected. starting binding");
-        //     for (let i = 0; i < this.interactionEvents.length; i++) {
-        //         document.querySelector('body').addEventListener(this.interactionEvents[i], function (e) {
-        //             e.stopPropagation();
-        //             if (e.target.matches(selectorString)) {
-        //                 console.log("You clicked an element of interest");
-        //                 this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
-        //             }
-        //         }.bind(this));
-        //     }
-        // }
-
-
+        navigation.addEventListener("navigate", navEvent => {
+            console.log("You navigated");
+            this.__addRecord__(this.__createNavigationRecord__(navEvent));
+        });
+        
         // Send interactions on unload
         window.addEventListener("beforeunload", e => this.__sendInteractions__());
     }
