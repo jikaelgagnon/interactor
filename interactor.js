@@ -27,8 +27,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 // TODO:
-// 1. Prevent duplicate navigations on yt shorts
-// 2. Prevent cases when a navigation and an interaction are logged for the same event
 
 
 
@@ -48,7 +46,7 @@ class Interactor {
             this.session = {},
             this.loadTime = new Date();
             this.cssSelectors = Array.isArray(config.cssSelectors) === true ? config.cssSelectors : [],
-            this.lastInteractionElement;
+            this.lastNavigationURL = "";
 
             // Initialize Session
             this.__initializeSession__();
@@ -104,10 +102,14 @@ class Interactor {
         });
 
         // Detects navigation events...
-        navigation.addEventListener("navigate", navEvent => {
-            console.log("You navigated");
-            this.__addRecord__(this.__createNavigationRecord__(navEvent));
-        });
+        navigation.addEventListener("navigate", function(navEvent){
+            if (!(navEvent.destination.url === this.lastNavigationURL)){
+                console.log("New url detected!");
+                console.log(navEvent);
+                // this.__addRecord__(this.__createNavigationRecord__(navEvent));
+                this.lastNavigationURL = navEvent.destination.url;
+            }
+        }.bind(this));
         
         // Send interactions on unload
         window.addEventListener("beforeunload", e => this.__sendInteractions__());
