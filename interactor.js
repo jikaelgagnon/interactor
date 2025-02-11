@@ -48,6 +48,7 @@ class Interactor {
             this.session = {},
             this.loadTime = new Date();
             this.cssSelectors = Array.isArray(config.cssSelectors) === true ? config.cssSelectors : [],
+            this.elementsOfInterest = new Set();
 
             // Initialize Session
             this.__initializeSession__();
@@ -71,19 +72,25 @@ class Interactor {
 
     
     addListenersToMutations() {
-        const selectorString = this.cssSelectors.join(", ");
-        const elements = document.querySelectorAll(selectorString);
-        elements.forEach(e => e.style.border = '2px solid red');
+        const filteredSelectors = this.cssSelectors.map(selector => `${selector}:not([data-listener-attached])`);
+        const selectorString = filteredSelectors.join(", ");
+        let elements = new Set(document.querySelectorAll(selectorString));
+
+        // console.log("interactionEvents:");
+        // console.log(this.interactionEvents);
+
         elements.forEach(element => {
+            element.style.border = '2px solid red';
+            element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
-                    // e.stopPropagation();
                     console.log("You clicked an element of interest");
                     this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
                 }.bind(this));
             }
         });
     }
+      
       
     
     // Create Events to Track
@@ -96,8 +103,8 @@ class Interactor {
         
         // Start observing the entire document body for added nodes
         observer.observe(document.body, {
-        childList: true,
-        subtree: true
+            childList: true,
+            subtree: true
         });
 
 
