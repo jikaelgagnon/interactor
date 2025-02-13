@@ -79,10 +79,9 @@ class Interactor {
             element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
-                    if (e.currentTarget.closest('[data-listener-attached]')) {
-                        console.log("You clicked an element of interest");
-                        this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
-                    }
+                    console.log("You clicked an element of interest");
+                    this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+
                 }.bind(this), true);
             }
         });
