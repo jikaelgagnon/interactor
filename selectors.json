@@ -1,7 +1,16 @@
-[
-    "#chip-container",
-    "#endpoint",
-    "#logo-icon",
-    "#content.ytd-rich-item-renderer",
-    "#thumbnail"
-]
+{
+    "baseURL": "https://www.youtube.com",
+    "selectors":{
+        "/*": [
+        "#chip-container",
+        "#endpoint",
+        "#logo-icon",
+        "#content.ytd-rich-item-renderer",
+        "#like-button[is-shorts]",
+        "#dislike-button[is-shorts]",
+        "ytd-compact-video-renderer",
+        "ytm-shorts-lockup-view-model-v2",
+        ".yt-spec-button-shape-next[aria-label=\"Next\"]"
+        ]
+    }
+}

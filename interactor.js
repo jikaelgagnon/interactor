@@ -26,9 +26,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// TODO:
-
-
 
 class Interactor {
     constructor(config) {
@@ -45,37 +42,70 @@ class Interactor {
             this.records = [],
             this.session = {},
             this.loadTime = new Date();
-            this.cssSelectors = Array.isArray(config.cssSelectors) === true ? config.cssSelectors : [],
-            this.lastNavigationURL = "";
+            this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['selectors'] === undefined) ? config.cssSelectors['selectors'] : {},
+            this.baseURL = typeof config.cssSelectors === 'object' && !(config.cssSelectors['baseURL'] === undefined) ? config.cssSelectors['baseURL'] : "";
+            this.currentURL = document.location.href;
+            this.selectorString;
+            this.updateSelectorString();
+
+            console.log(`Current url is: ${this.currentURL}`);
 
             // Initialize Session
             this.__initializeSession__();
             // Call Event Binding Method
-            console.log("binding events");
             this.__bindEvents__();
-            console.log("done binding events");
-            // this.__showInteractions__();
     }
 
-    // __showInteractions__(){
-    //     console.log(document.querySelectorAll('#endpoint'));
-    //     console.log("showing interactions")
-    //     const selectorString = this.cssSelectors.join(", ");
-    //     const interactionElements = document.querySelectorAll(selectorString);
-    //     // console.log(interactionElements);
-    //     // for (const e of interactionElements){
-    //     //     e.style.border = "thick solid #00FF00";
-    //     // }
-    // }
+    /**
+     * Updates the `selectorString` property by filtering and concatenating CSS selectors.
+     * 
+     * This method performs the following steps:
+     * 1. Filters the keys of `this.cssSelectors` to find matches based on the current URL.
+     * 2. For each matching key, it maps the selectors to exclude those with the `data-listener-attached` attribute.
+     * 3. Concatenates all filtered selectors into a single string, separated by commas.
+     * 4. Assigns the resulting string to the `selectorString` property.
+     * 
+     * Note: This method assumes that the keys in this.cssSelectors['selectors'] follows 
+     * the syntax for the URL Pattern API: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
+     * @returns {void}
+     */
+    updateSelectorString()
+    {
+        const matches = Object.keys(this.cssSelectors).filter((path) => {
+            console.log(path);
+            const p = new URLPattern(path, this.baseURL);
+            return p.test(this.currentURL);
+        })
+
+        let selectorsArray = [];
+
+        for (const key of matches){
+            const filteredSelectors = this.cssSelectors[key].map(selector => `${selector}:not([data-listener-attached])`);
+            selectorsArray = selectorsArray.concat(filteredSelectors);
+        }
+
+        const selectorString = selectorsArray.join(", ");
+
+        this.selectorString = selectorString;
+    }
 
     
+    /**
+     * Adds event listeners to elements matching the selector string.
+     * 
+     * This function selects all elements in the document that match the 
+     * `this.selectorString` and adds a red border to them (if in debug mode). It also attaches 
+     * event listeners for each event in `this.interactionEvents` to these elements.
+     * When an event is triggered, a message is logged to the console and an 
+     * interaction record is created and added.
+     * 
+     * @returns {void}
+     */
     addListenersToMutations() {
-        const filteredSelectors = this.cssSelectors.map(selector => `${selector}:not([data-listener-attached])`);
-        const selectorString = filteredSelectors.join(", ");
-        let elements = document.querySelectorAll(selectorString);
+        let elements = document.querySelectorAll(this.selectorString);
 
         elements.forEach(element => {
-            element.style.border = '2px solid red';
+            if (this.debug) element.style.border = '2px solid red';
             element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
@@ -87,8 +117,15 @@ class Interactor {
         });
     }
        
-    
-    // Create Events to Track
+    /**
+     * Binds various event listeners to the document and window.
+     * 
+     * - Observes the entire document body for added nodes using MutationObserver.
+     * - Detects navigation events and updates the current URL.
+     * - Sends interactions before the window unloads.
+     * 
+     * @returns {void}
+     */
     __bindEvents__() {
         const observer = new MutationObserver(function(mutations, obs){
             this.addListenersToMutations();
@@ -102,11 +139,13 @@ class Interactor {
 
         // Detects navigation events...
         navigation.addEventListener("navigate", function(navEvent){
-            if (!(navEvent.destination.url === this.lastNavigationURL)){
+            if (!(navEvent.destination.url === this.currentURL)){
                 console.log("New url detected!");
                 console.log(navEvent);
                 // this.__addRecord__(this.__createNavigationRecord__(navEvent));
-                this.lastNavigationURL = navEvent.destination.url;
+                this.currentURL = navEvent.destination.url;
+                console.log("logging selectors");
+                this.updateSelectorString();
             }
         }.bind(this));
         
@@ -114,24 +153,41 @@ class Interactor {
         window.addEventListener("beforeunload", e => this.__sendInteractions__());
     }
 
+    /**
+     * Logs the interaction record if debugging is enabled.
+     *
+     * @param {Object} record - The interaction record to log.
+     */
     __debuggingLog__(record){
          // Log Interaction if Debugging
          if (this.debug) {
             console.log(record);
         }
     }
-
+    /**
+     * Creates a navigation record object from a navigation event.
+     *
+     * @param {Event} navEvent - The navigation event.
+     * @returns {Object} The navigation record object.
+     */
     __createNavigationRecord__(navEvent) {
-            // Navigation Object
-            const navigation = {
-                type: navEvent.type,
-                destinationURL: navEvent.destination.url,
-                createdAt: new Date()
-            };
+        // Navigation Object
+        const navigation = {
+            type: navEvent.type,
+            destinationURL: navEvent.destination.url,
+            createdAt: new Date()
+        };
 
-            return navigation;
+        return navigation;
     }
 
+    /**
+     * Creates an interaction record object from an event.
+     *
+     * @param {Event} e - The event object.
+     * @param {string} type - The type of interaction.
+     * @returns {Object} The interaction record object.
+     */
     __createInteractionRecord__(e, type) {
         // Interaction Object
         const interaction = {
@@ -154,12 +210,19 @@ class Interactor {
         return interaction;
     }
 
-    __addRecord__(record)
-    {
+    /**
+     * Adds a record to the records array and logs it if debugging is enabled.
+     *
+     * @param {Object} record - The record to add.
+     */
+    __addRecord__(record) {
         this.records.push(record);
         this.__debuggingLog__(record);
     }
-    // Generate Session Object & Assign to Session Property
+
+    /**
+     * Generates a session object and assigns it to the session property.
+     */
     __initializeSession__() {
         // Assign Session Property
         this.session = {
@@ -184,9 +247,11 @@ class Interactor {
             endpoint: this.endpoint
         };
     }
-    // Insert End of Session Values into Session Property
-    __closeSession__() {
 
+    /**
+     * Inserts end-of-session values into the session property.
+     */
+    __closeSession__() {
         // Assign Session Properties
         this.session.unloadTime = new Date();
         this.session.interactions = this.records;
@@ -198,7 +263,10 @@ class Interactor {
             outerHeight: window.outerHeight
         };
     }
-    // Gather Additional Data and Send Interaction(s) to Server
+
+    /**
+     * Gathers additional data and sends interactions to the server.
+     */
     __sendInteractions__() {
         // Close Session
         this.__closeSession__();
@@ -210,6 +278,4 @@ class Interactor {
         });
         navigator.sendBeacon(this.endpoint, blob);
     }
-}
-
-
+}    

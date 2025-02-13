@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Greenstick Test",
+    "name": "Markov Logger",
     "version": "1.0",
-    "description": "Logs the current tab's URL to the console",
+    "description": "Logs user interactions for selected websites",
     "permissions": ["activeTab", "tabs"],
     "content_scripts": [
       {
