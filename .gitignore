@@ -1,1 +1,6 @@
 dev/*
+test_server/db_config.json
+test_server/node_modules/*
+firebasE_config.js
+node_modules
+.env
