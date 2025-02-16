@@ -1,6 +1,8 @@
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
 
+// TODO: Understand wtf this webpack shit is doing
+
 module.exports = (env, argv) => ({
   entry: "./background.js",
   output: {
