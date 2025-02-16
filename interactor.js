@@ -51,9 +51,9 @@ class Interactor {
             console.log(`Current url is: ${this.currentURL}`);
 
             // Initialize Session
-            this.__initializeSession__();
+            this.initializeSession();
             // Call Event Binding Method
-            this.__bindEvents__();
+            this.bindEvents();
     }
 
     /**
@@ -110,7 +110,7 @@ class Interactor {
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
                     console.log("You clicked an element of interest");
-                    this.__addRecord__(this.__createInteractionRecord__(e, "interaction"));
+                    this.addRecord(this.createInteractionRecord(e, "interaction"));
 
                 }.bind(this), true);
             }
@@ -126,7 +126,7 @@ class Interactor {
      * 
      * @returns {void}
      */
-    __bindEvents__() {
+    bindEvents() {
         const observer = new MutationObserver(function(mutations, obs){
             this.addListenersToMutations();
         }.bind(this));
@@ -142,7 +142,7 @@ class Interactor {
             if (!(navEvent.destination.url === this.currentURL)){
                 console.log("New url detected!");
                 console.log(navEvent);
-                // this.__addRecord__(this.__createNavigationRecord__(navEvent));
+                // this.addRecord(this.createNavigationRecord(navEvent));
                 this.currentURL = navEvent.destination.url;
                 console.log("logging selectors");
                 this.updateSelectorString();
@@ -150,7 +150,7 @@ class Interactor {
         }.bind(this));
         
         // Send interactions on unload
-        window.addEventListener("beforeunload", e => this.__sendInteractions__());
+        window.addEventListener("beforeunload", e => this.sendInteractions());
     }
 
     /**
@@ -158,7 +158,7 @@ class Interactor {
      *
      * @param {Object} record - The interaction record to log.
      */
-    __debuggingLog__(record){
+    debuggingLog(record){
          // Log Interaction if Debugging
          if (this.debug) {
             console.log(record);
@@ -170,7 +170,7 @@ class Interactor {
      * @param {Event} navEvent - The navigation event.
      * @returns {Object} The navigation record object.
      */
-    __createNavigationRecord__(navEvent) {
+    createNavigationRecord(navEvent) {
         // Navigation Object
         const navigation = {
             type: navEvent.type,
@@ -188,7 +188,7 @@ class Interactor {
      * @param {string} type - The type of interaction.
      * @returns {Object} The interaction record object.
      */
-    __createInteractionRecord__(e, type) {
+    createInteractionRecord(e, type) {
         // Interaction Object
         const interaction = {
             type: type,
@@ -215,15 +215,15 @@ class Interactor {
      *
      * @param {Object} record - The record to add.
      */
-    __addRecord__(record) {
+    addRecord(record) {
         this.records.push(record);
-        this.__debuggingLog__(record);
+        this.debuggingLog(record);
     }
 
     /**
      * Generates a session object and assigns it to the session property.
      */
-    __initializeSession__() {
+    initializeSession() {
         // Assign Session Property
         this.session = {
             loadTime: this.loadTime,
@@ -251,7 +251,7 @@ class Interactor {
     /**
      * Inserts end-of-session values into the session property.
      */
-    __closeSession__() {
+    closeSession() {
         // Assign Session Properties
         this.session.unloadTime = new Date();
         this.session.interactions = this.records;
@@ -267,9 +267,9 @@ class Interactor {
     /**
      * Gathers additional data and sends interactions to the server.
      */
-    __sendInteractions__() {
+    sendInteractions() {
         // Close Session
-        this.__closeSession__();
+        this.closeSession();
 
         console.log("Sending events to endpoint...");
 

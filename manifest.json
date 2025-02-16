@@ -3,7 +3,7 @@
     "name": "Markov Logger",
     "version": "1.0",
     "description": "Logs user interactions for selected websites",
-    "permissions": ["activeTab", "tabs"],
+    "permissions": ["activeTab", "tabs", "storage"],
     "content_scripts": [
       {
         "matches": ["https://www.youtube.com/*"],
@@ -11,7 +11,7 @@
       }
     ],
     "background": {
-      "service_worker": "background.js"
+      "service_worker": "dist/background.bundle.js"
     },
     "web_accessible_resources": [
       {

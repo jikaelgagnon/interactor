@@ -1,0 +1,31 @@
+{
+  "name": "interactor",
+  "version": "1.0.0",
+  "main": "interactor.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jikaelgagnon/interactor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jikaelgagnon/interactor/issues"
+  },
+  "homepage": "https://github.com/jikaelgagnon/interactor#readme",
+  "description": "",
+  "dependencies": {
+    "firebase": "^11.3.1"
+  },
+  "devDependencies": {
+    "dotenv-webpack": "^8.1.0",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}
