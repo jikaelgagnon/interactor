@@ -1,11 +1,5 @@
 import { Interactor } from "./interactor.js";
 
-(async () => {
-    const response = await chrome.runtime.sendMessage({greeting: "hello"});
-    // do something with response here, not outside the function
-    console.log(response);
-  })();
-
 let selectors;
 
 const url = chrome.runtime.getURL('selectors.json');
