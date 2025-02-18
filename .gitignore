@@ -2,4 +2,4 @@ dev/*
 test_server/db_config.json
 test_server/node_modules/*
 node_modules
-config.js
+src/configs/*
