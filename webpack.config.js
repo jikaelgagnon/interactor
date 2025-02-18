@@ -4,8 +4,8 @@ const path = require("path");
 
 module.exports = (env, argv) => ({
   entry: {
-    background: "./background.js",
-    content: "./content.js"  // Add content script
+    background: "./src/background.js",
+    content: "./src/content.js"  // Add content script
   },
   output: {
     filename: "[name].bundle.js",  // Generates background.bundle.js and content.bundle.js
