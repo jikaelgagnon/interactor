@@ -1,17 +1,17 @@
 const path = require("path");
 const Dotenv = require("dotenv-webpack");
 
-// TODO: Understand wtf this webpack shit is doing
-
 module.exports = (env, argv) => ({
-  entry: "./background.js",
+  entry: {
+    background: "./background.js",
+    content: "./content.js"  // Add content script
+  },
   output: {
-    filename: "background.bundle.js",
-    path: path.resolve(__dirname),
+    filename: "[name].bundle.js",  // Generates background.bundle.js and content.bundle.js
+    path: path.resolve(__dirname, "dist"),  // Store outputs in dist/
   },
   mode: argv.mode || "production",
   plugins: [
     new Dotenv()
-  ]
+  ],
 });
-

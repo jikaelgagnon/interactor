@@ -27,7 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-class Interactor {
+export class Interactor {
     constructor(config) {
             // Argument Assignment          // Type Checks                                                                          // Default Values
             this.interactions = typeof (config.interactions) == "boolean" ? config.interactions : true,

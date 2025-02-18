@@ -2,6 +2,18 @@
 
 A Chrome extension that logs user interactions based on CSS selectors.
 
+## Running
+
+Running Webpack is necessary because Chrome extensions do not support Node.js-style imports (import statements) or environment variables (process.env) natively. Webpack bundles and transforms your code so that it works in a Chrome extension. Webpack resolves imports and bundles everything into background.bundle.js, so you only need to load one file in `manifest.json`.
+
+
+
+After adding changes, run the following command and refresh the extension in chrome:
+
+```bash
+npx webpack
+```
+
 ## Example
 
 Given the following JSON file, the extension will track interactions on `https://youtube.com/*` for all elements
