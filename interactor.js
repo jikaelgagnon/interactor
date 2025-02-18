@@ -109,13 +109,14 @@ export class Interactor {
             element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
                 element.addEventListener(this.interactionEvents[i], function (e) {
-                    // console.log("You clicked an element of interest");
-                    this.addRecord(this.createInteractionRecord(e, "interaction"));
-                    (async () => {
-                        const response = await chrome.runtime.sendMessage({greeting: "hello"});
+                    console.log("You clicked an element of interest");
+                    const record = this.createInteractionRecord(e, "interaction");
+                    this.addRecord(record);
+                    (async (record) => {
+                        const response = await chrome.runtime.sendMessage(record);
                         // do something with response here, not outside the function
                         console.log(response);
-                      })();
+                      })(record);
 
                 }.bind(this), true);
             }

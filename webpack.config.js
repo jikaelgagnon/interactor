@@ -1,5 +1,6 @@
 const path = require("path");
-const Dotenv = require("dotenv-webpack");
+// const webpack = require("webpack");
+// const Dotenv = require("dotenv-webpack");
 
 module.exports = (env, argv) => ({
   entry: {
@@ -11,7 +12,4 @@ module.exports = (env, argv) => ({
     path: path.resolve(__dirname, "dist"),  // Store outputs in dist/
   },
   mode: argv.mode || "production",
-  plugins: [
-    new Dotenv()
-  ],
 });
