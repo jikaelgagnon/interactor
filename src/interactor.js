@@ -25,6 +25,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+import { Message } from "./message.js";
 
 export {Interactor};
 
@@ -90,7 +91,12 @@ class Interactor {
         this.selectorString = selectorString;
     }
 
-    
+    async sendMessageToBackground(type, payload){
+        let message = new Message(type, payload);
+        const response = await chrome.runtime.sendMessage(message);
+        return response;
+    }
+
     /**
      * Adds event listeners to elements matching the selector string.
      * 
@@ -113,11 +119,12 @@ class Interactor {
                     console.log("You clicked an element of interest");
                     const record = this.createInteractionRecord(e, "interaction");
                     this.addRecord(record);
-                    (async (record) => {
-                        const response = await chrome.runtime.sendMessage(record);
-                        // do something with response here, not outside the function
-                        console.log(response);
-                      })(record);
+                    this.sendMessageToBackground("sendInteraction", record);
+                    // (async (record) => {
+                    //     const response = await chrome.runtime.sendMessage(record);
+                    //     // do something with response here, not outside the function
+                    //     console.log(response);
+                    //   })(record);
 
                 }.bind(this), true);
             }
@@ -253,6 +260,12 @@ class Interactor {
             },
             endpoint: this.endpoint
         };
+        // let message = new Message("initializeSession", this.session);
+        // this.sendMessageToBackground("initializeSession", this.session);
+        // (async (record) => {
+        //     const response = await chrome.runtime.sendMessage(record);
+        //     console.log(response);
+        //   })(message);
     }
 
     /**
@@ -269,6 +282,8 @@ class Interactor {
             outerWidth: window.outerWidth,
             outerHeight: window.outerHeight
         };
+
+        this.sendMessageToBackground("closeSession", this.session);
     }
 
     /**
