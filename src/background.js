@@ -5,7 +5,6 @@ import { doc } from "firebase/firestore/lite";
 // On startup, create an object to hold session data
 class SessionData {
   constructor() {
-    this.sessionInfo;
     this.documents = [];
   }
   clearSession(){
@@ -57,7 +56,7 @@ chrome.runtime.onMessage.addListener(
     switch(request.type){
       case "sendInteraction":
         console.log("Interaction received. Adding to session...");
-        addToSession(request).then(() => {
+        addToSession(request.payload).then(() => {
           sendResponse({ status: "Data written to session!" });
         }).catch((err) => {
           sendResponse({ status: "Error writing data to session: " + err.message });
@@ -66,7 +65,12 @@ chrome.runtime.onMessage.addListener(
         break;
       case "closeSession":
           console.log("Session closed");
-          console.log(request);
+          console.log("Adding documents to database...");
+          SESSION_DATA._printContents();
+          const {...data} = SESSION_DATA;
+          addToDB(data);
+          SESSION_DATA.clearSession();
+          console.log("Done!");
           break;
       default:  
         sendResponse({ status: `Request type ${request.type} is unrecognized`});
