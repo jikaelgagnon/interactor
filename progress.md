@@ -158,3 +158,7 @@ All of this info is combined into a single `Session` object that is added to the
 
 ```
 
+All of this information goes to a FireBase database:
+
+![image](https://github.com/user-attachments/assets/ce92381b-ce36-47c8-9ae5-75dee985949a)
+
