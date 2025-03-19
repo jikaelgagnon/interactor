@@ -41,7 +41,7 @@ class Interactor {
             this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
             this.async = typeof (config.async) == "boolean" ? config.async : true,
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
-            this.records = [],
+            // this.records = [],
             this.session = {},
             this.loadTime = new Date();
             this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['selectors'] === undefined) ? config.cssSelectors['selectors'] : {},
@@ -108,6 +108,8 @@ class Interactor {
      * 
      * @returns {void}
      */
+
+    // TODO: SPEED THIS UP
     addListenersToMutations() {
         let elements = document.querySelectorAll(this.selectorString);
 
@@ -118,7 +120,6 @@ class Interactor {
                 element.addEventListener(this.interactionEvents[i], function (e) {
                     console.log("You clicked an element of interest");
                     const record = this.createInteractionRecord(e, "interaction");
-                    this.addRecord(record);
                     this.sendMessageToBackground("sendInteraction", record);
                     // (async (record) => {
                     //     const response = await chrome.runtime.sendMessage(record);
@@ -163,8 +164,8 @@ class Interactor {
             }
         }.bind(this));
         
-        // Send interactions on unload
-        window.addEventListener("beforeunload", e => this.sendInteractions());
+        // Close the session when the page is closed
+        window.addEventListener("beforeunload", e => this.closeSession());
     }
 
     /**
@@ -230,7 +231,6 @@ class Interactor {
      * @param {Object} record - The record to add.
      */
     addRecord(record) {
-        this.records.push(record);
         this.debuggingLog(record);
     }
 
@@ -272,32 +272,6 @@ class Interactor {
      * Inserts end-of-session values into the session property.
      */
     closeSession() {
-        // Assign Session Properties
-        this.session.unloadTime = new Date();
-        this.session.interactions = this.records;
-        this.session.clientEnd = {
-            name: window.navigator.appVersion,
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight,
-            outerWidth: window.outerWidth,
-            outerHeight: window.outerHeight
-        };
-
-        this.sendMessageToBackground("closeSession", this.session);
-    }
-
-    /**
-     * Gathers additional data and sends interactions to the server.
-     */
-    sendInteractions() {
-        // Close Session
-        this.closeSession();
-
-        console.log("Sending events to endpoint...");
-
-        const blob = new Blob([JSON.stringify(this.session)], {
-            type: 'application/json'
-        });
-        navigator.sendBeacon(this.endpoint, blob);
+        this.sendMessageToBackground("closeSession", null);
     }
 }    
