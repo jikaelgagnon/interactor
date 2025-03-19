@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Markov Logger",
+    "version": "1.0",
+    "description": "Logs user interactions for selected websites",
+    "permissions": ["activeTab", "tabs", "storage"],
+    "content_scripts": [
+      {
+        "matches": ["https://www.youtube.com/*"],
+        "js": ["content.bundle.js"]
+      }
+    ],
+    "background": {
+      "service_worker": "background.bundle.js"
+    }
+  }
