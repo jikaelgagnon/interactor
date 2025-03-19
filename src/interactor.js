@@ -38,7 +38,7 @@ class Interactor {
             this.conversions = typeof (config.conversions) == "boolean" ? config.conversions : true,
             this.conversionElement = typeof (config.conversionElement) == "string" ? config.conversionElement : 'conversion',
             this.conversionEvents = Array.isArray(config.conversionEvents) === true ? config.conversionEvents : ['mouseup', 'touchend'],
-            // this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
+            this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
             this.async = typeof (config.async) == "boolean" ? config.async : true,
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
             // this.records = [],
@@ -53,7 +53,7 @@ class Interactor {
             console.log(`Current url is: ${this.currentURL}`);
 
             // Initialize Session
-            // this.initializeSession();
+            this.initializeSession();
             // Call Event Binding Method
             this.bindEvents();
     }
@@ -141,33 +141,37 @@ class Interactor {
      * 
      * @returns {void}
      */
-    bindEvents() {
-        const observer = new MutationObserver(function(mutations, obs){
-            this.addListenersToMutations();
-        }.bind(this));
-        
-        // Start observing the entire document body for added nodes
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
 
-        // Detects navigation events...
+    bindEvents() {
+        // Wait for the page to fully load before adding listeners
+        window.addEventListener('load', () => {
+            const observer = new MutationObserver(function(mutations, obs) {
+                this.addListenersToMutations();
+            }.bind(this));
+            
+            // Start observing the entire document body for added nodes
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+    
+            // Initially process existing elements
+            this.addListenersToMutations();
+        });
+    
+        // Navigation events and unload events remain the same
         navigation.addEventListener("navigate", function(navEvent){
             if (!(navEvent.destination.url === this.currentURL)){
                 console.log("New url detected!");
                 console.log(navEvent);
-                // this.addRecord(this.createNavigationRecord(navEvent));
                 this.currentURL = navEvent.destination.url;
                 console.log("logging selectors");
                 this.updateSelectorString();
             }
         }.bind(this));
         
-        // Close the session when the page is closed
         window.addEventListener("beforeunload", e => this.closeSession());
     }
-
     /**
      * Logs the interaction record if debugging is enabled.
      *
@@ -272,6 +276,6 @@ class Interactor {
      * Inserts end-of-session values into the session property.
      */
     closeSession() {
-        this.sendMessageToBackground("closeSession", null);
+        this.sendMessageToBackground("closeSession", this.session);
     }
 }    
