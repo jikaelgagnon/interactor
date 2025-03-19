@@ -52,8 +52,6 @@ class Interactor {
 
             console.log(`Current url is: ${this.currentURL}`);
 
-            // Initialize Session
-            this.initializeSession();
             // Call Event Binding Method
             this.bindEvents();
     }
@@ -97,6 +95,26 @@ class Interactor {
         return response;
     }
 
+    onInteractionDetection(e){
+        console.log("You clicked an element of interest");
+        const record = this.createInteractionRecord(e, "interaction");
+        this.sendMessageToBackground("onInteractionDetection", record);
+    }
+
+    onNavigationDetection(navEvent){
+        console.log("in onNavigationDetection");
+        if (!(navEvent.destination.url === this.currentURL))
+        {
+            console.log("New url detected!");
+            console.log(navEvent);
+            const record = this.createNavigationRecord(navEvent);
+            this.sendMessageToBackground("onNavigationDetection", record);
+            this.currentURL = navEvent.destination.url;
+            console.log("logging selectors");
+            this.updateSelectorString();
+        }
+    }
+
     /**
      * Adds event listeners to elements matching the selector string.
      * 
@@ -117,17 +135,7 @@ class Interactor {
             if (this.debug) element.style.border = '2px solid red';
             element.setAttribute('data-listener-attached', 'true');
             for (let i = 0; i < this.interactionEvents.length; i++) {
-                element.addEventListener(this.interactionEvents[i], function (e) {
-                    console.log("You clicked an element of interest");
-                    const record = this.createInteractionRecord(e, "interaction");
-                    this.sendMessageToBackground("sendInteraction", record);
-                    // (async (record) => {
-                    //     const response = await chrome.runtime.sendMessage(record);
-                    //     // do something with response here, not outside the function
-                    //     console.log(response);
-                    //   })(record);
-
-                }.bind(this), true);
+                element.addEventListener(this.interactionEvents[i], (e) => this.onInteractionDetection(e), true);
             }
         });
     }
@@ -160,15 +168,18 @@ class Interactor {
         });
     
         // Navigation events and unload events remain the same
-        navigation.addEventListener("navigate", function(navEvent){
-            if (!(navEvent.destination.url === this.currentURL)){
-                console.log("New url detected!");
-                console.log(navEvent);
-                this.currentURL = navEvent.destination.url;
-                console.log("logging selectors");
-                this.updateSelectorString();
-            }
-        }.bind(this));
+        // navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
+        navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
+        // navigation.addEventListener("navigate", function(navEvent){
+        //     if (!(navEvent.destination.url === this.currentURL)){
+        //         console.log("New url detected!");
+        //         console.log(navEvent);
+        //         // this.sendMessageToBackground("sendNavigation", record);
+        //         this.currentURL = navEvent.destination.url;
+        //         console.log("logging selectors");
+        //         this.updateSelectorString();
+        //     }
+        // }.bind(this));
         
         window.addEventListener("beforeunload", e => this.closeSession());
     }
@@ -241,36 +252,36 @@ class Interactor {
     /**
      * Generates a session object and assigns it to the session property.
      */
-    initializeSession() {
-        // Assign Session Property
-        this.session = {
-            loadTime: this.loadTime,
-            unloadTime: new Date(),
-            language: window.navigator.language,
-            platform: window.navigator.platform,
-            port: window.location.port,
-            clientStart: {
-                name: window.navigator.appVersion,
-                innerWidth: window.innerWidth,
-                innerHeight: window.innerHeight,
-                outerWidth: window.outerWidth,
-                outerHeight: window.outerHeight
-            },
-            page: {
-                location: window.location.pathname,
-                href: window.location.href,
-                origin: window.location.origin,
-                title: document.title
-            },
-            endpoint: this.endpoint
-        };
+    // initializeSession() {
+    //     // Assign Session Property
+    //     this.session = {
+    //         loadTime: this.loadTime,
+    //         unloadTime: new Date(),
+    //         language: window.navigator.language,
+    //         platform: window.navigator.platform,
+    //         port: window.location.port,
+    //         clientStart: {
+    //             name: window.navigator.appVersion,
+    //             innerWidth: window.innerWidth,
+    //             innerHeight: window.innerHeight,
+    //             outerWidth: window.outerWidth,
+    //             outerHeight: window.outerHeight
+    //         },
+    //         page: {
+    //             location: window.location.pathname,
+    //             href: window.location.href,
+    //             origin: window.location.origin,
+    //             title: document.title
+    //         },
+    //         endpoint: this.endpoint
+    //     };
         // let message = new Message("initializeSession", this.session);
         // this.sendMessageToBackground("initializeSession", this.session);
         // (async (record) => {
         //     const response = await chrome.runtime.sendMessage(record);
         //     console.log(response);
         //   })(message);
-    }
+    // }
 
     /**
      * Inserts end-of-session values into the session property.

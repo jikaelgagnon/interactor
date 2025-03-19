@@ -54,7 +54,7 @@ chrome.runtime.onMessage.addListener(
     console.log("message content:");
     console.log(request);
     switch(request.type){
-      case "sendInteraction":
+      case "onInteractionDetection":
         console.log("Interaction received. Adding to session...");
         addToSession(request.payload).then(() => {
           sendResponse({ status: "Data written to session!" });
@@ -63,6 +63,15 @@ chrome.runtime.onMessage.addListener(
         });
         console.log("Interaction received");
         break;
+      case "onNavigationDetection":
+          console.log("Navigation received. Adding to session...");
+          addToSession(request.payload).then(() => {
+            sendResponse({ status: "Data written to session!" });
+          }).catch((err) => {
+            sendResponse({ status: "Error writing data to session: " + err.message });
+          });
+          console.log("Interaction received");
+          break;
       case "closeSession":
           console.log("Session closed");
           console.log("Adding documents to database...");
