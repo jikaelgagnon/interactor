@@ -38,7 +38,7 @@ class Interactor {
             this.conversions = typeof (config.conversions) == "boolean" ? config.conversions : true,
             this.conversionElement = typeof (config.conversionElement) == "string" ? config.conversionElement : 'conversion',
             this.conversionEvents = Array.isArray(config.conversionEvents) === true ? config.conversionEvents : ['mouseup', 'touchend'],
-            this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
+            // this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
             this.async = typeof (config.async) == "boolean" ? config.async : true,
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
             // this.records = [],
@@ -53,7 +53,7 @@ class Interactor {
             console.log(`Current url is: ${this.currentURL}`);
 
             // Initialize Session
-            this.initializeSession();
+            // this.initializeSession();
             // Call Event Binding Method
             this.bindEvents();
     }
