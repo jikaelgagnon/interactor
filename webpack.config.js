@@ -4,6 +4,7 @@ const path = require("path");
 
 
 module.exports = (env, argv) => ({
+  devtool: "cheap-module-source-map", // Enables source maps
   entry: {
     background: "./src/background.js",
     content: "./src/content.js"  // Add content script
