@@ -6,7 +6,7 @@
     "permissions": ["activeTab", "tabs", "storage"],
     "content_scripts": [
       {
-        "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*"],
+        "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://x.com/*"],
         "js": ["content.bundle.js"]
       }
     ],
