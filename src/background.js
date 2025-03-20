@@ -8,16 +8,20 @@ let USE_DB = false;
 // On startup, create an object to hold session data
 class SessionData {
   constructor() {
+    this.sessionInfo = null;
     this.documents = [];
   }
   clearSession(){
     this.documents = [];
+    this.sessionInfo = null;
   }
   addDocument(document){
     this.documents.push(document);
   }
   _printContents(){
-    console.log("---- PRINTING CURRENT SESSION DATA ----");
+    console.log("---- PRINTING SESSION INFO ----");
+    console.log(this.sessionInfo);
+    console.log("---- PRINTING SESSION DOCUMENTS ----");
     console.table(this.documents);
   }
   setInitialData(data){
@@ -83,6 +87,7 @@ chrome.runtime.onMessage.addListener(
       case "closeSession":
           console.log("Session closed");
           console.log("Adding documents to database...");
+          SESSION_DATA.sessionInfo = request.payload;
           SESSION_DATA._printContents();
           const {...data} = SESSION_DATA;
           addToDB(data);
