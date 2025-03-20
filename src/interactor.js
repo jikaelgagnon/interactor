@@ -35,6 +35,7 @@ class Interactor {
      */
     updateSelectorString()
     {
+        console.log(`CSS selectors are: ${this.cssSelectors}`)
         const matches = Object.keys(this.cssSelectors).filter((path) => {
             console.log(path);
             const p = new URLPattern(path, this.baseURL);
@@ -95,6 +96,7 @@ class Interactor {
     // TODO: SPEED THIS UP
     addListenersToMutations() {
         // console.log("finding all matching elements");
+        console.log(`selectors: ${this.selectorString}`);
         let elements = document.querySelectorAll(this.selectorString);
         // console.log("printing elements list");
         // console.table(elements);
@@ -230,12 +232,6 @@ class Interactor {
             end: null
         };
         this.session.start = this.getCurrentState();
-        let message = new Message("initializeSession", this.session);
-        this.sendMessageToBackground("initializeSession", this.session);
-        (async (record) => {
-            const response = await chrome.runtime.sendMessage(record);
-            console.log(response);
-          })(message);
     }
 
     /**
