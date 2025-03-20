@@ -3,7 +3,6 @@
     "name": "Markov Logger",
     "version": "1.0",
     "description": "Logs user interactions for selected websites",
-    "permissions": ["activeTab", "tabs", "storage"],
     "content_scripts": [
       {
         "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://x.com/*"],
