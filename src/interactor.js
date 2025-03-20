@@ -1,30 +1,3 @@
-/*
-BSD 2-Clause License
-
-Copyright (c) 2016, Benjamin Cordier
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 import { Message } from "./message.js";
 
 export {Interactor};
@@ -32,18 +5,8 @@ export {Interactor};
 class Interactor {
     constructor(config) {
             // Argument Assignment          // Type Checks                                                                          // Default Values
-            this.interactions = typeof (config.interactions) == "boolean" ? config.interactions : true,
-            this.interactionElement = typeof (config.interactionElement) == "string" ? config.interactionElement : 'interaction',
             this.interactionEvents = Array.isArray(config.interactionEvents) === true ? config.interactionEvents : ['click'],
-            this.conversions = typeof (config.conversions) == "boolean" ? config.conversions : true,
-            this.conversionElement = typeof (config.conversionElement) == "string" ? config.conversionElement : 'conversion',
-            this.conversionEvents = Array.isArray(config.conversionEvents) === true ? config.conversionEvents : ['mouseup', 'touchend'],
-            this.endpoint = typeof (config.endpoint) == "string" ? config.endpoint : 'http://localhost:5001/beacon',
-            this.async = typeof (config.async) == "boolean" ? config.async : true,
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
-            // this.records = [],
-            this.session = {},
-            this.loadTime = new Date();
             this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['selectors'] === undefined) ? config.cssSelectors['selectors'] : {},
             this.baseURL = typeof config.cssSelectors === 'object' && !(config.cssSelectors['baseURL'] === undefined) ? config.cssSelectors['baseURL'] : "";
             this.currentURL = document.location.href;
@@ -52,6 +15,7 @@ class Interactor {
 
             console.log(`Current url is: ${this.currentURL}`);
 
+            this.initializeSession();
             // Call Event Binding Method
             this.bindEvents();
     }
@@ -102,17 +66,18 @@ class Interactor {
     }
 
     onNavigationDetection(navEvent){
-        console.log("in onNavigationDetection");
+        console.log(" ---- Navigation event detected");
         if (!(navEvent.destination.url === this.currentURL))
         {
             console.log("New url detected!");
-            console.log(navEvent);
-            const record = this.createNavigationRecord(navEvent);
-            this.sendMessageToBackground("onNavigationDetection", record);
             this.currentURL = navEvent.destination.url;
-            console.log("logging selectors");
             this.updateSelectorString();
         }
+        else {
+            console.log("URL was unchanged");
+        }
+        const record = this.createNavigationRecord(navEvent);
+        this.sendMessageToBackground("onNavigationDetection", record);
     }
 
     /**
@@ -129,10 +94,10 @@ class Interactor {
 
     // TODO: SPEED THIS UP
     addListenersToMutations() {
-        console.log("finding all matching elements");
+        // console.log("finding all matching elements");
         let elements = document.querySelectorAll(this.selectorString);
-        console.log("printing elements list");
-        console.table(elements);
+        // console.log("printing elements list");
+        // console.table(elements);
 
         elements.forEach(element => {
             if (this.debug) element.style.border = '2px solid red';
@@ -172,19 +137,9 @@ class Interactor {
         });
     
         // Navigation events and unload events remain the same
-        // navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
         navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
-        // navigation.addEventListener("navigate", function(navEvent){
-        //     if (!(navEvent.destination.url === this.currentURL)){
-        //         console.log("New url detected!");
-        //         console.log(navEvent);
-        //         // this.sendMessageToBackground("sendNavigation", record);
-        //         this.currentURL = navEvent.destination.url;
-        //         console.log("logging selectors");
-        //         this.updateSelectorString();
-        //     }
-        // }.bind(this));
-        
+
+        // Send all data to database when tab is closed
         window.addEventListener("beforeunload", e => this.closeSession());
     }
     /**
@@ -253,44 +208,43 @@ class Interactor {
         this.debuggingLog(record);
     }
 
+    getCurrentState(){
+        return {
+            page: {
+                location: window.location.pathname,
+                href: window.location.href,
+                origin: window.location.origin,
+                title: document.title
+            },
+            url: this.currentURL
+        }
+    }
+
     /**
      * Generates a session object and assigns it to the session property.
      */
-    // initializeSession() {
-    //     // Assign Session Property
-    //     this.session = {
-    //         loadTime: this.loadTime,
-    //         unloadTime: new Date(),
-    //         language: window.navigator.language,
-    //         platform: window.navigator.platform,
-    //         port: window.location.port,
-    //         clientStart: {
-    //             name: window.navigator.appVersion,
-    //             innerWidth: window.innerWidth,
-    //             innerHeight: window.innerHeight,
-    //             outerWidth: window.outerWidth,
-    //             outerHeight: window.outerHeight
-    //         },
-    //         page: {
-    //             location: window.location.pathname,
-    //             href: window.location.href,
-    //             origin: window.location.origin,
-    //             title: document.title
-    //         },
-    //         endpoint: this.endpoint
-    //     };
-        // let message = new Message("initializeSession", this.session);
-        // this.sendMessageToBackground("initializeSession", this.session);
-        // (async (record) => {
-        //     const response = await chrome.runtime.sendMessage(record);
-        //     console.log(response);
-        //   })(message);
-    // }
+    initializeSession() {
+        // Assign Session Property
+        this.session = {
+            start: null,
+            end: null
+        };
+        this.session.start = this.getCurrentState();
+        let message = new Message("initializeSession", this.session);
+        this.sendMessageToBackground("initializeSession", this.session);
+        (async (record) => {
+            const response = await chrome.runtime.sendMessage(record);
+            console.log(response);
+          })(message);
+    }
 
     /**
      * Inserts end-of-session values into the session property.
      */
     closeSession() {
+        this.session.end = this.getCurrentState();
+        console.log("closing seesion");
+        console.log(this.session);
         this.sendMessageToBackground("closeSession", this.session);
     }
 }    
