@@ -129,7 +129,10 @@ class Interactor {
 
     // TODO: SPEED THIS UP
     addListenersToMutations() {
+        console.log("finding all matching elements");
         let elements = document.querySelectorAll(this.selectorString);
+        console.log("printing elements list");
+        console.table(elements);
 
         elements.forEach(element => {
             if (this.debug) element.style.border = '2px solid red';
@@ -151,6 +154,7 @@ class Interactor {
      */
 
     bindEvents() {
+        console.log("binding events to the page");
         // Wait for the page to fully load before adding listeners
         window.addEventListener('load', () => {
             const observer = new MutationObserver(function(mutations, obs) {

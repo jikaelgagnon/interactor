@@ -2,6 +2,9 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "./firebase.js";
 import { doc } from "firebase/firestore/lite";
 
+// TODO: Change this later... this is for debugging...
+let USE_DB = false;
+
 // On startup, create an object to hold session data
 class SessionData {
   constructor() {
@@ -39,12 +42,17 @@ async function clearSession(){
 
 async function addToDB(document) {
   console.log("Trying to add to DB");
-  try {
-    const docRef = await addDoc(collection(db, "userData"), document);
-    console.log("Document written with ID: ", docRef.id);
-  } catch (e) {
-    console.log("Failed to add to DB");
-    console.error("Error adding document: ", e);
+  if (USE_DB) {
+    try {
+      const docRef = await addDoc(collection(db, "userData"), document);
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.log("Failed to add to DB");
+      console.error("Error adding document: ", e);
+    }
+  }
+  else {
+    console.log("USE_DB is set to false");
   }
 }
 
