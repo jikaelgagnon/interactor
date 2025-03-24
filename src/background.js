@@ -64,7 +64,7 @@ chrome.tabs.onRemoved.addListener(function(tabid, removed) {
   if (SESSION_DATA.documents.length > 0){
     const {...data} = SESSION_DATA;
     addToDB(data);
-    clearSession();
+    SESSION_DATA.clearSession();
  }
 }
 )
@@ -93,15 +93,10 @@ chrome.runtime.onMessage.addListener(
           });
           console.log("Interaction received");
           break;
-      case "closeSession":
-          console.log("Session closed");
-          console.log("Adding documents to database...");
+      case "initializeSession":
+          console.log("Session started");
           SESSION_DATA.sessionInfo = request.payload;
-          SESSION_DATA._printContents();
-          const {...data} = SESSION_DATA;
-          addToDB(data);
-          SESSION_DATA.clearSession();
-          console.log("Done!");
+          console.log(request.payload);
           break;
       default:  
         sendResponse({ status: `Request type ${request.type} is unrecognized`});

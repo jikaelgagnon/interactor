@@ -39,7 +39,7 @@ class Interactor {
     {
         // console.log(`CSS selectors are: ${this.cssSelectors}`)
         const matches = Object.keys(this.cssSelectors).filter((path) => {
-            console.log(path);
+            // console.log(path);
             const p = new URLPattern(path, this.baseURL);
             return p.test(this.currentURL);
         })
@@ -72,18 +72,59 @@ class Interactor {
     }
 
     onNavigationDetection(navEvent){
-        console.log(" ---- Navigation event detected");
-        if (!(navEvent.destination.url === this.currentURL))
-        {
-            console.log("New url detected!");
-            this.currentURL = navEvent.destination.url;
+        // console.log(" ---- Navigation event detected");
+        // console.log("Logging keys");
+        // // for (let prop in navEvent) {
+        // //     console.log(prop);  // This will show inherited properties as well.
+        // // }
+        // // for (let prop in navEvent) {
+        // //     console.log(`${prop}:`, navEvent[prop]);
+        // // }
+
+        // console.log(navEvent.navigationType);
+        // console.log(navEvent.destination.sameDocument);
+        
+        // console.log("Done logging keys");
+        let urlChange = !(navEvent.destination.url === this.currentURL)
+        console.log(`Current url: ${this.currentURL}`);
+        console.log(`Destination url: ${navEvent.destination.url}`);
+        console.log(`URL change: ${urlChange}`);
+
+        // if (urlChange)
+        // {
+        //     console.log("New url detected!");
+        //     this.currentURL = navEvent.destination.url;
+        //     this.updateSelectorString();
+        // }
+        // else {
+        //     console.log("URL was unchanged");
+        //     const record = this.createNavigationRecord(navEvent);
+        //     this.sendMessageToBackground("onNavigationDetection", record);
+        // }
+
+        this.currentURL = navEvent.destination.url;
+
+
+        // These are "state changes"
+        if (navEvent.navigationType === "push" && urlChange){
+            console.log("You changed pages");
             this.updateSelectorString();
+            const record = this.createStateChangeRecord(navEvent);
+            this.sendMessageToBackground("onNavigationDetection", record);
         }
-        else {
-            console.log("URL was unchanged");
+
+        // These are self loops. We don't care about the URl
+        else if (navEvent.navigationType === "replace"){
+            if (urlChange){
+                console.log("You're on the same page but URL changed");
+            }
+            else{
+                console.log("You're on the same page and URL didn't change");
+                const record = this.createSelfLoopRecord(navEvent);
+                this.sendMessageToBackground("onNavigationDetection", record);
+            }
+
         }
-        const record = this.createNavigationRecord(navEvent);
-        this.sendMessageToBackground("onNavigationDetection", record);
     }
 
     /**
@@ -115,6 +156,41 @@ class Interactor {
     //         }
     //     });
     // }
+
+    // stringToColor(string, saturation = 100, lightness = 75){
+    //     let hash = 0;
+    //     for (let i = 0; i < string.length; i++) {
+    //         hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    //         hash = hash & hash;
+    //     }
+    //     return `hsl(${(hash % 360)}, ${saturation}%, ${lightness}%)`;
+    //   }
+
+    /*
+    Generates a colour based on a string: https://stackoverflow.com/a/31037383
+    Used for debugging
+    */
+    StringToColor = (function(){
+        var instance = null;
+    
+        return {
+        next: function stringToColor(str) {
+            if(instance === null) {
+                instance = {};
+                instance.stringToColorHash = {};
+                instance.nextVeryDifferntColorIdx = 0;
+                instance.veryDifferentColors = ["#00FF00","#0000FF","#FF0000","#01FFFE","#FFA6FE","#FFDB66","#006401","#010067","#95003A","#007DB5","#FF00F6","#FFEEE8","#774D00","#90FB92","#0076FF","#D5FF00","#FF937E","#6A826C","#FF029D","#FE8900","#7A4782","#7E2DD2","#85A900","#FF0056","#A42400","#00AE7E","#683D3B","#BDC6FF","#263400","#BDD393","#00B917","#9E008E","#001544","#C28C9F","#FF74A3","#01D0FF","#004754","#E56FFE","#788231","#0E4CA1","#91D0CB","#BE9970","#968AE8","#BB8800","#43002C","#DEFF74","#00FFC6","#FFE502","#620E00","#008F9C","#98FF52","#7544B1","#B500FF","#00FF78","#FF6E41","#005F39","#6B6882","#5FAD4E","#A75740","#A5FFD2","#FFB167","#009BFF","#E85EBE"];
+            }
+    
+            if(!instance.stringToColorHash[str]){
+                instance.stringToColorHash[str] = instance.veryDifferentColors[instance.nextVeryDifferntColorIdx++];
+                // console.log(`the colour for ${str} is ${instance.stringToColorHash[str]}`);
+                console.log(`%c The colour for ${str}`, `color: ${instance.stringToColorHash[str]}`);
+            }
+                return instance.stringToColorHash[str];
+            }
+        }
+    })();
        
     addListenersToMutations() {
         // let selectors = this.selectorString.split(", ");
@@ -144,7 +220,7 @@ class Interactor {
             // console.log(interaction["selector"]);
             // console.log(name);
             elements.forEach(element => {
-                if (this.debug) element.style.border = '2px solid red';
+                if (this.debug) element.style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute('data-listener-attached', 'true');
                 // element.setAttribute('matching-selector', interaction);
                 // element.setAttribute('interactor-name', 'JIKAEL_BUTTON');
@@ -186,11 +262,7 @@ class Interactor {
             this.addListenersToMutations();
         });
     
-        // Navigation events and unload events remain the same
         navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
-
-        // Send all data to database when tab is closed
-        // window.addEventListener("beforeunload", e => this.closeSession());
     }
     /**
      * Logs the interaction record if debugging is enabled.
@@ -209,11 +281,21 @@ class Interactor {
      * @param {Event} navEvent - The navigation event.
      * @returns {Object} The navigation record object.
      */
-    createNavigationRecord(navEvent) {
+    createStateChangeRecord(navEvent) {
         // Navigation Object
         const navigation = {
-            type: navEvent.type,
+            type: "state_change",
             destinationURL: navEvent.destination.url,
+            createdAt: new Date()
+        };
+
+        return navigation;
+    }
+
+    createSelfLoopRecord(navEvent) {
+        // Navigation Object
+        const navigation = {
+            type: "self_loop",
             createdAt: new Date()
         };
 
@@ -264,20 +346,16 @@ class Interactor {
      */
     initializeSession() {
         // Assign Session Property
-        this.session = {
-            start: null,
-            end: null
-        };
-        this.session.start = this.getCurrentState();
+        this.sendMessageToBackground("initializeSession", this.getCurrentState());
     }
 
     /**
      * Inserts end-of-session values into the session property.
      */
-    closeSession() {
-        this.session.end = this.getCurrentState();
-        console.log("closing seesion");
-        console.log(this.session);
-        this.sendMessageToBackground("closeSession", this.session);
-    }
+    // closeSession() {
+    //     this.session.end = this.getCurrentState();
+    //     console.log("closing seesion");
+    //     console.log(this.session);
+    //     this.sendMessageToBackground("closeSession", this.session);
+    // }
 }    
