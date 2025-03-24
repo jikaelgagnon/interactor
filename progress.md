@@ -5,160 +5,94 @@ A Chrome extension that logs user interactions based on CSS selectors.
 ## Example
 
 Given the following JSON file, the extension will track interactions on `https://youtube.com/*` for all elements
-that match the corresponding selectors, it will track `#chip-container` interactions on `https://youtube.com` and it will track `#like-button[is-shorts]` and `#dislike-button[is-shorts]` on any URL of the form `https://youtube.com/shorts/:id` (for example `https://www.youtube.com/shorts/HummvDzYq6Y`).
+that match the corresponding selectors, it will track interactions with the "Side Navigation Button", which is represented by elements matching the selector "#endpoint" on `https://youtube.com` and it will track `#like-button[is-shorts]` and `#dislike-button[is-shorts]` on any URL of the form `https://youtube.com/shorts/:id` (for example `https://www.youtube.com/shorts/HummvDzYq6Y`).
 
 ```json
-{
+export const selectors = {
     "baseURL": "https://www.youtube.com",
-    "selectors":{
+    "interactions": {
         "/*": [
-            "#endpoint",
-            "#logo-icon",
-            "#content.ytd-rich-item-renderer",
-            "ytd-compact-video-renderer",
-            "ytm-shorts-lockup-view-model-v2",
-            ".yt-spec-button-shape-next[aria-label=\"Next\"]"
+            {"selector": "#endpoint", "name": "Side Navigation Button"},
+            {"selector": "#logo-icon", "name": "YouTube Logo"},
+            {"selector": "ytd-rich-grid-media.style-scope.ytd-rich-item-renderer", "name": "Video"},
+            {"selector": "ytm-shorts-lockup-view-model-v2", "name": "Shorts on Miniplayer"},
+            {"selector": ".yt-spec-button-shape-next[aria-label=\"Next\"]", "name": "Next Button"},
+            {"selector": "#chip-container.style-scope.yt-chip-cloud-chip-renderer", "name": "Category Button"}
         ],
-        "": 
-        [
-            "#chip-container"
+        "": [
+            // {"selector": "#chip-container", "name": "chip-container"}
         ],
         "/shorts/:id": [
-            "#like-button[is-shorts]",
-            "#dislike-button[is-shorts]"
+            {"selector": "#like-button[is-shorts]", "name": "Shorts Like Button"},
+            {"selector": "#dislike-button[is-shorts]", "name": "Shorts Dislike Button"}
+        ],
+        "/watch?v=:id": [
+            {"selector": "ytd-compact-video-renderer.style-scope.ytd-item-section-renderer", "name": "Watch Page Recommended Video"},
+            {"selector": "ytd-toggle-button-renderer#dislike-button", "name": "Comment Dislike Button"},
+            {"selector": "ytd-toggle-button-renderer#like-button", "name": "Comment Like Button"},
         ]
     }
 }
 ```
 Once YouTube is opened, the elements of interest will be highlighted:
 
-![image](https://github.com/user-attachments/assets/69cd1191-5482-48fd-a223-8051bb4471a8)
+![image](https://github.com/user-attachments/assets/2d78ab01-192e-4488-ba06-756535598827)
 
-Upon clicking on an element of interest, two things can happen:
+
+Upon clicking on an element of interest, three things can happen:
 
 1. A new entry is appended to the database indicating an _interaction_
-2. A new entry is appended to the database indicating a _navigation_ (this occurs when clicking the element changes to a new page)
+2. A new entry is appended to the database indicating a _state change_
+3. A new entry is appended to the database indicating a _self loop_
 
 All of this info is combined into a single `Session` object that is added to the database once the tab is closed:
 
 ```json
-{
-  "documents": [
-// 1. interaction: click on Subscriptions button
-    {
-      "clientPosition": {
-        "x": 146,
-        "y": 183
-      },
-      "content": "Subscriptions",
-      "createdAt": "2025-03-19T21:49:38.552Z",
-      "event": "click",
-      "screenPosition": {
-        "x": 146,
-        "y": 304
-      },
-      "targetClasses": "title style-scope ytd-guide-entry-renderer",
-      "targetTag": "YT-FORMATTED-STRING",
-      "type": "interaction"
-    },
-// 2. navigation: change to Subscriptions page
-    {
-      "createdAt": "2025-03-19T21:49:38.558Z",
-      "destinationURL": "https://www.youtube.com/feed/subscriptions",
-      "type": "navigate"
-    },
-// 3. interaction: click on Home page
-    {
-      "clientPosition": {
-        "x": 130,
-        "y": 98
-      },
-      "content": "Home",
-      "createdAt": "2025-03-19T21:49:47.937Z",
-      "event": "click",
-      "screenPosition": {
-        "x": 130,
-        "y": 219
-      },
-      "targetClasses": "title style-scope ytd-guide-entry-renderer",
-      "targetTag": "YT-FORMATTED-STRING",
-      "type": "interaction"
-    },
-// 4. navigation: change to Home page
-    {
-      "createdAt": "2025-03-19T21:49:47.947Z",
-      "destinationURL": "https://www.youtube.com/",
-      "type": "navigate"
-    },
-// 6. interaction: click on the Algorithms section of the homepage
-    {
-      "clientPosition": {
-        "x": 1064,
-        "y": 85
-      },
-      "content": "Algorithms",
-      "createdAt": "2025-03-19T21:49:55.521Z",
-      "event": "click",
-      "screenPosition": {
-        "x": 1064,
-        "y": 206
-      },
-      "targetClasses": "style-scope yt-chip-cloud-chip-renderer",
-      "targetTag": "YT-FORMATTED-STRING",
-      "type": "interaction"
-    },
-// 7. click on a video thumbnail
-    {
-      "clientPosition": {
-        "x": 134,
-        "y": 25
-      },
-      "content": "",
-      "createdAt": "2025-03-19T21:52:39.622Z",
-      "event": "click",
-      "screenPosition": {
-        "x": 135,
-        "y": 146
-      },
-      "targetClasses": "",
-      "targetTag": "DIV",
-      "type": "interaction"
-    },
-// 8. navigation: switch to the video
-    {
-      "createdAt": "2025-03-19T21:52:45.259Z",
-      "destinationURL": "https://www.youtube.com/watch?v=ZuKIUjw_tNU",
-      "type": "navigate"
-    },
-// 9. interaction: click on a new video
-    {
-      "clientPosition": {
-        "x": 422,
-        "y": 564
-      },
-      "content": "1.4M views 1 year ago",
-      "createdAt": "2025-03-19T21:52:53.653Z",
-      "event": "click",
-      "screenPosition": {
-        "x": 423,
-        "y": 685
-      },
-      "targetClasses": "style-scope ytd-video-meta-block",
-      "targetTag": "DIV",
-      "type": "interaction"
-    },
-// 10. navigation: change the page
-    {
-      "createdAt": "2025-03-19T21:52:53.660Z",
-      "destinationURL": "https://www.youtube.com/watch?v=gkvyYTSKTQY",
-      "type": "navigate"
-    }
-  ]
-}
-
+[
+// 1. Click on a category on the home page
+  {
+    "createdAt": "2025-03-24T23:43:33.062Z",
+    "type": "interaction",
+    "name": "Category Button"
+  },
+// 2. Click on another category on the home page
+  {
+    "createdAt": "2025-03-24T23:43:36.647Z",
+    "type": "interaction",
+    "name": "Category Button"
+  },
+// 2. Click on a side navigation button
+  {
+    "createdAt": "2025-03-24T23:43:42.119Z",
+    "type": "interaction",
+    "name": "Side Navigation Button"
+  },
+// 3. This switches you to the shorts page
+  {
+    "createdAt": "2025-03-24T23:43:42.593Z",
+    "type": "state_change",
+    "destinationURL": "https://www.youtube.com/shorts/vywFu2pZVko"
+  },
+// 4. Scroll to next short
+  {
+    "createdAt": "2025-03-24T23:43:46.255Z",
+    "type": "self_loop"
+  },
+// 4. Scroll to next short
+  {
+    "createdAt": "2025-03-24T23:43:47.795Z",
+    "type": "self_loop"
+  }
+]
 ```
 
 All of this information goes to a FireBase database:
 
-![image](https://github.com/user-attachments/assets/ce92381b-ce36-47c8-9ae5-75dee985949a)
+![image](https://github.com/user-attachments/assets/1ea6aa69-c829-4a10-94f9-64b4d59dc851)
+
+I'm now working on a Python script that can convert this data into a Markov model visually using NetworkX, which should be pretty straightforward:
+
+![image](https://github.com/user-attachments/assets/b952b5f6-72da-49fe-aa89-69981e3b2f33)
+
+
 
