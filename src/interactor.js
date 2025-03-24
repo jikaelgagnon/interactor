@@ -7,11 +7,13 @@ class Interactor {
             // Argument Assignment          // Type Checks                                                                          // Default Values
             this.interactionEvents = Array.isArray(config.interactionEvents) === true ? config.interactionEvents : ['click'],
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
-            this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['selectors'] === undefined) ? config.cssSelectors['selectors'] : {},
+            this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['interactions'] === undefined) ? config.cssSelectors['interactions'] : {},
             this.baseURL = typeof config.cssSelectors === 'object' && !(config.cssSelectors['baseURL'] === undefined) ? config.cssSelectors['baseURL'] : "";
             this.currentURL = document.location.href;
             this.selectorString;
             this.updateSelectorString();
+            this.currentSelectors;
+            this.currentInteractions;
 
             console.log(`Current url is: ${this.currentURL}`);
 
@@ -35,23 +37,27 @@ class Interactor {
      */
     updateSelectorString()
     {
-        console.log(`CSS selectors are: ${this.cssSelectors}`)
+        // console.log(`CSS selectors are: ${this.cssSelectors}`)
         const matches = Object.keys(this.cssSelectors).filter((path) => {
             console.log(path);
             const p = new URLPattern(path, this.baseURL);
             return p.test(this.currentURL);
         })
 
-        let selectorsArray = [];
+        this.currentInteractions = []
 
         for (const key of matches){
-            const filteredSelectors = this.cssSelectors[key].map(selector => `${selector}:not([data-listener-attached])`);
-            selectorsArray = selectorsArray.concat(filteredSelectors);
+            let interactions = this.cssSelectors[key];
+            for (const interaction of interactions){
+                // console.log(interaction);
+                let selector = interaction["selector"];
+                // interaction["selector"] = `${selector}:not([data-listener-attached])`;
+                this.currentInteractions.push({
+                    "selector": `${selector}:not([data-listener-attached])`,
+                    "name": interaction["name"]
+                });
+            }
         }
-
-        const selectorString = selectorsArray.join(", ");
-
-        this.selectorString = selectorString;
     }
 
     async sendMessageToBackground(type, payload){
@@ -60,9 +66,8 @@ class Interactor {
         return response;
     }
 
-    onInteractionDetection(e){
-        console.log("You clicked an element of interest");
-        const record = this.createInteractionRecord(e, "interaction");
+    onInteractionDetection(e, name){
+        const record = this.createInteractionRecord(name, "interaction");
         this.sendMessageToBackground("onInteractionDetection", record);
     }
 
@@ -94,22 +99,66 @@ class Interactor {
      */
 
     // TODO: SPEED THIS UP
-    addListenersToMutations() {
-        // console.log("finding all matching elements");
-        console.log(`selectors: ${this.selectorString}`);
-        let elements = document.querySelectorAll(this.selectorString);
-        // console.log("printing elements list");
-        // console.table(elements);
+    // addListenersToMutations() {
+    //     // console.log("finding all matching elements");
+    //     console.log(`selectors: ${this.selectorString}`);
+    //     let elements = document.querySelectorAll(this.selectorString);
+    //     // console.log("printing elements list");
+    //     // console.table(elements);
 
-        elements.forEach(element => {
-            if (this.debug) element.style.border = '2px solid red';
-            element.setAttribute('data-listener-attached', 'true');
-            for (let i = 0; i < this.interactionEvents.length; i++) {
-                element.addEventListener(this.interactionEvents[i], (e) => this.onInteractionDetection(e), true);
-            }
-        });
-    }
+    //     elements.forEach(element => {
+    //         if (this.debug) element.style.border = '2px solid red';
+    //         element.setAttribute('data-listener-attached', 'true');
+    //         // element.setAttribute('interactor-name', 'JIKAEL_BUTTON');
+    //         for (let i = 0; i < this.interactionEvents.length; i++) {
+    //             element.addEventListener(this.interactionEvents[i], (e) => this.onInteractionDetection(e), true);
+    //         }
+    //     });
+    // }
        
+    addListenersToMutations() {
+        // let selectors = this.selectorString.split(", ");
+        // this.currentSelectors.forEach(selector => {
+        //     let elements = document.querySelectorAll(selector);
+        //     elements.forEach(element => {
+        //         if (this.debug) element.style.border = '2px solid red';
+        //         element.setAttribute('data-listener-attached', 'true');
+        //         element.setAttribute('matching-selector', selector);
+        //         // element.setAttribute('interactor-name', 'JIKAEL_BUTTON');
+        //         for (let i = 0; i < this.interactionEvents.length; i++) {
+        //             element.addEventListener(this.interactionEvents[i], (e) => {
+        //                 console.log(`This element matched selector: ${selector}`);
+        //                 this.onInteractionDetection(e);
+        //             }
+        //             , true);
+        //         }
+        //     });
+        // })
+        // console.log("Current interactions:");
+        // console.log(this.currentInteractions);
+        // console.log(this.currentInteractions[0]);
+        this.currentInteractions.forEach(interaction => {
+            // console.log(interaction);
+            let elements = document.querySelectorAll(interaction["selector"]);
+            let name = interaction["name"];
+            // console.log(interaction["selector"]);
+            // console.log(name);
+            elements.forEach(element => {
+                if (this.debug) element.style.border = '2px solid red';
+                element.setAttribute('data-listener-attached', 'true');
+                // element.setAttribute('matching-selector', interaction);
+                // element.setAttribute('interactor-name', 'JIKAEL_BUTTON');
+                
+                for (let i = 0; i < this.interactionEvents.length; i++) {
+                    element.addEventListener(this.interactionEvents[i], (e) => {
+                        e.stopPropagation();
+                        this.onInteractionDetection(e, name)
+                    }
+                    , true);
+                }
+            });
+        })
+    }
     /**
      * Binds various event listeners to the document and window.
      * 
@@ -142,7 +191,7 @@ class Interactor {
         navigation.addEventListener("navigate", (e) => this.onNavigationDetection(e));
 
         // Send all data to database when tab is closed
-        window.addEventListener("beforeunload", e => this.closeSession());
+        // window.addEventListener("beforeunload", e => this.closeSession());
     }
     /**
      * Logs the interaction record if debugging is enabled.
@@ -179,25 +228,14 @@ class Interactor {
      * @param {string} type - The type of interaction.
      * @returns {Object} The interaction record object.
      */
-    createInteractionRecord(e, type) {
+    createInteractionRecord(name, type) {
         // Interaction Object
         const interaction = {
-            type: type,
-            event: e.type,
-            targetTag: e.target.nodeName,
-            targetClasses: e.target.className,
-            content: e.target.innerText,
-            clientPosition: {
-                x: e.clientX,
-                y: e.clientY
-            },
-            screenPosition: {
-                x: e.screenX,
-                y: e.screenY
-            },
+            name: name,
+            type: "interaction",
             createdAt: new Date()
         };
-
+        console.log(interaction);
         return interaction;
     }
 

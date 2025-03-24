@@ -3,7 +3,7 @@ import { db } from "./firebase.js";
 import { doc } from "firebase/firestore/lite";
 
 // TODO: Change this later... this is for debugging...
-let USE_DB = false;
+let USE_DB = true;
 
 // On startup, create an object to hold session data
 class SessionData {
@@ -59,6 +59,11 @@ async function addToDB(document) {
     console.log("USE_DB is set to false");
   }
 }
+
+chrome.tabs.onRemoved.addListener(function(tabid, removed) {
+  const {...data} = SESSION_DATA;
+  addToDB(data);
+ })
 
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
