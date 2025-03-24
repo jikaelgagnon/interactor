@@ -151,7 +151,6 @@ class Interactor {
                 
                 for (let i = 0; i < this.interactionEvents.length; i++) {
                     element.addEventListener(this.interactionEvents[i], (e) => {
-                        e.stopPropagation();
                         this.onInteractionDetection(e, name)
                     }
                     , true);

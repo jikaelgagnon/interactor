@@ -61,9 +61,13 @@ async function addToDB(document) {
 }
 
 chrome.tabs.onRemoved.addListener(function(tabid, removed) {
-  const {...data} = SESSION_DATA;
-  addToDB(data);
- })
+  if (SESSION_DATA.documents.length > 0){
+    const {...data} = SESSION_DATA;
+    addToDB(data);
+    clearSession();
+ }
+}
+)
 
 chrome.runtime.onMessage.addListener(
   function (request, sender, sendResponse) {
