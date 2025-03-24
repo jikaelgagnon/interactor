@@ -3,3 +3,4 @@ test_server/db_config.json
 test_server/node_modules/*
 node_modules
 src/configs/*
+secrets/*

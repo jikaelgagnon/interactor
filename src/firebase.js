@@ -2,7 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import {firebaseConfig} from "./configs/firebaseConfig.js";
 
-// TODO: Uncomment...
 console.log(firebaseConfig);
 
 // // Initialize Firebase
