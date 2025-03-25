@@ -74,7 +74,7 @@ class Interactor {
     }
 
     onInteractionDetection(e, name){
-        const record = this.createInteractionRecord(name, "interaction");
+        const record = this.createInteractionRecord(name, this.getCleanStateName(), "interaction");
         this.sendMessageToBackground("onInteractionDetection", record);
     }
 
@@ -104,6 +104,20 @@ class Interactor {
         return true;
     }
 
+    getCleanStateName(){
+        console.log(`Current url: ${this.currentURL}`);
+        let path = new URL(this.currentURL).pathname;
+        let groups = path.split("/");
+        console.log(`Current path: ${path}`);
+        console.log(`Uses ID: ${this.currentURLUsesId}`);
+
+        if (this.currentURLUsesId){
+            groups = groups.slice(0, groups.length-1);
+        }
+        console.log(`Groups: ${groups}`);
+        return groups.join("/");
+    }
+
     onNavigationDetection(navEvent){
         // console.log(" ---- Navigation event detected");
         // console.log("Logging keys");
@@ -119,6 +133,7 @@ class Interactor {
         
         // console.log("Done logging keys");
         let urlChange = !(navEvent.destination.url === this.currentURL)
+        let sourceState = this.getCleanStateName();
         // console.log(`Current url: ${this.currentURL}`);
         // console.log(`Destination url: ${navEvent.destination.url}`);
         // console.log(`URL change: ${urlChange}`);
@@ -139,13 +154,14 @@ class Interactor {
         // }
         let old_url = this.currentURL;
         this.currentURL = navEvent.destination.url;
+        let destState = this.getCleanStateName();
 
 
         // These are "state changes"
         if (navEvent.navigationType === "push" && !match){
             console.log("You changed pages");
             this.updateSelectorString();
-            const record = this.createStateChangeRecord(navEvent, old_url);
+            const record = this.createStateChangeRecord(navEvent, sourceState, destState);
             this.sendMessageToBackground("onNavigationDetection", record);
         }
 
@@ -157,7 +173,7 @@ class Interactor {
             else{
                 console.log("You're on the same page and URL didn't change");
             }
-            const record = this.createSelfLoopRecord(navEvent, urlChange);
+            const record = this.createSelfLoopRecord(navEvent, sourceState, urlChange);
             this.sendMessageToBackground("onNavigationDetection", record);
         }
     }
@@ -316,22 +332,22 @@ class Interactor {
      * @param {Event} navEvent - The navigation event.
      * @returns {Object} The navigation record object.
      */
-    createStateChangeRecord(navEvent, sourceURL) {
+    createStateChangeRecord(navEvent, sourceState, destState) {
         // Navigation Object
         const metadata = {
-            destinationPath: new URL(navEvent.destination.url).pathname,
+            destinationState: destState,
         };
 
-        return new Document("state_change", sourceURL, metadata);
+        return new Document("state_change", sourceState, metadata);
     }
 
-    createSelfLoopRecord(navEvent, urlChange) {
+    createSelfLoopRecord(navEvent, sourceState, urlChange) {
         // Navigation Object
         const metadata =  {
             urlChange: urlChange
         };
 
-        return new Document("self_loop", this.currentURL, metadata);
+        return new Document("self_loop", sourceState, metadata);
     }
 
     /**
@@ -341,12 +357,12 @@ class Interactor {
      * @param {string} type - The type of interaction.
      * @returns {Object} The interaction record object.
      */
-    createInteractionRecord(name, type) {
+    createInteractionRecord(name, sourceState, type) {
         // Interaction Object
         const metadata = {
             name: name
         };
-        return new Document("interaction", this.currentURL, metadata);
+        return new Document("interaction", sourceState, metadata);
     }
 
     /**
@@ -375,6 +391,7 @@ class Interactor {
      */
     initializeSession() {
         // Assign Session Property
+        // this.currentURL = window.location.pathname;
         this.sendMessageToBackground("initializeSession", this.getCurrentState());
     }
 
