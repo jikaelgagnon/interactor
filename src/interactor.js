@@ -137,7 +137,7 @@ class Interactor {
         //     const record = this.createNavigationRecord(navEvent);
         //     this.sendMessageToBackground("onNavigationDetection", record);
         // }
-
+        let old_url = this.currentURL;
         this.currentURL = navEvent.destination.url;
 
 
@@ -145,7 +145,7 @@ class Interactor {
         if (navEvent.navigationType === "push" && !match){
             console.log("You changed pages");
             this.updateSelectorString();
-            const record = this.createStateChangeRecord(navEvent);
+            const record = this.createStateChangeRecord(navEvent, old_url);
             this.sendMessageToBackground("onNavigationDetection", record);
         }
 
@@ -316,13 +316,13 @@ class Interactor {
      * @param {Event} navEvent - The navigation event.
      * @returns {Object} The navigation record object.
      */
-    createStateChangeRecord(navEvent) {
+    createStateChangeRecord(navEvent, sourceURL) {
         // Navigation Object
         const metadata = {
             destinationPath: new URL(navEvent.destination.url).pathname,
         };
 
-        return new Document("state_change", this.currentURL, metadata);
+        return new Document("state_change", sourceURL, metadata);
     }
 
     createSelfLoopRecord(navEvent, urlChange) {
