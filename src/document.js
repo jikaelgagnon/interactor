@@ -1,9 +1,9 @@
 export {Document};
 
 class Document {
-    constructor(type, currentURL, metadata) {
+    constructor(type, currentURL, time, metadata) {
         this.type = type;
-        this.createdAt = Date();
+        this.createdAt = time;
         this.currentPath = new URL(currentURL).pathname;
         this.metadata = metadata;
     }
