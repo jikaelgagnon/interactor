@@ -48,8 +48,6 @@ Upon clicking on an element of interest, three things can happen:
 All of this info is combined into a single `Session` object that is added to the database once the tab is closed:
 
 ```json
-[
-```json
 {
   "documents": [
     // 1. Click on a video from the home page
@@ -59,14 +57,14 @@ All of this info is combined into a single `Session` object that is added to the
       "metadata": {"name": "Video"},
       "currentPath": "/"
     },
-    // 2. Extra data to be removed...
+    // 2. Extra data to be removed (no URL change)
     {
       "createdAt": "Tue Mar 25 2025 10:43:32 GMT-0400 (Eastern Daylight Time)",
       "type": "self_loop",
       "metadata": {"urlChange": false},
       "currentPath": "/"
     },
-    // 3. State changes to the /watch page
+    // 3. State change to the /watch page
     {
       "createdAt": "Tue Mar 25 2025 10:43:32 GMT-0400 (Eastern Daylight Time)",
       "type": "state_change",
@@ -80,7 +78,7 @@ All of this info is combined into a single `Session` object that is added to the
       "metadata": {"name": "Watch Page Recommended Video"},
       "currentPath": "/watch"
     },
-    // 5. This results in a self loop
+    // 5. Self loop due to URL change
     {
       "createdAt": "Tue Mar 25 2025 10:43:37 GMT-0400 (Eastern Daylight Time)",
       "type": "self_loop",
@@ -94,70 +92,98 @@ All of this info is combined into a single `Session` object that is added to the
       "metadata": {"name": "Watch Page Recommended Video"},
       "currentPath": "/watch"
     },
-    // 7. This results in a self loop
+    // 7. Self loop due to URL change
     {
       "createdAt": "Tue Mar 25 2025 10:43:41 GMT-0400 (Eastern Daylight Time)",
       "type": "self_loop",
       "metadata": {"urlChange": true},
       "currentPath": "/watch"
     },
-    // 8. Click on YouTube logo
+    // 8. Click on another recommended video
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:44 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Watch Page Recommended Video"},
+      "currentPath": "/watch"
+    },
+    // 9. Self loop due to URL change
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:44 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": true},
+      "currentPath": "/watch"
+    },
+    // 10. Click on YouTube logo
     {
       "createdAt": "Tue Mar 25 2025 10:43:49 GMT-0400 (Eastern Daylight Time)",
       "type": "interaction",
       "metadata": {"name": "YouTube Logo"},
       "currentPath": "/watch"
     },
-    // 9. This results in a state change
+    // 11. State change to the home page
     {
       "createdAt": "Tue Mar 25 2025 10:43:49 GMT-0400 (Eastern Daylight Time)",
       "type": "state_change",
       "metadata": {"destinationPath": "/"},
       "currentPath": "/"
     },
-    // 9. Click on shorts from the side navigation button
+    // 12. Click on side navigation button
     {
       "createdAt": "Tue Mar 25 2025 10:43:55 GMT-0400 (Eastern Daylight Time)",
       "type": "interaction",
       "metadata": {"name": "Side Navigation Button"},
       "currentPath": "/"
     },
-    // 10. This changes state to the shorts page
+    // 13. State change to the shorts page
     {
       "createdAt": "Tue Mar 25 2025 10:43:56 GMT-0400 (Eastern Daylight Time)",
       "type": "state_change",
       "metadata": {"destinationPath": "/shorts/G7oVnN19Vss"},
       "currentPath": "/shorts/G7oVnN19Vss"
     },
-    // 11. Like a YT short
+    // 14. Like a YT short
     {
       "createdAt": "Tue Mar 25 2025 10:44:00 GMT-0400 (Eastern Daylight Time)",
       "type": "interaction",
       "metadata": {"name": "Shorts Like Button"},
       "currentPath": "/shorts/G7oVnN19Vss"
     },
-    // 12. Scroll to next short
+    // 15. Scroll to the next short (no URL change)
     {
       "createdAt": "Tue Mar 25 2025 10:44:02 GMT-0400 (Eastern Daylight Time)",
       "type": "self_loop",
       "metadata": {"urlChange": false},
       "currentPath": "/shorts/G7oVnN19Vss"
     },
-    // 13. Scroll to next short (triggered by same event as above)
+    // 16. Scroll to the next short (URL change)
     {
       "createdAt": "Tue Mar 25 2025 10:44:02 GMT-0400 (Eastern Daylight Time)",
       "type": "self_loop",
       "metadata": {"urlChange": true},
       "currentPath": "/shorts/qyooRIwV-M0"
     },
-    // 14. Click on YouTube logo
+    // 17. Scroll again (no URL change)
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:09 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": false},
+      "currentPath": "/shorts/qyooRIwV-M0"
+    },
+    // 18. Scroll again (URL change)
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:09 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": true},
+      "currentPath": "/shorts/xknfogEvLsI"
+    },
+    // 19. Click on YouTube logo
     {
       "createdAt": "Tue Mar 25 2025 10:44:10 GMT-0400 (Eastern Daylight Time)",
       "type": "interaction",
       "metadata": {"name": "YouTube Logo"},
       "currentPath": "/shorts/xknfogEvLsI"
     },
-    // 15. This results in a state change
+    // 20. State change to the home page
     {
       "createdAt": "Tue Mar 25 2025 10:44:10 GMT-0400 (Eastern Daylight Time)",
       "type": "state_change",
@@ -165,7 +191,7 @@ All of this info is combined into a single `Session` object that is added to the
       "currentPath": "/"
     }
   ],
-// Info about the session
+  // Info about the session
   "sessionInfo": {
     "page": {
       "title": "YouTube",
@@ -177,11 +203,11 @@ All of this info is combined into a single `Session` object that is added to the
   }
 }
 ```
-```
 
 All of this information goes to a FireBase database:
 
-![image](https://github.com/user-attachments/assets/1ea6aa69-c829-4a10-94f9-64b4d59dc851)
+![image](https://github.com/user-attachments/assets/6ca7d1af-9bd7-4585-8afd-2d751d34d2db)
+
 
 I'm now working on a Python script that can convert this data into a Markov model visually using NetworkX, which should be pretty straightforward:
 
