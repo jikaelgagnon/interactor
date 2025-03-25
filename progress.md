@@ -49,41 +49,134 @@ All of this info is combined into a single `Session` object that is added to the
 
 ```json
 [
-// 1. Click on a category on the home page
-  {
-    "createdAt": "2025-03-24T23:43:33.062Z",
-    "type": "interaction",
-    "name": "Category Button"
-  },
-// 2. Click on another category on the home page
-  {
-    "createdAt": "2025-03-24T23:43:36.647Z",
-    "type": "interaction",
-    "name": "Category Button"
-  },
-// 2. Click on a side navigation button
-  {
-    "createdAt": "2025-03-24T23:43:42.119Z",
-    "type": "interaction",
-    "name": "Side Navigation Button"
-  },
-// 3. This switches you to the shorts page
-  {
-    "createdAt": "2025-03-24T23:43:42.593Z",
-    "type": "state_change",
-    "destinationURL": "https://www.youtube.com/shorts/vywFu2pZVko"
-  },
-// 4. Scroll to next short
-  {
-    "createdAt": "2025-03-24T23:43:46.255Z",
-    "type": "self_loop"
-  },
-// 4. Scroll to next short
-  {
-    "createdAt": "2025-03-24T23:43:47.795Z",
-    "type": "self_loop"
+```json
+{
+  "documents": [
+    // 1. Click on a video from the home page
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:32 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Video"},
+      "currentPath": "/"
+    },
+    // 2. Extra data to be removed...
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:32 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": false},
+      "currentPath": "/"
+    },
+    // 3. State changes to the /watch page
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:32 GMT-0400 (Eastern Daylight Time)",
+      "type": "state_change",
+      "metadata": {"destinationPath": "/watch"},
+      "currentPath": "/watch"
+    },
+    // 4. Click on a recommended video
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:37 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Watch Page Recommended Video"},
+      "currentPath": "/watch"
+    },
+    // 5. This results in a self loop
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:37 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": true},
+      "currentPath": "/watch"
+    },
+    // 6. Click on another recommended video
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:41 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Watch Page Recommended Video"},
+      "currentPath": "/watch"
+    },
+    // 7. This results in a self loop
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:41 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": true},
+      "currentPath": "/watch"
+    },
+    // 8. Click on YouTube logo
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:49 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "YouTube Logo"},
+      "currentPath": "/watch"
+    },
+    // 9. This results in a state change
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:49 GMT-0400 (Eastern Daylight Time)",
+      "type": "state_change",
+      "metadata": {"destinationPath": "/"},
+      "currentPath": "/"
+    },
+    // 9. Click on shorts from the side navigation button
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:55 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Side Navigation Button"},
+      "currentPath": "/"
+    },
+    // 10. This changes state to the shorts page
+    {
+      "createdAt": "Tue Mar 25 2025 10:43:56 GMT-0400 (Eastern Daylight Time)",
+      "type": "state_change",
+      "metadata": {"destinationPath": "/shorts/G7oVnN19Vss"},
+      "currentPath": "/shorts/G7oVnN19Vss"
+    },
+    // 11. Like a YT short
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:00 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "Shorts Like Button"},
+      "currentPath": "/shorts/G7oVnN19Vss"
+    },
+    // 12. Scroll to next short
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:02 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": false},
+      "currentPath": "/shorts/G7oVnN19Vss"
+    },
+    // 13. Scroll to next short (triggered by same event as above)
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:02 GMT-0400 (Eastern Daylight Time)",
+      "type": "self_loop",
+      "metadata": {"urlChange": true},
+      "currentPath": "/shorts/qyooRIwV-M0"
+    },
+    // 14. Click on YouTube logo
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:10 GMT-0400 (Eastern Daylight Time)",
+      "type": "interaction",
+      "metadata": {"name": "YouTube Logo"},
+      "currentPath": "/shorts/xknfogEvLsI"
+    },
+    // 15. This results in a state change
+    {
+      "createdAt": "Tue Mar 25 2025 10:44:10 GMT-0400 (Eastern Daylight Time)",
+      "type": "state_change",
+      "metadata": {"destinationPath": "/"},
+      "currentPath": "/"
+    }
+  ],
+// Info about the session
+  "sessionInfo": {
+    "page": {
+      "title": "YouTube",
+      "origin": "https://www.youtube.com",
+      "location": "/",
+      "href": "https://www.youtube.com/"
+    },
+    "url": "https://www.youtube.com/"
   }
-]
+}
+```
 ```
 
 All of this information goes to a FireBase database:
