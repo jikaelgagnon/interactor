@@ -1,4 +1,5 @@
 import { Message } from "./message.js";
+import { Document } from "./document.js";
 
 export {Interactor};
 
@@ -14,6 +15,7 @@ class Interactor {
             this.updateSelectorString();
             this.currentSelectors;
             this.currentInteractions;
+            this.currentURLUsesId;
 
             console.log(`Current url is: ${this.currentURL}`);
 
@@ -37,11 +39,16 @@ class Interactor {
      */
     updateSelectorString()
     {
+        this.currentURLUsesId = false;
         // console.log(`CSS selectors are: ${this.cssSelectors}`)
         const matches = Object.keys(this.cssSelectors).filter((path) => {
             // console.log(path);
             const p = new URLPattern(path, this.baseURL);
-            return p.test(this.currentURL);
+            const match = p.test(this.currentURL);
+            if (match && path.endsWith(":id")){
+                this.currentURLUsesId = true;
+            }
+            return match;
         })
 
         this.currentInteractions = []
@@ -71,6 +78,32 @@ class Interactor {
         this.sendMessageToBackground("onInteractionDetection", record);
     }
 
+    checkForMatch(url){
+        let curPathname = new URL(this.currentURL).pathname;
+        let otherPathname = new URL(url).pathname;
+        let l1 = curPathname.split("/");
+        let l2 = otherPathname.split("/");
+        console.log(`cur path uses ID: ${this.currentURLUsesId}`);
+        console.log(`cur path ${curPathname}, length: ${l1.length}`);
+        console.table(l1);
+        console.log(`other path ${otherPathname}, length: ${l2.length}`);
+        console.table(l2);
+
+        if (curPathname.length !== otherPathname.length){
+            return false;
+        }
+
+        console.log("lengths are the same");
+
+        let max_idx = l1.length - 1*(this.currentURLUsesId);
+        for (let i = 0; i < max_idx; i++){
+            if (l1[i] !== l1[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+
     onNavigationDetection(navEvent){
         // console.log(" ---- Navigation event detected");
         // console.log("Logging keys");
@@ -86,9 +119,12 @@ class Interactor {
         
         // console.log("Done logging keys");
         let urlChange = !(navEvent.destination.url === this.currentURL)
-        console.log(`Current url: ${this.currentURL}`);
-        console.log(`Destination url: ${navEvent.destination.url}`);
-        console.log(`URL change: ${urlChange}`);
+        // console.log(`Current url: ${this.currentURL}`);
+        // console.log(`Destination url: ${navEvent.destination.url}`);
+        // console.log(`URL change: ${urlChange}`);
+        let match = this.checkForMatch(navEvent.destination.url);
+        console.log(`URLs match: ${match}`);
+        // console.log(`URLs match: ${match}`);
 
         // if (urlChange)
         // {
@@ -106,7 +142,7 @@ class Interactor {
 
 
         // These are "state changes"
-        if (navEvent.navigationType === "push" && urlChange){
+        if (navEvent.navigationType === "push" && !match){
             console.log("You changed pages");
             this.updateSelectorString();
             const record = this.createStateChangeRecord(navEvent);
@@ -114,16 +150,15 @@ class Interactor {
         }
 
         // These are self loops. We don't care about the URl
-        else if (navEvent.navigationType === "replace"){
+        else if (navEvent.navigationType === "replace" || match){
             if (urlChange){
                 console.log("You're on the same page but URL changed");
             }
             else{
                 console.log("You're on the same page and URL didn't change");
-                const record = this.createSelfLoopRecord(navEvent);
-                this.sendMessageToBackground("onNavigationDetection", record);
             }
-
+            const record = this.createSelfLoopRecord(navEvent, urlChange);
+            this.sendMessageToBackground("onNavigationDetection", record);
         }
     }
 
@@ -283,23 +318,20 @@ class Interactor {
      */
     createStateChangeRecord(navEvent) {
         // Navigation Object
-        const navigation = {
-            type: "state_change",
-            destinationURL: navEvent.destination.url,
-            createdAt: new Date()
+        const metadata = {
+            destinationPath: new URL(navEvent.destination.url).pathname,
         };
 
-        return navigation;
+        return new Document("state_change", this.currentURL, metadata);
     }
 
-    createSelfLoopRecord(navEvent) {
+    createSelfLoopRecord(navEvent, urlChange) {
         // Navigation Object
-        const navigation = {
-            type: "self_loop",
-            createdAt: new Date()
+        const metadata =  {
+            urlChange: urlChange
         };
 
-        return navigation;
+        return new Document("self_loop", this.currentURL, metadata);
     }
 
     /**
@@ -311,13 +343,10 @@ class Interactor {
      */
     createInteractionRecord(name, type) {
         // Interaction Object
-        const interaction = {
-            name: name,
-            type: "interaction",
-            createdAt: new Date()
+        const metadata = {
+            name: name
         };
-        console.log(interaction);
-        return interaction;
+        return new Document("interaction", this.currentURL, metadata);
     }
 
     /**
