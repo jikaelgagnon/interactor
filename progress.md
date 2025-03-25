@@ -48,186 +48,198 @@ Upon clicking on an element of interest, three things can happen:
 All of this info is combined into a single `Session` object that is added to the database once the tab is closed:
 
 ```json
-{
-   "documents":[
-//1. Click on a video
-      {
-         "createdAt":"2025-03-25T15:34:59.917Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"Video"
-         },
-         "currentPath":"/"
-      },
-//2. Data artifact (to be cleaned)
-      {
-         "createdAt":"2025-03-25T15:34:59.936Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":false
-         },
-         "currentPath":"/"
-      },
-//3. Change state from / to /watch
-      {
-         "createdAt":"2025-03-25T15:34:59.938Z",
-         "type":"state_change",
-         "metadata":{
-            "destinationPath":"/watch"
-         },
-         "currentPath":"/"
-      },
-//4. Click on a recommended video
-      {
-         "createdAt":"2025-03-25T15:35:02.832Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"Watch Page Recommended Video"
-         },
-         "currentPath":"/watch"
-      },
-//5. Self loop since we're still on the watch page
-      {
-         "createdAt":"2025-03-25T15:35:02.843Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":true
-         },
-         "currentPath":"/watch"
-      },
-//6. Click on the YouTube logo
-      {
-         "createdAt":"2025-03-25T15:35:06.263Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"YouTube Logo"
-         },
-         "currentPath":"/watch"
-      },
-//7. Change state from /watch to /
-      {
-         "createdAt":"2025-03-25T15:35:06.271Z",
-         "type":"state_change",
-         "metadata":{
-            "destinationPath":"/"
-         },
-         "currentPath":"/watch"
-      },
-//8. Click on a side nav button
-      {
-         "createdAt":"2025-03-25T15:35:11.040Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"Side Navigation Button"
-         },
-         "currentPath":"/"
-      },
-//9. Change to /shorts
-      {
-         "createdAt":"2025-03-25T15:35:11.581Z",
-         "type":"state_change",
-         "metadata":{
-            "destinationPath":"/shorts/e4lKw8rsZBk"
-         },
-         "currentPath":"/"
-      },
-//10. Scroll to next short
-      {
-         "createdAt":"2025-03-25T15:35:14.300Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":false
-         },
-         "currentPath":"/shorts/e4lKw8rsZBk"
-      },
-//11. Scroll to next short (artifact)
-      {
-         "createdAt":"2025-03-25T15:35:14.502Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":true
-         },
-         "currentPath":"/shorts/TNz8IcDNfVw"
-      },
-//12. Scroll to next short
-      {
-         "createdAt":"2025-03-25T15:35:15.817Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":false
-         },
-         "currentPath":"/shorts/TNz8IcDNfVw"
-      },
-//13. Scroll to next short (artifact)
-      {
-         "createdAt":"2025-03-25T15:35:16.007Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":true
-         },
-         "currentPath":"/shorts/Dy5p_zjthM0"
-      },
-//14. Scroll to next short
-      {
-         "createdAt":"2025-03-25T15:35:18.246Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":false
-         },
-         "currentPath":"/shorts/Dy5p_zjthM0"
-      },
-//15. Scroll to next short (artifact)
-      {
-         "createdAt":"2025-03-25T15:35:18.408Z",
-         "type":"self_loop",
-         "metadata":{
-            "urlChange":true
-         },
-         "currentPath":"/shorts/SU2Cyb2wiGI"
-      },
-//16. Like a short
-      {
-         "createdAt":"2025-03-25T15:35:19.418Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"Shorts Like Button"
-         },
-         "currentPath":"/shorts/SU2Cyb2wiGI"
-      },
-//17. Click on YouTube logo
-      {
-         "createdAt":"2025-03-25T15:35:21.898Z",
-         "type":"interaction",
-         "metadata":{
-            "name":"YouTube Logo"
-         },
-         "currentPath":"/shorts/SU2Cyb2wiGI"
-      },
-//18. State change from /shorts to /
-      {
-         "createdAt":"2025-03-25T15:35:21.904Z",
-         "type":"state_change",
-         "metadata":{
-            "destinationPath":"/"
-         },
-         "currentPath":"/shorts/SU2Cyb2wiGI"
-      }
-   ],
-   "sessionInfo":{
-      "page":{
-         "title":"YouTube",
-         "origin":"https://www.youtube.com",
-         "location":"/",
-         "href":"https://www.youtube.com/"
-      },
-      "url":"https://www.youtube.com/"
-   }
-}
+[
+    {
+        "createdAt": "2025-03-25T16:11:27.645Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "Video"
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:27.662Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:27.664Z",
+        "type": "state_change",
+        "metadata": {
+            "destinationState": "/watch"
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:39.764Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "Watch Page Recommended Video"
+        },
+        "sourceState": "/watch"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:39.779Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/watch"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:46.822Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "YouTube Logo"
+        },
+        "sourceState": "/watch"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:46.834Z",
+        "type": "state_change",
+        "metadata": {
+            "destinationState": "/"
+        },
+        "sourceState": "/watch"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:49.468Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "Side Navigation Button"
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:50.073Z",
+        "type": "state_change",
+        "metadata": {
+            "destinationState": "/shorts/_Z1dMmGBBCo"
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:53.686Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:53.872Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:59.403Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:11:59.564Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:01.218Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:01.354Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:02.585Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:02.710Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:04.037Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": false
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:04.209Z",
+        "type": "self_loop",
+        "metadata": {
+            "urlChange": true
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:05.358Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "YouTube Logo"
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:05.364Z",
+        "type": "state_change",
+        "metadata": {
+            "destinationState": ""
+        },
+        "sourceState": "/shorts"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:19.620Z",
+        "type": "interaction",
+        "metadata": {
+            "name": "Video"
+        },
+        "sourceState": "/"
+    },
+    {
+        "createdAt": "2025-03-25T16:13:19.628Z",
+        "type": "state_change",
+        "metadata": {
+            "destinationState": "/watch"
+        },
+        "sourceState": "/"
+    }
+]
 ```
 
 All of this information goes to a FireBase database:
 
-![image](https://github.com/user-attachments/assets/6ca7d1af-9bd7-4585-8afd-2d751d34d2db)
+![image](https://github.com/user-attachments/assets/ab61d6f9-4634-4ae6-836b-dc6b4b17150b)
+
 
 
 I'm now working on a Python script that can convert this data into a Markov model visually using NetworkX, which should be pretty straightforward:
