@@ -1,9 +1,8 @@
 import { collection, addDoc } from "firebase/firestore"; 
 import { db } from "./firebase.js";
-import { doc } from "firebase/firestore/lite";
 
 // TODO: Change this later... this is for debugging...
-let USE_DB = true;
+let USE_DB = false;
 
 // On startup, create an object to hold session data
 class SessionData {

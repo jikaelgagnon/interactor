@@ -55,13 +55,13 @@ class Interactor {
 
         for (const key of matches){
             let interactions = this.cssSelectors[key];
-            for (const interaction of interactions){
+            for (const interactable of interactions["selectors"]){
                 // console.log(interaction);
-                let selector = interaction["selector"];
+                let selector = interactable["selector"];
                 // interaction["selector"] = `${selector}:not([data-listener-attached])`;
                 this.currentInteractions.push({
                     "selector": `${selector}:not([data-listener-attached])`,
-                    "name": interaction["name"]
+                    "name": interactable["name"]
                 });
             }
         }
