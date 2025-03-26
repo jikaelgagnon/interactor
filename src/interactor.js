@@ -16,6 +16,7 @@ class Interactor {
             this.currentSelectors;
             this.currentInteractions;
             this.currentURLUsesId;
+            this.mostSpecificPattern;
 
             console.log(`Current url is: ${this.currentURL}`);
 
@@ -41,15 +42,22 @@ class Interactor {
     {
         this.currentURLUsesId = false;
         // console.log(`CSS selectors are: ${this.cssSelectors}`)
+        let closestMatch = "";
         const matches = Object.keys(this.cssSelectors).filter((path) => {
             // console.log(path);
             const p = new URLPattern(path, this.baseURL);
             const match = p.test(this.currentURL);
-            if (match && path.endsWith(":id")){
-                this.currentURLUsesId = true;
+            if (match && path.length > closestMatch.length){
+                closestMatch = path;
             }
             return match;
         })
+
+        if (closestMatch.endsWith(":id")){
+            this.currentURLUsesId = true;
+        }
+
+        console.log(`Current url uses ID: ${this.currentURLUsesId}`);
 
         this.currentInteractions = []
 
