@@ -16,8 +16,7 @@ class Interactor {
             this.currentSelectors;
             this.currentInteractions;
             this.currentURLUsesId;
-            this.mostSpecificPattern;
-
+            this.currentMatch;
             console.log(`Current url is: ${this.currentURL}`);
 
             this.initializeSession();
@@ -53,9 +52,19 @@ class Interactor {
             return match;
         })
 
+        if (matches.length == 0){
+            return;
+        }
+
         if (closestMatch.endsWith(":id")){
             this.currentURLUsesId = true;
         }
+
+        this.currentMatch = this.cssSelectors[closestMatch];
+
+        console.log("Printing current match");
+
+        console.log(this.currentMatch);
 
         console.log(`Current url uses ID: ${this.currentURLUsesId}`);
 
@@ -147,6 +156,13 @@ class Interactor {
         // console.log(`URL change: ${urlChange}`);
         let match = this.checkForMatch(navEvent.destination.url);
         console.log(`URLs match: ${match}`);
+        console.log("------ TRYING TO GET ID ------------");
+        let idSelectorExists = "idSelector" in this.currentMatch;
+        console.log(`ID Selector is not null: ${idSelectorExists}`);
+        if (idSelectorExists){
+            let id = this.currentMatch["idSelector"]();
+            console.log(id);
+        }
         // console.log(`URLs match: ${match}`);
 
         // if (urlChange)
