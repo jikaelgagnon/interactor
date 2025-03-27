@@ -1,21 +1,30 @@
 const path = require("path");
-// const webpack = require("webpack");
-// const Dotenv = require("dotenv-webpack");
 
-
-module.exports = (env, argv) => ({
-  devtool: "cheap-module-source-map", // Enables source maps
+module.exports = {
   entry: {
-    background: "./src/background.js",
-    content: "./src/content.js"  // Add content script
+    background: "./src/background.ts",  // Entry for background script
+    content: "./src/content.ts"         // Entry for content script
   },
   output: {
     filename: "[name].bundle.js",  // Generates background.bundle.js and content.bundle.js
     path: path.resolve(__dirname, "dist"),  // Store outputs in dist/
   },
   mode: "production",
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,  // Handle TypeScript files
+        use: "ts-loader",  // Use ts-loader to transpile TypeScript
+        exclude: /node_modules/
+      }
+    ]
+  },
+  resolve: {
+    extensions: [".ts", ".js"]  // Resolve .ts and .js files
+  },
   optimization: {
     minimize: true,
   },
-  target: ['web', 'es5']
-});
+  target: 'web'  // Ensure targeting the web platform with modern JavaScript
+};
+
