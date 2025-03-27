@@ -1,6 +1,8 @@
 import { Message } from "./message";
 import { Document } from "./document";
 
+// Your class implementation goes here...
+
 export class Interactor {
     interactionEvents: string[];
     debug: boolean;
@@ -34,12 +36,13 @@ export class Interactor {
         this.bindEvents();
     }
 
-    updateSelectorString(): void {
+    private updateSelectorString(): void {
         this.currentURLUsesId = false;
         let closestMatch = "";
 
         const matches = Object.keys(this.paths).filter((path) => {
             console.log(path);
+            // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, this.baseURL);
             const match = p.test(this.currentURL);
             if (match && path.length > closestMatch.length) {
@@ -79,18 +82,18 @@ export class Interactor {
         console.log(this.currentInteractions);
     }
 
-    async sendMessageToBackground(type: string, payload: any): Promise<any> {
+    private async sendMessageToBackground(type: string, payload: any): Promise<any> {
         let message = new Message(type, payload);
         const response = await chrome.runtime.sendMessage(message);
         return response;
     }
 
-    onInteractionDetection(e: Event, name: string): void {
+    private onInteractionDetection(e: Event, name: string): void {
         const record = this.createInteractionRecord(name, this.getCleanStateName(), "interaction");
         this.sendMessageToBackground("onInteractionDetection", record);
     }
 
-    checkForMatch(url: string): boolean {
+    private checkForMatch(url: string): boolean {
         let curPathname = new URL(this.currentURL).pathname;
         let otherPathname = new URL(url).pathname;
         let l1 = curPathname.split("/");
@@ -109,7 +112,7 @@ export class Interactor {
         return true;
     }
 
-    getCleanStateName(): string {
+    private getCleanStateName(): string {
         let path = new URL(this.currentURL).pathname;
         let groups = path.split("/");
 
@@ -119,16 +122,11 @@ export class Interactor {
         return groups.join("/");
     }
 
-    onNavigationDetection(navEvent: any): void {
+    private onNavigationDetection(navEvent: any): void {
         let urlChange = !(navEvent.destination.url === this.currentURL);
         let sourceState = this.getCleanStateName();
         let match = this.checkForMatch(navEvent.destination.url);
 
-        let idSelectorExists = "idSelector" in this.currentMatch;
-        if (idSelectorExists) {
-            let id = this.currentMatch["idSelector"]();
-            console.log(id);
-        }
 
         let old_url = this.currentURL;
         this.currentURL = navEvent.destination.url;
@@ -144,7 +142,7 @@ export class Interactor {
         }
     }
 
-    addListenersToMutations(): void {
+    private addListenersToMutations(): void {
         this.currentInteractions.forEach(interaction => {
             let elements = document.querySelectorAll(interaction["selector"]);
             let name = interaction["name"];
@@ -160,7 +158,7 @@ export class Interactor {
         });
     }
 
-    bindEvents(): void {
+    private bindEvents(): void {
         console.log("binding events to the page");
         window.addEventListener('load', () => {
             const observer = new MutationObserver((mutations: MutationRecord[], obs: MutationObserver) => this.addListenersToMutations());
@@ -171,44 +169,62 @@ export class Interactor {
 
             this.addListenersToMutations();
         });
-
+        // @ts-ignore: Ignoring TypeScript error for navigation not found
         navigation.addEventListener("navigate", (e: Event) => this.onNavigationDetection(e));
     }
 
-    debuggingLog(record: any): void {
+    private debuggingLog(record: any): void {
         if (this.debug) {
             console.log(record);
         }
     }
 
-    createStateChangeRecord(navEvent: any, sourceState: string, destState: string): Document {
+    private getIdOrEmpty(): string{
+        let idSelectorExists = "idSelector" in this.currentMatch;
+        let id = "";
+        if (idSelectorExists) {
+            console.log("getting id");
+            id = this.currentMatch["idSelector"]();
+        }
+        else{
+            console.log("no id selector exists");
+        }
+        return id;
+    }
+
+    private createStateChangeRecord(navEvent: any, sourceState: string, destState: string): Document {
+        
         const metadata = {
             destinationState: destState,
+            id: this.getIdOrEmpty() 
         };
+
 
         return new Document("state_change", sourceState, metadata);
     }
 
-    createSelfLoopRecord(navEvent: any, sourceState: string, urlChange: boolean): Document {
+    private createSelfLoopRecord(navEvent: any, sourceState: string, urlChange: boolean): Document {
         const metadata = {
-            urlChange: urlChange
+            urlChange: urlChange,
+            id: this.getIdOrEmpty(),
         };
 
         return new Document("self_loop", sourceState, metadata);
     }
 
-    createInteractionRecord(name: string, sourceState: string, type: string): Document {
+    private createInteractionRecord(name: string, sourceState: string, type: string): Document {
         const metadata = {
-            name: name
+            name: name,
+            id: this.getIdOrEmpty()
         };
         return new Document("interaction", sourceState, metadata);
     }
 
-    addRecord(record: any): void {
+    private addRecord(record: any): void {
         this.debuggingLog(record);
     }
 
-    getCurrentState(): any {
+    private getCurrentState(): any {
         return {
             page: {
                 location: window.location.pathname,
@@ -220,11 +236,11 @@ export class Interactor {
         };
     }
 
-    initializeSession(): void {
+    private initializeSession(): void {
         this.sendMessageToBackground("initializeSession", this.getCurrentState());
     }
 
-    StringToColor = (function () {
+    private StringToColor = (function () {
         let instance: any = null;
 
         return {
