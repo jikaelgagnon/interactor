@@ -1,13 +1,14 @@
 import { Interactor } from "./interactor";
-import ytConfig from './configs/tiktok_config.json';
+// import ytConfig from './configs/youtube_config.json';
 import tiktokConfig from './configs/tiktok_config.json';
 import { ConfigLoader } from "./config";
 
-
+console.log("TESTING THAT TS WORKS!!!!!!!!!!!11");
+console.log("using tiktok,...");
 // Define the selector function with proper typing
-const ytIDSelector = (): string => {
-    return document.location.href;
-};
+// const ytIDSelector = (): string => {
+//     return document.location.href;
+// };
 
 const tiktokIDSelector = (): string => {
     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
@@ -23,7 +24,7 @@ const tiktokIDSelector = (): string => {
 // const ytConfigLoader = new ConfigLoader(ytConfig);
 // ytConfigLoader.addIDSelector("/shorts/:id", ytIDSelector);
 // const ytInteractor = new Interactor(ytConfigLoader.config);
-
+console.log(tiktokConfig);
 const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
-tiktokConfigLoader.addIDSelector("/shorts/:id", tiktokIDSelector);
+tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
 const tiktokInteractor = new Interactor(tiktokConfigLoader.config);
