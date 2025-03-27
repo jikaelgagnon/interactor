@@ -8,17 +8,19 @@ class Interactor {
             // Argument Assignment          // Type Checks                                                                          // Default Values
             this.interactionEvents = Array.isArray(config.interactionEvents) === true ? config.interactionEvents : ['click'],
             this.debug = typeof (config.debug) == "boolean" ? config.debug : true,
-            this.cssSelectors = typeof config.cssSelectors === 'object' && !(config.cssSelectors['interactions'] === undefined) ? config.cssSelectors['interactions'] : {},
-            this.baseURL = typeof config.cssSelectors === 'object' && !(config.cssSelectors['baseURL'] === undefined) ? config.cssSelectors['baseURL'] : "";
+            this.paths = typeof config === 'object' && !(config['paths'] === undefined) ? config['paths'] : {},
+            this.baseURL = typeof config === 'object' && !(config['baseURL'] === undefined) ? config['baseURL'] : "";
             this.currentURL = document.location.href;
             this.selectorString;
-            this.updateSelectorString();
             this.currentSelectors;
-            this.currentInteractions;
+            this.currentInteractions = [];
             this.currentURLUsesId;
             this.currentMatch;
             console.log(`Current url is: ${this.currentURL}`);
+            console.log("Received config:");
+            console.log(config);
 
+            this.updateSelectorString();
             this.initializeSession();
             // Call Event Binding Method
             this.bindEvents();
@@ -42,8 +44,11 @@ class Interactor {
         this.currentURLUsesId = false;
         // console.log(`CSS selectors are: ${this.cssSelectors}`)
         let closestMatch = "";
-        const matches = Object.keys(this.cssSelectors).filter((path) => {
-            // console.log(path);
+        // console.log("updating selector string");
+        // console.log("css selectors:");
+        // console.log(this.cssSelectors);
+        const matches = Object.keys(this.paths).filter((path) => {
+            console.log(path);
             const p = new URLPattern(path, this.baseURL);
             const match = p.test(this.currentURL);
             if (match && path.length > closestMatch.length){
@@ -53,26 +58,33 @@ class Interactor {
         })
 
         if (matches.length == 0){
+            console.log("no matches found");
             return;
         }
 
         if (closestMatch.endsWith(":id")){
+            console.log("current url uses id");
             this.currentURLUsesId = true;
         }
 
-        this.currentMatch = this.cssSelectors[closestMatch];
+        this.currentMatch = this.paths[closestMatch];
+        this.currentInteractions = this.currentMatch;
 
-        console.log("Printing current match");
+        // console.log("Printing current match");
 
         console.log(this.currentMatch);
 
-        console.log(`Current url uses ID: ${this.currentURLUsesId}`);
+        // console.log(`Current url uses ID: ${this.currentURLUsesId}`);
 
         this.currentInteractions = []
-
+        // console.log("setting current interactions");
+        // console.log(`Number of matches: ${matches.length}`);
         for (const key of matches){
-            let interactions = this.cssSelectors[key];
+            // console.log(`Setting values for key ${key}`);
+            let interactions = this.paths[key];
+            console.log(interactions);
             for (const interactable of interactions["selectors"]){
+                console.log(`Adding ${interactable} to current interactions`);
                 // console.log(interaction);
                 let selector = interactable["selector"];
                 // interaction["selector"] = `${selector}:not([data-listener-attached])`;
@@ -82,6 +94,8 @@ class Interactor {
                 });
             }
         }
+        // console.log(`Added matches...`);
+        console.log(this.currentInteractions);
     }
 
     async sendMessageToBackground(type, payload){
@@ -268,28 +282,11 @@ class Interactor {
     })();
        
     addListenersToMutations() {
-        // let selectors = this.selectorString.split(", ");
-        // this.currentSelectors.forEach(selector => {
-        //     let elements = document.querySelectorAll(selector);
-        //     elements.forEach(element => {
-        //         if (this.debug) element.style.border = '2px solid red';
-        //         element.setAttribute('data-listener-attached', 'true');
-        //         element.setAttribute('matching-selector', selector);
-        //         // element.setAttribute('interactor-name', 'JIKAEL_BUTTON');
-        //         for (let i = 0; i < this.interactionEvents.length; i++) {
-        //             element.addEventListener(this.interactionEvents[i], (e) => {
-        //                 console.log(`This element matched selector: ${selector}`);
-        //                 this.onInteractionDetection(e);
-        //             }
-        //             , true);
-        //         }
-        //     });
-        // })
-        // console.log("Current interactions:");
-        // console.log(this.currentInteractions);
-        // console.log(this.currentInteractions[0]);
+        console.log("iterating through current interactions");
+        console.log(`Number of interactions: ${this.currentInteractions.length}`);
         this.currentInteractions.forEach(interaction => {
             // console.log(interaction);
+            
             let elements = document.querySelectorAll(interaction["selector"]);
             let name = interaction["name"];
             // console.log(interaction["selector"]);
