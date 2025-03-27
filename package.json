@@ -25,7 +25,17 @@
     "process": "^0.11.10"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-typescript": "^7.27.0",
+    "@types/chrome": "^0.0.313",
+    "@types/firebase": "^2.4.32",
+    "@types/node": "^22.13.14",
+    "@types/webpack-env": "^1.18.8",
+    "babel-loader": "^10.0.0",
     "dotenv-webpack": "^8.1.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.2",
     "webpack": "^5.98.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1"
