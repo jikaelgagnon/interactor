@@ -1,17 +1,14 @@
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
-// TODO: Change this later... this is for debugging...
 let USE_DB = false;
 
-interface SessionDataInterface {
-  sessionInfo: any;
-  documents: any[];
-  initialData?: any;
-  closingData?: any;
-}
-
-class SessionData implements SessionDataInterface {
+/**
+ * Represents session data, including session information, associated documents,
+ * and optional initial and closing data. Provides methods to manage and manipulate
+ * session-related information.
+ */
+class SessionData {
   sessionInfo: any;
   documents: any[];
   initialData?: any;
@@ -93,7 +90,7 @@ chrome.runtime.onMessage.addListener(
     console.log("message content:");
     console.log(request);
     
-    switch (request.type) {
+    switch (request.sender) {
       case "onInteractionDetection":
         console.log("Interaction received. Adding to session...");
         addToSession(request.payload)
