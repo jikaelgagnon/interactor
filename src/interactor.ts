@@ -1,50 +1,55 @@
 import { Message } from "./message";
 import { Document } from "./document";
-
-// Your class implementation goes here...
+import { Config, PathData, SelectorData} from "./config";
 
 export class Interactor {
     interactionEvents: string[];
     debug: boolean;
-    paths: Record<string, any>;
+    paths: { [path: string]: PathData };
     baseURL: string;
     currentURL: string;
-    selectorString: string | undefined;
-    currentSelectors: any;
-    currentInteractions: any[];
-    currentURLUsesId: boolean | undefined;
-    currentMatch: any;
+    currentSelectors!: SelectorData[];
+    currentURLUsesId!: boolean;
+    currentMatchPathData: any;
+    interactionAttribute: string;
 
-    constructor(config: any) {
-        this.interactionEvents = Array.isArray(config.interactionEvents) ? config.interactionEvents : ['click'];
-        this.debug = typeof config.debug === "boolean" ? config.debug : true;
-        this.paths = typeof config === 'object' && config['paths'] !== undefined ? config['paths'] : {};
-        this.baseURL = typeof config === 'object' && config['baseURL'] !== undefined ? config['baseURL'] : "";
+    constructor(config: Config) {
+        // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
+        this.interactionEvents = config.interactionEvents ? config.interactionEvents : ['click'];
+        // If enabled, highlight all selected HTML elements with coloured boxes
+        this.debug = config.debug ? config.debug : true;
+        // An object consisting of path patterns and their corresponding CSS selectors
+        this.paths = config.paths;
+        // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
+        this.baseURL = config.baseURL;
+        // URL the user is currently on
         this.currentURL = document.location.href;
-        this.selectorString = undefined;
-        this.currentSelectors = undefined;
-        this.currentInteractions = [];
-        this.currentURLUsesId = undefined;
-        this.currentMatch = undefined;
+        this.updateCurrentPageData();
+        this.interactionAttribute = "monitoring-interactions"
 
         console.log(`Current url is: ${this.currentURL}`);
         console.log("Received config:");
         console.log(config);
-
-        this.updateSelectorString();
         this.initializeSession();
         this.bindEvents();
     }
 
-    private updateSelectorString(): void {
-        this.currentURLUsesId = false;
-        let closestMatch = "";
+    private updateCurrentPageData(){
+        let matches = this.updateCurrentURLMatchData();
+        this.currentSelectors = this.getCurrentSelectors(matches);
+    }
 
+    private updateCurrentURLMatchData(): string[]{
+        this.currentURLUsesId = false;
+        let closestMatch = ""; // the pattern that most closely matches the current URL
+
+        // Get a list of all the paths that match the current URL
         const matches = Object.keys(this.paths).filter((path) => {
             console.log(path);
             // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, this.baseURL);
             const match = p.test(this.currentURL);
+            // Closest match is the longest pattern that matches the current URL
             if (match && path.length > closestMatch.length) {
                 closestMatch = path;
             }
@@ -53,7 +58,6 @@ export class Interactor {
 
         if (matches.length === 0) {
             console.log("no matches found");
-            return;
         }
 
         if (closestMatch.endsWith(":id")) {
@@ -61,25 +65,19 @@ export class Interactor {
             this.currentURLUsesId = true;
         }
 
-        this.currentMatch = this.paths[closestMatch];
-        this.currentInteractions = this.currentMatch;
+        this.currentMatchPathData = this.paths[closestMatch];
+        return matches;
+    }
 
-        console.log(this.currentMatch);
-
-        this.currentInteractions = [];
-        for (const key of matches) {
-            let interactions = this.paths[key];
-            console.log(interactions);
-            for (const interactable of interactions["selectors"]) {
-                console.log(`Adding ${interactable} to current interactions`);
-                let selector = interactable["selector"];
-                this.currentInteractions.push({
-                    "selector": `${selector}:not([data-listener-attached])`,
-                    "name": interactable["name"]
-                });
+    private getCurrentSelectors(matches: string[]): SelectorData[] {
+        let currentSelectors = [];
+        for (const path of matches) {
+            let pathData = this.paths[path];
+            for (const selector of pathData["selectors"]) {
+                currentSelectors.push(selector);
             }
         }
-        console.log(this.currentInteractions);
+        return currentSelectors;
     }
 
     private async sendMessageToBackground(type: string, payload: any): Promise<any> {
@@ -133,7 +131,7 @@ export class Interactor {
         let destState = this.getCleanStateName();
 
         if (navEvent.navigationType === "push" && !match) {
-            this.updateSelectorString();
+            this.updateCurrentPageData();
             const record = this.createStateChangeRecord(navEvent, sourceState, destState);
             this.sendMessageToBackground("onNavigationDetection", record);
         } else if (navEvent.navigationType === "replace" || match) {
@@ -143,12 +141,12 @@ export class Interactor {
     }
 
     private addListenersToMutations(): void {
-        this.currentInteractions.forEach(interaction => {
-            let elements = document.querySelectorAll(interaction["selector"]);
+        this.currentSelectors.forEach(interaction => {
+            let elements = document.querySelectorAll(interaction["selector"]+`:not([${this.interactionAttribute}]`);
             let name = interaction["name"];
             elements.forEach(element => {
                 if (this.debug) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
-                element.setAttribute('data-listener-attached', 'true');
+                element.setAttribute(this.interactionAttribute, 'true');
                 for (let i = 0; i < this.interactionEvents.length; i++) {
                     element.addEventListener(this.interactionEvents[i], (e: Event) => {
                         this.onInteractionDetection(e, name);
@@ -180,11 +178,11 @@ export class Interactor {
     }
 
     private getIdOrEmpty(): string{
-        let idSelectorExists = "idSelector" in this.currentMatch;
+        let idSelectorExists = "idSelector" in this.currentMatchPathData;
         let id = "";
         if (idSelectorExists) {
             console.log("getting id");
-            id = this.currentMatch["idSelector"]();
+            id = this.currentMatchPathData["idSelector"]();
         }
         else{
             console.log("no id selector exists");
