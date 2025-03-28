@@ -1,10 +1,10 @@
 export {Message};
 
 class Message {
-    type: string;
+    sender: string;
     payload: Object;
-    constructor (type: string, payload: Object) {
-        this.type = type;
+    constructor (sender: string, payload: Object) {
+        this.sender = sender;
         this.payload = payload;
     }
 }

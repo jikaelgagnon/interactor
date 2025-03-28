@@ -1,4 +1,4 @@
-import { Interactor } from "./interactor";
+import { Monitor } from "./monitor";
 // import ytConfig from './configs/youtube_config.json';
 import tiktokConfig from './configs/tiktok_config.json';
 import { ConfigLoader } from "./config";
@@ -27,4 +27,4 @@ const tiktokIDSelector = (): string => {
 console.log(tiktokConfig);
 const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
 tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
-const tiktokInteractor = new Interactor(tiktokConfigLoader.config);
+const tiktokInteractor = new Monitor(tiktokConfigLoader.config);

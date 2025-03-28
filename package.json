@@ -1,7 +1,7 @@
 {
   "name": "interactor",
   "version": "1.0.0",
-  "main": "interactor.js",
+  "main": "monitor.js",
   "directories": {
     "doc": "docs"
   },
