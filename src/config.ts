@@ -5,7 +5,7 @@ interface SelectorData{
 
 interface PathData {
     selectors: SelectorData[];
-    idSelector?: (url: string) => string;
+    idSelector?: () => string;
 }
 
 interface Config {
@@ -25,7 +25,7 @@ class ConfigLoader {
         this.config = config;
     }
 
-    addIDSelector(urlPattern: string, idSelectorFunction: (url: string) => string): void {
+    addIDSelector(urlPattern: string, idSelectorFunction: () => string): void {
         const paths = this.config.paths;
 
         if (!(urlPattern in paths)) {

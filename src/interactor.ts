@@ -2,53 +2,29 @@ import { Message } from "./message";
 import { Document } from "./document";
 import { Config, PathData, SelectorData} from "./config";
 
-export class Interactor {
-    interactionEvents: string[];
-    debug: boolean;
-    paths: { [path: string]: PathData };
-    baseURL: string;
-    currentURL: string;
-    currentSelectors!: SelectorData[];
-    currentURLUsesId!: boolean;
-    currentMatchPathData: any;
-    interactionAttribute: string;
+class PageData {
+    url!: string;
+    selectors!: SelectorData[];
+    urlUsesId!: boolean;
+    idSelector!: () => string;
+    matchPathData!: PathData; 
 
-    constructor(config: Config) {
-        // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
-        this.interactionEvents = config.interactionEvents ? config.interactionEvents : ['click'];
-        // If enabled, highlight all selected HTML elements with coloured boxes
-        this.debug = config.debug ? config.debug : true;
-        // An object consisting of path patterns and their corresponding CSS selectors
-        this.paths = config.paths;
-        // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
-        this.baseURL = config.baseURL;
-        // URL the user is currently on
-        this.currentURL = document.location.href;
-        this.updateCurrentPageData();
-        this.interactionAttribute = "monitoring-interactions"
-
-        console.log(`Current url is: ${this.currentURL}`);
-        console.log("Received config:");
-        console.log(config);
-        this.initializeSession();
-        this.bindEvents();
+    update(baseURL: string, url: string, paths: { [path: string]: PathData }){
+        this.url = url;
+        let matches = this.updateMatchData(baseURL, paths);
+        this.selectors = this.getSelectors(matches, paths);
     }
 
-    private updateCurrentPageData(){
-        let matches = this.updateCurrentURLMatchData();
-        this.currentSelectors = this.getCurrentSelectors(matches);
-    }
-
-    private updateCurrentURLMatchData(): string[]{
-        this.currentURLUsesId = false;
+    private updateMatchData(baseURL: string, paths: { [path: string]: PathData }): string[]{
+        let currentURLUsesId = false;
         let closestMatch = ""; // the pattern that most closely matches the current URL
 
         // Get a list of all the paths that match the current URL
-        const matches = Object.keys(this.paths).filter((path) => {
+        const matches = Object.keys(paths).filter((path) => {
             console.log(path);
             // @ts-ignore: Ignoring TypeScript error for URLPattern not found
-            const p = new URLPattern(path, this.baseURL);
-            const match = p.test(this.currentURL);
+            const p = new URLPattern(path, baseURL);
+            const match = p.test(this.url);
             // Closest match is the longest pattern that matches the current URL
             if (match && path.length > closestMatch.length) {
                 closestMatch = path;
@@ -62,23 +38,105 @@ export class Interactor {
 
         if (closestMatch.endsWith(":id")) {
             console.log("current url uses id");
-            this.currentURLUsesId = true;
+            this.urlUsesId = true;
         }
-
-        this.currentMatchPathData = this.paths[closestMatch];
+        this.matchPathData = paths[closestMatch];
         return matches;
     }
 
-    private getCurrentSelectors(matches: string[]): SelectorData[] {
+    private getSelectors(matches: string[], paths: { [path: string]: PathData }): SelectorData[] {
         let currentSelectors = [];
         for (const path of matches) {
-            let pathData = this.paths[path];
+            let pathData = paths[path];
             for (const selector of pathData["selectors"]) {
                 currentSelectors.push(selector);
             }
         }
+        console.log("current selectors:");
+        console.log(currentSelectors);
         return currentSelectors;
     }
+}
+
+export class Interactor {
+    interactionEvents: string[];
+    debug: boolean;
+    paths: { [path: string]: PathData };
+    baseURL: string;
+    currentPageData: PageData;
+    currentURL: string;
+    currentSelectors!: SelectorData[];
+    currentURLUsesId!: boolean;
+    currentMatchPathData!: PathData;
+    interactionAttribute: string;
+
+    constructor(config: Config) {
+        // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
+        this.interactionEvents = config.interactionEvents ? config.interactionEvents : ['click'];
+        // If enabled, highlight all selected HTML elements with coloured boxes
+        this.debug = config.debug ? config.debug : true;
+        // An object consisting of path patterns and their corresponding CSS selectors
+        this.paths = config.paths;
+        // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
+        this.baseURL = config.baseURL;
+        this.currentPageData = new PageData();
+        // URL the user is currently on 
+        this.currentURL = document.location.href;
+        // Attribute added to all elements being monitored
+        this.interactionAttribute = "monitoring-interactions"
+        // Sets the currentSelectors, currentURLUsesId, currentMatchPathData
+        this.updateCurrentPageData(document.location.href);
+        console.log(`Current url is: ${this.currentURL}`);
+        console.log("Received config:");
+        console.log(config);
+        this.initializeSession();
+        this.bindEvents();
+    }
+
+    private updateCurrentPageData(url: string){
+        this.currentPageData.update(this.baseURL, url, this.paths);
+    }
+
+    // private updateCurrentURLMatchData(): string[]{
+    //     this.currentURLUsesId = false;
+    //     let closestMatch = ""; // the pattern that most closely matches the current URL
+
+    //     // Get a list of all the paths that match the current URL
+    //     const matches = Object.keys(this.paths).filter((path) => {
+    //         console.log(path);
+    //         // @ts-ignore: Ignoring TypeScript error for URLPattern not found
+    //         const p = new URLPattern(path, this.baseURL);
+    //         const match = p.test(this.currentURL);
+    //         // Closest match is the longest pattern that matches the current URL
+    //         if (match && path.length > closestMatch.length) {
+    //             closestMatch = path;
+    //         }
+    //         return match;
+    //     });
+
+    //     if (matches.length === 0) {
+    //         console.log("no matches found");
+    //     }
+
+    //     if (closestMatch.endsWith(":id")) {
+    //         console.log("current url uses id");
+    //         this.currentURLUsesId = true;
+    //     }
+
+    //     this.currentMatchPathData = this.paths[closestMatch];
+    //     return matches;
+    // }
+
+    // private getCurrentSelectors(matches: string[]): SelectorData[] {
+    //     let currentSelectors = [];
+    //     for (const path of matches) {
+    //         let pathData = this.paths[path];
+    //         for (const selector of pathData["selectors"]) {
+    //             currentSelectors.push(selector);
+    //         }
+    //     }
+    //     return currentSelectors;
+    // }
 
     private async sendMessageToBackground(type: string, payload: any): Promise<any> {
         let message = new Message(type, payload);
@@ -92,7 +150,7 @@ export class Interactor {
     }
 
     private checkForMatch(url: string): boolean {
-        let curPathname = new URL(this.currentURL).pathname;
+        let curPathname = new URL(this.currentPageData.url).pathname;
         let otherPathname = new URL(url).pathname;
         let l1 = curPathname.split("/");
         let l2 = otherPathname.split("/");
@@ -101,7 +159,7 @@ export class Interactor {
             return false;
         }
 
-        let max_idx = l1.length - (this.currentURLUsesId ? 1 : 0);
+        let max_idx = l1.length - (this.currentPageData.urlUsesId ? 1 : 0);
         for (let i = 0; i < max_idx; i++) {
             if (l1[i] !== l2[i]) {
                 return false;
@@ -111,27 +169,27 @@ export class Interactor {
     }
 
     private getCleanStateName(): string {
-        let path = new URL(this.currentURL).pathname;
+        let path = new URL(this.currentPageData.url).pathname;
         let groups = path.split("/");
 
-        if (this.currentURLUsesId) {
+        if (this.currentPageData.url) {
             groups = groups.slice(0, groups.length - 1);
         }
         return groups.join("/");
     }
 
     private onNavigationDetection(navEvent: any): void {
-        let urlChange = !(navEvent.destination.url === this.currentURL);
+        let urlChange = !(navEvent.destination.url === this.currentPageData.url);
         let sourceState = this.getCleanStateName();
         let match = this.checkForMatch(navEvent.destination.url);
 
 
-        let old_url = this.currentURL;
-        this.currentURL = navEvent.destination.url;
+        let old_url = this.currentPageData.url;
+        this.currentPageData.url = navEvent.destination.url;
         let destState = this.getCleanStateName();
 
         if (navEvent.navigationType === "push" && !match) {
-            this.updateCurrentPageData();
+            this.updateCurrentPageData(this.currentPageData.url);
             const record = this.createStateChangeRecord(navEvent, sourceState, destState);
             this.sendMessageToBackground("onNavigationDetection", record);
         } else if (navEvent.navigationType === "replace" || match) {
@@ -141,7 +199,10 @@ export class Interactor {
     }
 
     private addListenersToMutations(): void {
-        this.currentSelectors.forEach(interaction => {
+        console.log("adding selectors");
+        console.log("Current page data:");
+        console.log(this.currentPageData);
+        this.currentPageData.selectors.forEach(interaction => {
             let elements = document.querySelectorAll(interaction["selector"]+`:not([${this.interactionAttribute}]`);
             let name = interaction["name"];
             elements.forEach(element => {
@@ -178,9 +239,8 @@ export class Interactor {
     }
 
     private getIdOrEmpty(): string{
-        let idSelectorExists = "idSelector" in this.currentMatchPathData;
         let id = "";
-        if (idSelectorExists) {
+        if (this.currentMatchPathData.idSelector) {
             console.log("getting id");
             id = this.currentMatchPathData["idSelector"]();
         }
@@ -218,10 +278,6 @@ export class Interactor {
         return new Document("interaction", sourceState, metadata);
     }
 
-    private addRecord(record: any): void {
-        this.debuggingLog(record);
-    }
-
     private getCurrentState(): any {
         return {
             page: {
@@ -230,7 +286,7 @@ export class Interactor {
                 origin: window.location.origin,
                 title: document.title
             },
-            url: this.currentURL
+            url: this.currentPageData.url
         };
     }
 
