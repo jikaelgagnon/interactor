@@ -1,14 +1,21 @@
+interface SelectorData{
+    selector: string;
+    name: string;
+}
+
 interface PathData {
-    selectors: { selector: string, name: string }[];
+    selectors: SelectorData[];
     idSelector?: (url: string) => string;
 }
 
 interface Config {
     baseURL: string;
     paths: { [path: string]: PathData };
+    debug?: boolean;
+    interactionEvents?: string[];
 }
 
-export { ConfigLoader };
+export {SelectorData, Config, ConfigLoader, PathData};
 
 class ConfigLoader {
     public config: Config;
