@@ -125,7 +125,7 @@ export class Monitor {
         };
 
 
-        return new DBDocument(ActivityType.state_change, sourceState, metadata);
+        return new DBDocument(ActivityType.state_change, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -142,7 +142,7 @@ export class Monitor {
             id: this.currentPageData.getIDFromPage(),
         };
 
-        return new DBDocument(ActivityType.self_loop, sourceState, metadata);
+        return new DBDocument(ActivityType.self_loop, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -157,7 +157,7 @@ export class Monitor {
             name: name,
             id: this.currentPageData.getIDFromPage()
         };
-        return new DBDocument(ActivityType.interaction, sourceState, metadata);
+        return new DBDocument(ActivityType.interaction, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -223,8 +223,8 @@ export class Monitor {
     private getCleanStateName(): string {
         let path = new URL(this.currentPageData.url).pathname;
         let groups = path.split("/");
-
-        if (this.currentPageData.url) {
+        
+        if (this.currentPageData.urlUsesId) {
             groups = groups.slice(0, groups.length - 1);
         }
         return groups.join("/");
