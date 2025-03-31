@@ -4,6 +4,7 @@ import { Config, PathData} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
+import { start } from "repl";
 
 /**
  * This class reads from a provided Config object and attaches listeners to the elements specified in the selectors.
@@ -31,17 +32,26 @@ export class Monitor {
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new PageData();
-        // Sets all the fields for currentPageData
-        this.updateCurrentPageData(document.location.href);
         this.interactionAttribute = "monitoring-interactions"
-        console.log("Received config:");
-        console.log(config);
+
+        // Check if this page should be monitored
+        if (window.location.origin === this.baseURL) {
+            this.initializeMonitor();
+        } else {
+            console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
+        }
+    }
+
+        /**
+     * Initializes the monitor if base URL matches the current URL
+     */
+    private initializeMonitor(){
+        this.updateCurrentPageData(document.location.href);
         // Creates a new entry in the DB describing the state at the start of the session
         this.initializeSession();
         // Binds listeners to the HTML elements specified in the config for all matching path patterns
         this.bindEvents();
     }
-
     /**
    * Updates the page data whenever a new page is detected
    * @param url - the url of the new page
