@@ -1,39 +1,43 @@
 import { Message } from "./message";
-import { Document } from "./document";
+import {DBDocument } from "./dbdocument";
 import { Config, PathData} from "./config";
 import { PageData } from "./pagedata";
+import { ActivityType } from "./activity";
 
+/**
+ * This class reads from a provided Config object and attaches listeners to the elements specified in the selectors.
+ * When these elements are interacted with, or when a navigation occurs, a document is sent to the background script
+ * to be appended to the database. This class is instantiated in content.ts.
+ */
 export class Monitor {
+    // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
     interactionEvents: string[];
+    // If true, highlight all selected HTML elements with coloured boxes
     debug: boolean;
+    // An object mapping path patterns to their corresponding CSS selectors
+    // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
     paths: { [path: string]: PathData };
+    // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
     baseURL: string;
+    // Contains data relevant to the current page.
     currentPageData: PageData;
+    // Attribute added to all elements being monitored
     interactionAttribute: string;
 
     constructor(config: Config) {
-        // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
         this.interactionEvents = config.interactionEvents ? config.interactionEvents : ['click'];
-        // If enabled, highlight all selected HTML elements with coloured boxes
         this.debug = config.debug ? config.debug : true;
-        // An object consisting of path patterns and their corresponding CSS selectors
         this.paths = config.paths;
-        // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
         this.baseURL = config.baseURL;
-        // Contains data relevant to the current page.
         this.currentPageData = new PageData();
         // Sets all the fields for currentPageData
         this.updateCurrentPageData(document.location.href);
-        // URL the user is currently on 
-        // Attribute added to all elements being monitored
         this.interactionAttribute = "monitoring-interactions"
-        // Sets the currentSelectors, currentURLUsesId, currentMatchPathData
-        
         console.log("Received config:");
         console.log(config);
         // Creates a new entry in the DB describing the state at the start of the session
         this.initializeSession();
-        // Binds listeners to the HTML elements specified in the config
+        // Binds listeners to the HTML elements specified in the config for all matching path patterns
         this.bindEvents();
     }
 
@@ -102,7 +106,7 @@ export class Monitor {
    * @returns A document describing the state change
    */
 
-    private createStateChangeRecord(sourceState: string, destState: string): Document {
+    private createStateChangeRecord(sourceState: string, destState: string): DBDocument {
         
         const metadata = {
             destinationState: destState,
@@ -110,7 +114,7 @@ export class Monitor {
         };
 
 
-        return new Document("state_change", sourceState, metadata);
+        return new DBDocument(ActivityType.state_change, sourceState, metadata);
     }
 
     /**
@@ -121,13 +125,13 @@ export class Monitor {
    * @returns A document describing self loop
    */
 
-    private createSelfLoopRecord(sourceState: string, urlChange: boolean): Document {
+    private createSelfLoopRecord(sourceState: string, urlChange: boolean): DBDocument {
         const metadata = {
             urlChange: urlChange,
             id: this.currentPageData.getIDFromPage(),
         };
 
-        return new Document("self_loop", sourceState, metadata);
+        return new DBDocument(ActivityType.self_loop, sourceState, metadata);
     }
 
     /**
@@ -137,12 +141,12 @@ export class Monitor {
    * @returns A document interaction self loop
    */
 
-    private createInteractionRecord(name: string, sourceState: string): Document {
+    private createInteractionRecord(name: string, sourceState: string): DBDocument {
         const metadata = {
             name: name,
             id: this.currentPageData.getIDFromPage()
         };
-        return new Document("interaction", sourceState, metadata);
+        return new DBDocument(ActivityType.interaction, sourceState, metadata);
     }
 
     /**
@@ -153,7 +157,7 @@ export class Monitor {
    * @returns Response indicating whether the message succeeded
    */
 
-    private async sendMessageToBackground(sender: string, payload: Object): Promise<any> {
+    private async sendMessageToBackground(sender: string, payload: DBDocument): Promise<any> {
         let message = new Message(sender, payload);
         const response = await chrome.runtime.sendMessage(message);
         return response;

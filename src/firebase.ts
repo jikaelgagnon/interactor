@@ -2,8 +2,9 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 import firebaseConfig from "./configs/firebaseConfig.json";
 
-console.log(firebaseConfig);
-
+/**
+ * Responsible for initializing and exporting an instance of the database
+ */
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
