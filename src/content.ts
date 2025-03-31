@@ -1,7 +1,7 @@
-import { Monitor } from "./monitor";
+import { Monitor } from "./interactions/monitor";
 // import ytConfig from './configs/youtube_config.json';
 import tiktokConfig from './configs/tiktok_config.json';
-import { ConfigLoader } from "./config";
+import { ConfigLoader } from "./interactions/config";
 
 console.log("TESTING THAT TS WORKS!!!!!!!!!!!11");
 console.log("using tiktok,...");

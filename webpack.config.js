@@ -20,7 +20,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [".ts", ".js"]  // Resolve .ts and .js files
+    extensions: [".ts"]  // Resolve .ts and .js files
   },
   optimization: {
     minimize: true,
