@@ -10,7 +10,7 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "firebase/*": ["src/firebase/*"]
+      "firebase/*": ["src/database/firebase/*"]
     },
   },
   "include": [

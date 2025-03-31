@@ -1,4 +1,4 @@
-import { ActivityType } from "./activity";
+import { ActivityType } from "../communication/activity";
 
 export { DBDocument as DBDocument };
 /**

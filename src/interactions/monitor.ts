@@ -1,8 +1,9 @@
-import { Message } from "./message";
-import {DBDocument } from "./dbdocument";
+import { BackgroundMessage } from "../communication/backgroundmessage";
+import {DBDocument } from "../database/dbdocument";
 import { Config, PathData} from "./config";
 import { PageData } from "./pagedata";
-import { ActivityType } from "./activity";
+import { ActivityType } from "../communication/activity";
+import {SenderMethod} from "../communication/sender"
 
 /**
  * This class reads from a provided Config object and attaches listeners to the elements specified in the selectors.
@@ -53,7 +54,7 @@ export class Monitor {
    * Creates a new entry in the DB describing the state at the start of the session
    */
     private initializeSession(): void {
-        this.sendMessageToBackground("initializeSession", this.getCurrentState());
+        this.sendMessageToBackground(SenderMethod.InitializeSession, this.getCurrentState());
     }
 
     /**
@@ -157,8 +158,8 @@ export class Monitor {
    * @returns Response indicating whether the message succeeded
    */
 
-    private async sendMessageToBackground(sender: string, payload: DBDocument): Promise<any> {
-        let message = new Message(sender, payload);
+    private async sendMessageToBackground(senderMethod: SenderMethod, payload: DBDocument): Promise<any> {
+        let message = new BackgroundMessage(senderMethod, payload);
         const response = await chrome.runtime.sendMessage(message);
         return response;
     }
@@ -171,7 +172,7 @@ export class Monitor {
 
     private onInteractionDetection(e: Event, name: string): void {
         const record = this.createInteractionRecord(name, this.getCleanStateName());
-        this.sendMessageToBackground("onInteractionDetection", record);
+        this.sendMessageToBackground(SenderMethod.InteractionDetection, record);
     }
 
     /**
@@ -191,10 +192,10 @@ export class Monitor {
         if (navEvent.navigationType === "push" && !match) {
             this.updateCurrentPageData(this.currentPageData.url);
             const record = this.createStateChangeRecord(sourceState, destState);
-            this.sendMessageToBackground("onNavigationDetection", record);
+            this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         } else if (navEvent.navigationType === "replace" || match) {
             const record = this.createSelfLoopRecord(sourceState, urlChange);
-            this.sendMessageToBackground("onNavigationDetection", record);
+            this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }
     }
 

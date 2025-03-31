@@ -1,5 +1,7 @@
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "./database/firebase";
+import { BackgroundMessage } from "./communication/backgroundmessage";
+import { SenderMethod } from "./communication/sender";
 
 let USE_DB = false;
 
@@ -82,7 +84,7 @@ chrome.tabs.onRemoved.addListener((tabId: number, removeInfo: chrome.tabs.TabRem
 
 chrome.runtime.onMessage.addListener(
   (
-    request: any,
+    request: BackgroundMessage,
     sender: chrome.runtime.MessageSender,
     sendResponse: (response?: any) => void
   ): boolean => {
@@ -90,8 +92,8 @@ chrome.runtime.onMessage.addListener(
     console.log("message content:");
     console.log(request);
     
-    switch (request.sender) {
-      case "onInteractionDetection":
+    switch (request.senderMethod) {
+      case SenderMethod.InteractionDetection:
         console.log("Interaction received. Adding to session...");
         addToSession(request.payload)
           .then(() => {
@@ -103,7 +105,7 @@ chrome.runtime.onMessage.addListener(
         console.log("Interaction received");
         break;
         
-      case "onNavigationDetection":
+      case SenderMethod.NavigationDetection:
         console.log("Navigation received. Adding to session...");
         addToSession(request.payload)
           .then(() => {
@@ -115,14 +117,14 @@ chrome.runtime.onMessage.addListener(
         console.log("Interaction received");
         break;
         
-      case "initializeSession":
+      case SenderMethod.InitializeSession:
         console.log("Session started");
         SESSION_DATA.sessionInfo = request.payload;
         console.log(request.payload);
         break;
         
       default:
-        sendResponse({ status: `Request type ${request.type} is unrecognized` });
+        sendResponse({ status: `Request type ${request.senderMethod} is unrecognized` });
     }
     return true;
   }

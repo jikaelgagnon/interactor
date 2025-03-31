@@ -9,7 +9,8 @@ export class PageData {
     selectors!: SelectorData[];
     // Indicates whether the URL contains an id. Eg. www.youtube.com/shorts/:id or www.youtube.com/watch?v=:id
     urlUsesId!: boolean;
-    // The URL pattern and CSS selectors for the pattern that most closely matches this.url
+    // The URL pattern, CSS selectors, and optionally a function for getting page ID 
+    // for the pattern that most closely matches this.url
     // Ex: If the url is www.youtube.com/shorts/ABC and the patterns are /* and /shorts/:id, then 
     // matchPathData would contain the PathData for /shorts/:id, since its a closer match to the URL.
     matchPathData!: PathData; 
