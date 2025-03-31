@@ -82,50 +82,134 @@ chrome.tabs.onRemoved.addListener((tabId: number, removeInfo: chrome.tabs.TabRem
   }
 });
 
-chrome.runtime.onMessage.addListener(
-  (
-    request: BackgroundMessage,
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void
-  ): boolean => {
-    console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
-    console.log("message content:");
-    console.log(request);
+// chrome.runtime.onMessage.addListener(
+//   (
+//     request: BackgroundMessage,
+//     sender: chrome.runtime.MessageSender,
+//     sendResponse: (response?: any) => void
+//   ): boolean => {
+//     console.log(sender.tab ? "from a content script:" + sender.tab.url : "from the extension");
+//     console.log("message content:");
+//     console.log(request);
     
-    switch (request.senderMethod) {
-      case SenderMethod.InteractionDetection:
-        console.log("Interaction received. Adding to session...");
-        addToSession(request.payload)
-          .then(() => {
-            sendResponse({ status: "Data written to session!" });
-          })
-          .catch((err: Error) => {
-            sendResponse({ status: "Error writing data to session: " + err.message });
-          });
-        console.log("Interaction received");
-        break;
+//     switch (request.senderMethod) {
+//       case SenderMethod.InteractionDetection:
+//         console.log("Interaction received. Adding to session...");
+//         addToSession(request.payload)
+//           .then(() => {
+//             sendResponse({ status: "Data written to session!" });
+//           })
+//           .catch((err: Error) => {
+//             sendResponse({ status: "Error writing data to session: " + err.message });
+//           });
+//         console.log("Interaction received");
+//         break;
         
-      case SenderMethod.NavigationDetection:
-        console.log("Navigation received. Adding to session...");
-        addToSession(request.payload)
-          .then(() => {
-            sendResponse({ status: "Data written to session!" });
-          })
-          .catch((err: Error) => {
-            sendResponse({ status: "Error writing data to session: " + err.message });
-          });
-        console.log("Interaction received");
-        break;
+//       case SenderMethod.NavigationDetection:
+//         console.log("Navigation received. Adding to session...");
+//         addToSession(request.payload)
+//           .then(() => {
+//             sendResponse({ status: "Data written to session!" });
+//           })
+//           .catch((err: Error) => {
+//             sendResponse({ status: "Error writing data to session: " + err.message });
+//           });
+//         console.log("Interaction received");
+//         break;
         
-      case SenderMethod.InitializeSession:
-        console.log("Session started");
-        SESSION_DATA.sessionInfo = request.payload;
-        console.log(request.payload);
-        break;
+//       case SenderMethod.InitializeSession:
+//         console.log("Session started");
+//         SESSION_DATA.sessionInfo = request.payload;
+//         console.log(request.payload);
+//         break;
         
-      default:
-        sendResponse({ status: `Request type ${request.senderMethod} is unrecognized` });
-    }
-    return true;
+//       default:
+//         sendResponse({ status: `Request type ${request.senderMethod} is unrecognized` });
+//     }
+//     return true;
+//   }
+// );
+
+// chrome.runtime.onMessage.addListener(
+//   async (
+//     request: BackgroundMessage,
+//     sender: chrome.runtime.MessageSender,
+//     sendResponse: (response?: any) => void
+//   ): Promise<boolean> => {
+//     console.log(sender.tab ? `from a content script: ${sender.tab.url}` : "from the extension");
+//     console.log("message content:", request);
+
+//     try {
+//       switch (request.senderMethod) {
+//         case SenderMethod.InteractionDetection:
+//           console.log("Interaction received. Adding to session...");
+//           await addToSession(request.payload);
+//           sendResponse({ status: "Data written to session!" });
+//           break;
+
+//         case SenderMethod.NavigationDetection:
+//           console.log("Navigation received. Adding to session...");
+//           await addToSession(request.payload);
+//           sendResponse({ status: "Data written to session!" });
+//           break;
+
+//         case SenderMethod.InitializeSession:
+//           console.log("Session started");
+//           SESSION_DATA.sessionInfo = request.payload;
+//           console.log(request.payload);
+//           sendResponse({ status: "Session initialized" });
+//           break;
+
+//         default:
+//           console.warn(`Unrecognized sender method: ${request.senderMethod}`);
+//           sendResponse({ status: `Unrecognized request type: ${request.senderMethod}` });
+//       }
+//     } catch (error: any) {
+//       console.error("Error processing message:", error);
+//       sendResponse({ status: "Error", message: error.message });
+//     }
+
+//     return true;
+//   }
+// );
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log(sender.tab ? `from content script: ${sender.tab.url}` : "from the extension");
+  console.log("message content:", message);
+
+  handleMessage(message)
+    .then((response) => {
+      sendResponse(response);
+    })
+    .catch((error) => {
+      console.error("Error handling message:", error);
+      sendResponse({ status: "Error", message: error.message });
+    });
+
+  // Return true to indicate asynchronous response handling
+  return true;
+});
+
+const handleMessage = async (request: BackgroundMessage): Promise<any> => {
+  switch (request.senderMethod) {
+    case SenderMethod.InteractionDetection:
+      console.log("Interaction received. Adding to session...");
+      await addToSession(request.payload);
+      return { status: "Data written to session!" };
+
+    case SenderMethod.NavigationDetection:
+      console.log("Navigation received. Adding to session...");
+      await addToSession(request.payload);
+      return { status: "Data written to session!" };
+
+    case SenderMethod.InitializeSession:
+      console.log("Session started");
+      SESSION_DATA.sessionInfo = request.payload;
+      console.log(request.payload);
+      return { status: "Session initialized" };
+
+    default:
+      console.warn(`Unrecognized sender method: ${request.senderMethod}`);
+      return { status: `Unrecognized request type: ${request.senderMethod}` };
   }
-);
+};
