@@ -1,8 +1,17 @@
 import { SelectorData, PathData } from "./config";
+/**
+ * A class responsible for tracking the state of the page that the user is currently on.
+ */
 export class PageData {
+    // URL of the page
     url!: string;
+    // CSS selectors being applied to the page
     selectors!: SelectorData[];
+    // Indicates whether the URL contains an id. Eg. www.youtube.com/shorts/:id or www.youtube.com/watch?v=:id
     urlUsesId!: boolean;
+    // The URL pattern and CSS selectors for the pattern that most closely matches this.url
+    // Ex: If the url is www.youtube.com/shorts/ABC and the patterns are /* and /shorts/:id, then 
+    // matchPathData would contain the PathData for /shorts/:id, since its a closer match to the URL.
     matchPathData!: PathData; 
     /**
      * Updates the state of the PageData
