@@ -1,10 +1,9 @@
 import { BackgroundMessage } from "../communication/backgroundmessage";
-import {DBDocument } from "../database/dbdocument";
+import {DBDocument, ActivityDocument, SessionDocument} from "../database/dbdocument";
 import { Config, PathData} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
-import { start } from "repl";
 
 /**
  * This class reads from a provided Config object and attaches listeners to the elements specified in the selectors.
@@ -91,9 +90,9 @@ export class Monitor {
    */
 
     private addListenersToNewMatches(): void {
-        console.log("adding selectors");
-        console.log("Current page data:");
-        console.log(this.currentPageData);
+        // console.log("adding selectors");
+        // console.log("Current page data:");
+        // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
             let elements = document.querySelectorAll(interaction["selector"]+`:not([${this.interactionAttribute}]`);
             let name = interaction["name"];
@@ -125,7 +124,7 @@ export class Monitor {
         };
 
 
-        return new DBDocument(ActivityType.state_change, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.state_change, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -142,7 +141,7 @@ export class Monitor {
             id: this.currentPageData.getIDFromPage(),
         };
 
-        return new DBDocument(ActivityType.self_loop, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.self_loop, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -157,7 +156,7 @@ export class Monitor {
             name: name,
             id: this.currentPageData.getIDFromPage()
         };
-        return new DBDocument(ActivityType.interaction, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.interaction, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -235,16 +234,8 @@ export class Monitor {
    * @returns Current state 
    */
 
-    private getCurrentState(): any {
-        return {
-            page: {
-                location: window.location.pathname,
-                href: window.location.href,
-                origin: window.location.origin,
-                title: document.title
-            },
-            url: this.currentPageData.url
-        };
+    private getCurrentState(): SessionDocument {
+        return new SessionDocument(this.currentPageData.url);
     }
 
     /**

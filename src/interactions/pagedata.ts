@@ -65,7 +65,7 @@ export class PageData {
      */
 
     getIDFromPage(){
-        return this.matchPathData.idSelector?.() || "";
+        return this.matchPathData.idSelector?.() || "No ID selector function for this page";
     }
 
     /**
@@ -83,8 +83,6 @@ export class PageData {
                 currentSelectors.push(selector);
             }
         }
-        console.log("current selectors:");
-        console.log(currentSelectors);
         return currentSelectors;
     }
 

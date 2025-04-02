@@ -11,5 +11,9 @@
     ],
     "background": {
       "service_worker": "background.bundle.js"
-    }
+    },
+    "permissions": [
+      "identity",
+      "identity.email"
+    ]
   }
