@@ -65,7 +65,7 @@ export class PageData {
      */
 
     getIDFromPage(){
-        return this.matchPathData.idSelector?.() || "No ID selector function for this page";
+        return this.matchPathData.idSelector?.() || "";
     }
 
     /**
