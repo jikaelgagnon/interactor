@@ -18,7 +18,7 @@ const ytConfigLoader = new ConfigLoader(ytConfig);
 // ytConfigLoader.addIDSelector("/shorts/:id", ytIDSelector);
 const ytInteractor = new Monitor(ytConfigLoader.config);
 
-console.log(tiktokConfig);
-const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
-tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
-const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
+// console.log(tiktokConfig);
+// const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
+// tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
+// const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
