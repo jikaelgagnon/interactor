@@ -118,7 +118,7 @@ const handleMessage = async (request: BackgroundMessage): Promise<any> => {
       console.log("Session started");
       let email = await getUserEmail() as string;
       SessionData.instance.sessionInfo = request.payload as SessionDocument;
-      SessionData.instance.sessionInfo.setEmail(email);
+      SessionData.instance.sessionInfo.email = email;
       return { status: "Session initialized" };
 
     default:
