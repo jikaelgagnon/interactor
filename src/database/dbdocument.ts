@@ -38,7 +38,7 @@ class ActivityDocument extends DBDocument{
  */
 
 class SessionDocument extends DBDocument{
-    private email: string = "Email not set";
+    email: string = "Email not set";
     constructor(url: string) {
         super(url);
     }
