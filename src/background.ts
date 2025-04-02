@@ -4,7 +4,7 @@ import {ActivityDocument, SessionDocument} from "./database/dbdocument";
 import { BackgroundMessage } from "./communication/backgroundmessage";
 import { SenderMethod } from "./communication/sender";
 
-let USE_DB = true;
+let USE_DB = false;
 
 /**
  * A singleton class representing session data, including session information, associated documents,
