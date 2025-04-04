@@ -12,20 +12,20 @@ let USE_DB = true;
  * session-related information.
  */
 class SessionData {
-  sessionInfo?: SessionDocument;
+  sessionInfo: SessionDocument;
   documents: ActivityDocument[];
   static instance: SessionData = new SessionData();
 
   private constructor() {
     this.documents = [];
+    this.sessionInfo = new SessionDocument("Cleared session");
   }
 
   /**
    * Clears the session when the tab is closed
    */
   static clearSession(): void {
-    SessionData.instance.documents = [];
-    SessionData.instance.sessionInfo = undefined;
+    SessionData.instance = new SessionData();
   }
 
   /**
