@@ -1,4 +1,4 @@
-import { SelectorData, PathData } from "./config";
+import { SelectorData, PathData, PathMap } from "./config";
 /**
  * A class responsible for tracking the state of the page that the user is currently on.
  */
@@ -20,7 +20,7 @@ export class PageData {
      * @param url: The full url of the current page
      * @param paths: A list of all the paths defined in a config
      */
-    update(baseURL: string, url: string, paths: { [path: string]: PathData }){
+    update(baseURL: string, url: string, paths: PathMap){
         this.url = url;
         let matches = this.updateMatchData(baseURL, paths);
         this.selectors = this.getSelectors(matches, paths);
@@ -35,7 +35,7 @@ export class PageData {
      * @returns A list of all paths in the config that match `baseURL`
      */
 
-    private updateMatchData(baseURL: string, paths: { [path: string]: PathData }): string[]{
+    private updateMatchData(baseURL: string, paths: PathMap): string[]{
         let closestMatch = ""; // the pattern that most closely matches the current URL
 
         // Get a list of all the paths that match the current URL
@@ -64,7 +64,7 @@ export class PageData {
      * @returns Result of if it exsits`matchPathData.idSelector`, else it returns an empty string
      */
 
-    getIDFromPage(){
+    getIDFromPage(): string{
         return this.matchPathData.idSelector?.() || "";
     }
 
@@ -75,7 +75,7 @@ export class PageData {
      * @returns A list of all selectors for the matching paths
      */
 
-    private getSelectors(matches: string[], paths: { [path: string]: PathData }): SelectorData[] {
+    private getSelectors(matches: string[], paths: PathMap): SelectorData[] {
         let currentSelectors = [];
         for (const path of matches) {
             let pathData = paths[path];
