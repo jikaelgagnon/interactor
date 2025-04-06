@@ -87,8 +87,7 @@ class SessionData {
         
     
         await updateDoc(sessionDocRef, {
-          "sessionInfo.endTime": new Date().toISOString(),
-          active: false
+          "sessionInfo.endTime": new Date().toISOString()
         });
     
         console.log(`Session ${session.sessionId} closed`);
