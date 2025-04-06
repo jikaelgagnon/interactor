@@ -4,16 +4,131 @@ import { ActivityDocument, SessionDocument } from "./database/dbdocument";
 import { BackgroundMessage } from "./communication/backgroundmessage";
 import { SenderMethod } from "./communication/sender";
 
-
 let USE_DB = true;
 
 /**
- * A class representing session data for a specific tab, including session information,
- * associated documents, and optional initial and closing data.
+ * Singleton class that manages session tracking for each browser tab.
+ * It handles initialization, activity tracking, and cleanup when tabs are closed.
+ */
+class SessionManager {
+  private static instance: SessionManager;
+
+  /** A map storing active sessions keyed by their tab ID. */
+  private sessionMap: Map<number, SessionData>;
+
+  /** Private constructor to prevent direct instantiation. */
+  private constructor() {
+    this.sessionMap = new Map();
+    this.setupListeners();
+  }
+
+  /**
+   * Retrieves the singleton instance of the SessionManager.
+   * @returns The singleton SessionManager instance.
+   */
+  public static getInstance(): SessionManager {
+    if (!SessionManager.instance) {
+      SessionManager.instance = new SessionManager();
+    }
+    return SessionManager.instance;
+  }
+
+  /**
+   * Sets up listeners for tab close events and incoming messages from content scripts.
+   */
+  private setupListeners(): void {
+    chrome.tabs.onRemoved.addListener((tabId: number) => {
+      const session = this.sessionMap.get(tabId);
+      if (session) {
+        session.closeSessionInDb(tabId);
+        this.sessionMap.delete(tabId);
+      }
+    });
+
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      const tabId = sender.tab?.id ?? null;
+      this.handleMessage(message, tabId)
+        .then((response) => sendResponse(response))
+        .catch((error) => {
+          console.error("Error handling message:", error);
+          sendResponse({ status: "Error", message: error.message });
+        });
+      return true; // asynchronous response
+    });
+  }
+
+  /**
+   * Handles all incoming messages and routes them based on the sender method.
+   * @param request - The message payload from the content script.
+   * @param tabId - The ID of the tab sending the message.
+   * @returns A response object indicating status or result.
+   */
+  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<any> {
+    const session = tabId !== null ? this.getSessionForTab(tabId) : new SessionData();
+
+    switch (request.senderMethod) {
+      case SenderMethod.InteractionDetection:
+      case SenderMethod.NavigationDetection:
+        const doc = request.payload as ActivityDocument;
+        await session.addActivityDocumentToDb(doc);
+        return { status: "Data written to database!" };
+
+      case SenderMethod.InitializeSession:
+        console.log("Session started");
+        const email = await this.getUserEmail();
+        session.sessionInfo = request.payload as SessionDocument;
+        session.sessionInfo.email = email;
+        await session.createSessionInDb();
+        console.log("Session initialized for tab:", tabId);
+        return { status: "Session initialized" };
+
+      default:
+        console.warn(`Unrecognized sender method: ${request.senderMethod}`);
+        return { status: `Unrecognized request type: ${request.senderMethod}` };
+    }
+  }
+
+  /**
+   * Retrieves or creates a SessionData instance for the specified tab.
+   * @param tabId - The tab ID to fetch session data for.
+   * @returns The SessionData associated with the tab.
+   */
+  private getSessionForTab(tabId: number): SessionData {
+    if (!this.sessionMap.has(tabId)) {
+      this.sessionMap.set(tabId, new SessionData());
+    }
+    return this.sessionMap.get(tabId)!;
+  }
+
+  /**
+   * Retrieves the current user's email using the Chrome Identity API.
+   * @returns A promise resolving to the user's email, or an empty string if unavailable.
+   */
+  private async getUserEmail(): Promise<string> {
+    return new Promise((resolve) => {
+      chrome.identity.getProfileUserInfo((userInfo) => {
+        if (chrome.runtime.lastError) {
+          console.log(chrome.runtime.lastError.message);
+          resolve("");
+        } else {
+          resolve(userInfo.email || "");
+        }
+      });
+    });
+  }
+}
+
+/**
+ * A class representing a single session's data, including metadata and tracked activities.
  */
 class SessionData {
+  /** Information about the session, including user and timing metadata. */
   sessionInfo: SessionDocument;
+
+  /** Firestore document ID for this session (assigned after creation). */
   sessionId: string = "NO ID SET";
+
+  /** List of user activity documents for this session. */
   documents: ActivityDocument[];
 
   constructor() {
@@ -22,193 +137,66 @@ class SessionData {
   }
 
   /**
-   * Immediately adds an activity document to an existing session document in Firestore.
-   * @param document - The activity that just occurred.
+   * Appends an activity document to the current session in Firestore.
+   * @param document - The activity data to append.
    */
   async addActivityDocumentToDb(document: ActivityDocument): Promise<void> {
-    if (!USE_DB) {
-      console.log("USE_DB is set to false, not saving to database");
-      return;
-    }
-
-    if (!this.sessionId) {
-      console.error("Session ID not available. Cannot append activity.");
+    if (!USE_DB || !this.sessionId) {
+      console.log("Skipping DB write");
       return;
     }
 
     try {
-      // Reference to the specific document using its ID
       const sessionDocRef = doc(db, "userData", this.sessionId);
-      
-      // Update the documents array by adding the new activity
       await updateDoc(sessionDocRef, {
-        documents: arrayUnion(document)
+        documents: arrayUnion(document),
       });
-      
-      console.log("Activity appended to session document:", this.sessionId);
+      console.log("Activity appended to session:", this.sessionId);
     } catch (e) {
-      console.log("Failed to add activity to session document");
-      console.error("Error updating document: ", e);
+      console.error("Error updating document:", e);
     }
   }
 
+  /**
+   * Creates a new session document in Firestore and sets the start time.
+   * @returns The Firestore document ID, or null if creation failed.
+   */
   async createSessionInDb(): Promise<string | null> {
-    if (!USE_DB) {
-      console.log("USE_DB is set to false, not creating session in database");
-      return null;
-    }
+    if (!USE_DB) return null;
 
     try {
       const sessionData = {
         sessionInfo: this.sessionInfo,
-        documents: [] // Start with empty documents array
+        documents: [],
       };
-      
+
       const docRef = await addDoc(collection(db, "userData"), sessionData);
-      console.log("Session document created with ID: ", docRef.id);
       this.sessionId = docRef.id;
       return docRef.id;
     } catch (e) {
-      console.log("Failed to create session in DB");
-      console.error("Error creating session: ", e);
+      console.error("Error creating session:", e);
       return null;
     }
   }
 
-    /**
-   * Closes the session in Firestore when the tab is closed.
+  /**
+   * Closes the session by updating the end time in Firestore.
+   * @param tabId - The ID of the tab whose session is being closed.
    */
-    async closeSessionInDb(tabId: number): Promise<void> {
-      const session = sessionMap.get(tabId);
-      if (!USE_DB || !session || !session.sessionId) return;
-    
-      try {
-        const sessionDocRef = doc(db, "userData", session.sessionId);
-        
-    
-        await updateDoc(sessionDocRef, {
-          "sessionInfo.endTime": new Date().toISOString()
-        });
-    
-        console.log(`Session ${session.sessionId} closed`);
-      } catch (e) {
-        console.error("Error closing session: ", e);
-      }
+  async closeSessionInDb(tabId: number): Promise<void> {
+    if (!USE_DB || !this.sessionId) return;
+
+    try {
+      const sessionDocRef = doc(db, "userData", this.sessionId);
+      await updateDoc(sessionDocRef, {
+        "sessionInfo.endTime": new Date().toISOString(), // ensure consistent ISO format
+      });
+      console.log(`Session ${this.sessionId} closed`);
+    } catch (e) {
+      console.error("Error closing session:", e);
     }
+  }
 }
 
-// Global map to maintain a session for each tab by tab ID.
-const sessionMap = new Map<number, SessionData>();
-
-/**
- * Retrieves (or creates) the SessionData instance for the given tab ID.
- * @param tabId The ID of the tab.
- */
-function getSessionForTab(tabId: number): SessionData {
-  let session = sessionMap.get(tabId);
-  if (!session) {
-    session = new SessionData();
-    sessionMap.set(tabId, session);
-  }
-  return session;
-}
-
-/**
- * Close the session when a tab is closed.
- */
-chrome.tabs.onRemoved.addListener((tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) => {
-  const session = sessionMap.get(tabId);
-  if (session) {
-    session.closeSessionInDb(tabId);
-    sessionMap.delete(tabId);
-  }
-});
-
-/**
- * Handles messaging between content and background scripts.
- */
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log(sender.tab ? `from content script: ${sender.tab.url}` : "from the extension");
-  console.log("message content:", message);
-
-  // Retrieve the tabId if available
-  const tabId = sender.tab && sender.tab.id !== undefined ? sender.tab.id : null;
-
-  handleMessage(message, tabId)
-    .then((response) => {
-      sendResponse(response);
-    })
-    .catch((error) => {
-      console.error("Error handling message:", error);
-      sendResponse({ status: "Error", message: error.message });
-    });
-
-  // Return true to indicate asynchronous response handling.
-  return true;
-});
-
-/**
- * Saves data immediately when received from a content script.
- * @param request - Message sent to the background from the content script.
- * @param tabId - The tab ID associated with this message.
- * @returns - Promise indicating the status of the handling.
- */
-const handleMessage = async (request: BackgroundMessage, tabId: number | null): Promise<any> => {
-  // For messages without an associated tab (e.g. from the extension), you can choose how to handle them.
-  const session = tabId !== null ? getSessionForTab(tabId) : new SessionData();
-
-  switch (request.senderMethod) {
-    case SenderMethod.InteractionDetection:
-      console.log("Interaction received. Adding to database immediately...");
-      const interactionDoc = request.payload as ActivityDocument;
-      await session.addActivityDocumentToDb(interactionDoc);
-      return { status: "Data written to database!" };
-
-    case SenderMethod.NavigationDetection:
-      console.log("Navigation received. Adding to database immediately...");
-      const navigationDoc = request.payload as ActivityDocument;
-      await session.addActivityDocumentToDb(navigationDoc);
-      return { status: "Data written to database!" };
-
-    case SenderMethod.InitializeSession:
-      console.log("Session started");
-      const email = await getUserEmail() as string;
-      session.sessionInfo = request.payload as SessionDocument;
-      session.sessionInfo.email = email;
-      
-      // Create the initial session document and get its ID.
-      try {
-        await session.createSessionInDb();
-        console.log("Session initialized for tab:", tabId);
-      } catch (e) {
-        console.error("Error creating session document:", e);
-      }
-      
-      return { status: "Session initialized" };
-
-    default:
-      console.warn(`Unrecognized sender method: ${request.senderMethod}`);
-      return { status: `Unrecognized request type: ${request.senderMethod}` };
-  }
-};
-
-/**
- * Gets the user's email.
- * @returns The user's email.
- */
-async function getUserEmail(): Promise<string> {
-  return new Promise((resolve) => {
-    chrome.identity.getProfileUserInfo((userInfo) => {
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError.message);
-        resolve("");
-      } else if (!userInfo.email) {
-        console.log("Email not available. User may not be signed in.");
-        resolve("");
-      } else {
-        console.log(`Email retrieved: ${userInfo.email}`);
-        resolve(userInfo.email);
-      }
-    });
-  });
-}
+// Instantiate the singleton to ensure listeners are active
+SessionManager.getInstance();
