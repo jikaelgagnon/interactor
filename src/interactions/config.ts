@@ -1,4 +1,4 @@
-export {SelectorData, Config, ConfigLoader, PathData};
+export {SelectorData, Config, ConfigLoader, PathData, PathMap};
 
 interface SelectorData{
     /**
@@ -8,6 +8,16 @@ interface SelectorData{
     selector: string;
     // The human readable name for the CSS selector
     name: string;
+}
+
+interface PathMap {
+    /**
+     * A mapping of URL patterns to path data.
+     * The URL Pattern should follow the URL Pattern API syntax.
+     * These are appended to the baseURL when checking for matches.
+     * Ex: baseURL: www.youtube.com, path: /shorts/:id -> www.youtube.com/shorts/:id
+     */
+    [path: string]: PathData;
 }
 
 interface PathData {
@@ -31,7 +41,7 @@ interface Config {
     // A mapping of URL patterns to path data. The URL Pattern should follow the 
     // URL Pattern API syntax. These are appended to the baseURL when checking for matches
     // Ex: baseURL: www.youtube.com, path: /shorts/:id -> www.youtube.com/shorts/:id
-    paths: { [path: string]: PathData };
+    paths: PathMap;
     // Indicates whether the Monitor should be in debug mode. If true, add coloured boxes
     // around selected HTML elements
     debug?: boolean;

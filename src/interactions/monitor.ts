@@ -1,6 +1,6 @@
 import { BackgroundMessage } from "../communication/backgroundmessage";
 import {DBDocument, ActivityDocument, SessionDocument} from "../database/dbdocument";
-import { Config, PathData} from "./config";
+import { Config, PathData, PathMap} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
@@ -17,7 +17,7 @@ export class Monitor {
     debug: boolean;
     // An object mapping path patterns to their corresponding CSS selectors
     // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-    paths: { [path: string]: PathData };
+    paths: PathMap;
     // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
     baseURL: string;
     // Contains data relevant to the current page.
@@ -127,7 +127,7 @@ export class Monitor {
         }
 
 
-        return new ActivityDocument(ActivityType.state_change, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.StateChange, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -147,7 +147,7 @@ export class Monitor {
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.self_loop, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.SelfLoop, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
@@ -167,7 +167,7 @@ export class Monitor {
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.interaction, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.Interaction, sourceState, metadata, this.currentPageData.url);
     }
 
     /**
