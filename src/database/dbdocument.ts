@@ -38,9 +38,12 @@ class ActivityDocument extends DBDocument{
  */
 
 class SessionDocument extends DBDocument{
+    startTime: Date;
+    endTime?: Date;
     email: string = "Email not set";
     constructor(url: string) {
         super(url);
+        this.startTime = new Date();
     }
     setEmail(email: string){
         this.email = email;
