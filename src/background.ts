@@ -70,6 +70,7 @@ class SessionManager {
       case SenderMethod.InteractionDetection:
       case SenderMethod.NavigationDetection:
         const doc = request.payload as ActivityDocument;
+        console.log("received a new activity...");
         await session.addActivityDocumentToDb(doc);
         return { status: "Data written to database!" };
 
