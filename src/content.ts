@@ -3,6 +3,9 @@ import ytConfig from './configs/youtube_config.json';
 import tiktokConfig from './configs/tiktok_config.json';
 import { ConfigLoader } from "./interactions/config";
 
+const ytConfigLoader = new ConfigLoader(ytConfig);
+const ytInteractor = new Monitor(ytConfigLoader.config);
+
 const tiktokIDSelector = (): string => {
     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
     if (!vid){
@@ -13,10 +16,6 @@ const tiktokIDSelector = (): string => {
     let url = `https://tiktok.com/share/video/${id}`;
     return url;
 }
-
-const ytConfigLoader = new ConfigLoader(ytConfig);
-// ytConfigLoader.addIDSelector("/shorts/:id", ytIDSelector);
-const ytInteractor = new Monitor(ytConfigLoader.config);
 
 // console.log(tiktokConfig);
 // const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
