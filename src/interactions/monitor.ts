@@ -94,7 +94,7 @@ export class Monitor {
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
-            let elements = document.querySelectorAll(interaction["selector"]+`:not([${this.interactionAttribute}]`);
+            let elements = document.querySelectorAll(`:is(${interaction["selector"]}):not([${this.interactionAttribute}])`);
             let name = interaction["name"];
             elements.forEach(element => {
                 if (this.debug) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
@@ -251,6 +251,7 @@ export class Monitor {
 
     /**
    * Generates a unique color from a given string
+   * Source: https://stackoverflow.com/a/31037383 
    * @returns Color hex code
    */
 

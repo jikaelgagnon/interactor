@@ -5,7 +5,7 @@
     "description": "Logs user interactions for selected websites",
     "content_scripts": [
       {
-        "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://x.com/*"],
+        "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*"],
         "js": ["content.bundle.js"]
       }
     ],
@@ -15,5 +15,11 @@
     "permissions": [
       "identity",
       "identity.email"
-    ]
+    ],
+    "icons": {
+    "128": "markov_logger_logo.png"
+  },
+  "action": {
+    "default_icon": "markov_logger_logo.png"
+  }
   }
