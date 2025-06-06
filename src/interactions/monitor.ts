@@ -26,7 +26,7 @@ export class Monitor {
     interactionAttribute: string;
 
     constructor(config: Config) {
-        this.interactionEvents = config.interactionEvents ? config.interactionEvents : ['click'];
+        this.interactionEvents = config.events ? config.events : ['click'];
         this.debug = config.debug ? config.debug : true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
@@ -116,7 +116,7 @@ export class Monitor {
    * @returns A document describing the state change
    */
 
-    private createStateChangeRecord(sourceState: string, destState: string): DBDocument {
+    private createStateChangeRecord(event: Event, destState: string): DBDocument {
         
         const metadata: {id?: string } = {};
         let id = this.currentPageData.getIDFromPage();
@@ -125,7 +125,7 @@ export class Monitor {
         }
 
 
-        return new ActivityDocument(ActivityType.StateChange, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url);
     }
 
     /**
@@ -136,14 +136,14 @@ export class Monitor {
    * @returns A document describing self loop
    */
 
-    private createSelfLoopRecord(sourceState: string, urlChange: boolean): DBDocument {
+    private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
         const metadata: {id?: string } = {};
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.SelfLoop, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url);
     }
 
     /**
@@ -153,7 +153,7 @@ export class Monitor {
    * @returns A document interaction self loop
    */
 
-    private createInteractionRecord(name: string, sourceState: string): DBDocument {
+    private createInteractionRecord(name: string, event: Event): DBDocument {
 
         const metadata: { name: string; id?: string } = {
             name: name,
@@ -163,7 +163,7 @@ export class Monitor {
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.Interaction, sourceState, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url);
     }
 
     /**
@@ -187,7 +187,8 @@ export class Monitor {
    */
 
     private onInteractionDetection(e: Event, name: string): void {
-        const record = this.createInteractionRecord(name, this.getCleanStateName());
+        console.log(`Event detected with event type: ${e.type}`)
+        const record = this.createInteractionRecord(name, e);
         this.sendMessageToBackground(SenderMethod.InteractionDetection, record);
     }
 
@@ -204,13 +205,15 @@ export class Monitor {
 
         this.currentPageData.url = navEvent.destination.url;
         let destState = this.getCleanStateName();
+
+        console.log(`Navigation detected with event type: ${navEvent.type}`)
         
         if (navEvent.navigationType === "push") {
             this.updateCurrentPageData(this.currentPageData.url);
-            const record = this.createStateChangeRecord(sourceState, destState);
+            const record = this.createStateChangeRecord(navEvent, destState);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         } else if (navEvent.navigationType === "replace") {
-            const record = this.createSelfLoopRecord(sourceState, urlChange);
+            const record = this.createSelfLoopRecord(navEvent, urlChange);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }
     }

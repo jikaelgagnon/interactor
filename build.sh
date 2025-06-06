@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# If you use Windows Subsystem for Linux, Chrome will not let you you upload the extension.
+# Instead, you'll need to move it to your Windows filesystem first. This script does that
+# builds the extension and moves it automatically.
+
 # Exit on any error
 set -e
 
