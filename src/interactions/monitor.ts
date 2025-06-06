@@ -118,9 +118,7 @@ export class Monitor {
 
     private createStateChangeRecord(sourceState: string, destState: string): DBDocument {
         
-        const metadata: { destinationState: string; id?: string } = {
-            destinationState: destState,
-        };
+        const metadata: {id?: string } = {};
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
             metadata.id = id;
@@ -139,9 +137,7 @@ export class Monitor {
    */
 
     private createSelfLoopRecord(sourceState: string, urlChange: boolean): DBDocument {
-        const metadata: { urlChange: boolean; id?: string } = {
-            urlChange: urlChange,
-        };
+        const metadata: {id?: string } = {};
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
             metadata.id = id;
@@ -204,16 +200,16 @@ export class Monitor {
     private onNavigationDetection(navEvent: any): void {
         let urlChange = !(navEvent.destination.url === this.currentPageData.url);
         let sourceState = this.getCleanStateName();
-        let match = this.currentPageData.checkForMatch(navEvent.destination.url);
+        // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
 
         this.currentPageData.url = navEvent.destination.url;
         let destState = this.getCleanStateName();
         
-        if (navEvent.navigationType === "push" && !match) {
+        if (navEvent.navigationType === "push") {
             this.updateCurrentPageData(this.currentPageData.url);
             const record = this.createStateChangeRecord(sourceState, destState);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
-        } else if (navEvent.navigationType === "replace" || match) {
+        } else if (navEvent.navigationType === "replace") {
             const record = this.createSelfLoopRecord(sourceState, urlChange);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }
