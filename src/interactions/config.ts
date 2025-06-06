@@ -46,7 +46,7 @@ interface Config {
     // around selected HTML elements
     debug?: boolean;
     // A list of event types to monitor. By default, this is just ["click"]
-    interactionEvents?: string[];
+    events?: string[];
 }
 
 class ConfigLoader {
