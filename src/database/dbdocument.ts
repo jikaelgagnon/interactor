@@ -20,15 +20,12 @@ class ActivityDocument extends DBDocument{
     type: ActivityType;
     // Timestamp for when the document was created
     createdAt: Date;
-    // State from which the document was cerated
-    sourceState: string;
     // Metadata about the event
     metadata: Object;
     constructor(type: ActivityType, sourceState: string, metadata: Object, url: string) {
         super(url);
         this.type = type;
         this.createdAt = new Date();
-        this.sourceState = sourceState;
         this.metadata = metadata;
     }
 }
