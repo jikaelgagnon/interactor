@@ -1,5 +1,5 @@
 import { Monitor } from "./interactions/monitor";
-import ytConfig from './configs/youtube_config.json';
+import ytConfig from './configs/youtube_config2.json';
 import tiktokConfig from './configs/tiktok_config.json';
 import { ConfigLoader } from "./interactions/config";
 

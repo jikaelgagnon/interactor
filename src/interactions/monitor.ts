@@ -99,6 +99,7 @@ export class Monitor {
             elements.forEach(element => {
                 if (this.debug) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute(this.interactionAttribute, 'true');
+
                 for (let i = 0; i < this.interactionEvents.length; i++) {
                     element.addEventListener(this.interactionEvents[i], (e: Event) => {
                         this.onInteractionDetection(e, name);
@@ -110,13 +111,11 @@ export class Monitor {
 
     /**
    * Sends a message to the background script.
-   * @param sourceState - the state prior to the navigation (obtained using `getCleanState()`)
-   * @param destState - the state after to the navigation (obtained using `getCleanState()`)
-   * 
+   * @param event - the HTML event that occured
    * @returns A document describing the state change
    */
 
-    private createStateChangeRecord(event: Event, destState: string): DBDocument {
+    private createStateChangeRecord(event: Event): DBDocument {
         
         const metadata: {id?: string } = {};
         let id = this.currentPageData.getIDFromPage();
@@ -130,7 +129,7 @@ export class Monitor {
 
     /**
    * Sends a message to the background script.
-   * @param sourceState - the state prior to the navigation (obtained using `getCleanState()`)
+   * @param event - the HTML event that occured
    * @param urlChange - indicates whether the self-loop resulted in a url change
    * 
    * @returns A document describing self loop
@@ -149,7 +148,7 @@ export class Monitor {
     /**
    * Sends a message to the background script.
    * @param name - the name of the element that triggered the callback (as defined in the config)
-   * @param sourceState - the state prior to the navigation (obtained using `getCleanState()`
+   * @param event - the HTML event that occured
    * @returns A document interaction self loop
    */
 
@@ -200,17 +199,17 @@ export class Monitor {
 
     private onNavigationDetection(navEvent: any): void {
         let urlChange = !(navEvent.destination.url === this.currentPageData.url);
-        let sourceState = this.getCleanStateName();
+        // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
 
         this.currentPageData.url = navEvent.destination.url;
-        let destState = this.getCleanStateName();
+        // let destState = this.getCleanStateName();
 
         console.log(`Navigation detected with event type: ${navEvent.type}`)
         
         if (navEvent.navigationType === "push") {
             this.updateCurrentPageData(this.currentPageData.url);
-            const record = this.createStateChangeRecord(navEvent, destState);
+            const record = this.createStateChangeRecord(navEvent);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         } else if (navEvent.navigationType === "replace") {
             const record = this.createSelfLoopRecord(navEvent, urlChange);
@@ -218,26 +217,26 @@ export class Monitor {
         }
     }
 
-    /**
-   * Converts a URL into a "state", which is a condensed version of the URL, which
-   * excludes the params. 
-   * If the pattern matching the page includes an ID (eg. /shorts:id), then 
-   * if will be removed.
-   * @returns The clean state name
-   * 
-   * @example
-   * `https://www.youtube.com/shorts/ic-xaIpMB1E` is converted to `shorts`
-   */
+//     /**
+//    * Converts a URL into a "state", which is a condensed version of the URL, which
+//    * excludes the params. 
+//    * If the pattern matching the page includes an ID (eg. /shorts:id), then 
+//    * if will be removed.
+//    * @returns The clean state name
+//    * 
+//    * @example
+//    * `https://www.youtube.com/shorts/ic-xaIpMB1E` is converted to `shorts`
+//    */
 
-    private getCleanStateName(): string {
-        let path = new URL(this.currentPageData.url).pathname;
-        let groups = path.split("/");
+//     private getCleanStateName(): string {
+//         let path = new URL(this.currentPageData.url).pathname;
+//         let groups = path.split("/");
         
-        if (this.currentPageData.urlUsesId) {
-            groups = groups.slice(0, groups.length - 1);
-        }
-        return groups.join("/");
-    }
+//         if (this.currentPageData.urlUsesId) {
+//             groups = groups.slice(0, groups.length - 1);
+//         }
+//         return groups.join("/");
+//     }
 
     /**
    * Gets the current state of the page.

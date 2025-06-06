@@ -7,8 +7,6 @@ export class PageData {
     url!: string;
     // CSS selectors being applied to the page
     selectors!: SelectorData[];
-    // Indicates whether the URL contains an id. Eg. www.youtube.com/shorts/:id or www.youtube.com/watch?v=:id
-    urlUsesId!: boolean;
     // The URL pattern, CSS selectors, and optionally a function for getting page ID 
     // for the pattern that most closely matches this.url
     // Ex: If the url is www.youtube.com/shorts/ABC and the patterns are /* and /shorts/:id, then 
@@ -55,7 +53,7 @@ export class PageData {
             console.log("no matches found");
         }
 
-        this.urlUsesId = closestMatch.endsWith(":id");
+        // this.urlUsesId = closestMatch.endsWith(":id");
         this.matchPathData = paths[closestMatch];
         return matches;
     }
@@ -99,22 +97,22 @@ export class PageData {
      * ```
      */
 
-    checkForMatch(url: string): boolean {
-        let curPathname = new URL(this.url).pathname;
-        let otherPathname = new URL(url).pathname;
-        let l1 = curPathname.split("/");
-        let l2 = otherPathname.split("/");
+    // checkForMatch(url: string): boolean {
+    //     let curPathname = new URL(this.url).pathname;
+    //     let otherPathname = new URL(url).pathname;
+    //     let l1 = curPathname.split("/");
+    //     let l2 = otherPathname.split("/");
 
-        if (curPathname.length !== otherPathname.length) {
-            return false;
-        }
+    //     if (curPathname.length !== otherPathname.length) {
+    //         return false;
+    //     }
 
-        let max_idx = l1.length - (this.urlUsesId ? 1 : 0);
-        for (let i = 0; i < max_idx; i++) {
-            if (l1[i] !== l2[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
+    //     let max_idx = l1.length - (this.urlUsesId ? 1 : 0);
+    //     for (let i = 0; i < max_idx; i++) {
+    //         if (l1[i] !== l2[i]) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 }
