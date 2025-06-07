@@ -1,6 +1,7 @@
 import { Monitor } from "./interactions/monitor";
 import ytConfig from './configs/youtube_config.json';
 import tiktokConfig from './configs/tiktok_config.json';
+import linkedinConfig from './configs/linkedin_config.json';
 import { ConfigLoader } from "./interactions/config";
 
 const ytConfigLoader = new ConfigLoader(ytConfig);
@@ -21,3 +22,7 @@ const tiktokIDSelector = (): string => {
 const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
 tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
 const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
+
+// console.log(tiktokConfig);
+const linkedinConfigLoader = new ConfigLoader(linkedinConfig);
+const linkedinInteractor = new Monitor(linkedinConfigLoader.config);
