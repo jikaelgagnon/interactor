@@ -102,7 +102,7 @@ export class Monitor {
 
                 for (let i = 0; i < this.interactionEvents.length; i++) {
                     element.addEventListener(this.interactionEvents[i], (e: Event) => {
-                        this.onInteractionDetection(e, name);
+                        this.onInteractionDetection(element, e, name);
                     }, true);
                 }
             });
@@ -147,14 +147,16 @@ export class Monitor {
 
     /**
    * Sends a message to the background script.
+   * @param element - the element that triggered the event
    * @param name - the name of the element that triggered the callback (as defined in the config)
    * @param event - the HTML event that occured
    * @returns A document interaction self loop
    */
 
-    private createInteractionRecord(name: string, event: Event): DBDocument {
+    private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
 
-        const metadata: { name: string; id?: string } = {
+        const metadata: {html: string, name: string; id?: string } = {
+            html: element.getHTML(),
             name: name,
         };
         let id = this.currentPageData.getIDFromPage();
@@ -185,9 +187,12 @@ export class Monitor {
    * @param name - the name of the element that triggered the callback (as defined in the config)
    */
 
-    private onInteractionDetection(e: Event, name: string): void {
+    private onInteractionDetection(element: Element, e: Event, name: string): void {
         console.log(`Event detected with event type: ${e.type}`)
-        const record = this.createInteractionRecord(name, e);
+        console.log(`Event triggered by ${element}`)
+        console.log(element.innerHTML);
+        console.log(element.getHTML());
+        const record = this.createInteractionRecord(element, name, e);
         this.sendMessageToBackground(SenderMethod.InteractionDetection, record);
     }
 
