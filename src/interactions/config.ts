@@ -27,7 +27,7 @@ interface PathData {
      * an idSelector function that extracts an ID from pages with the corresponding URL
      */
     // A list of selectors and names for the page
-    selectors: SelectorData[];
+    selectors?: SelectorData[];
     // A function that extracts an ID from the current page and returns it as a string
     idSelector?: () => string;
 }

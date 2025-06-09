@@ -77,8 +77,10 @@ export class PageData {
         let currentSelectors = [];
         for (const path of matches) {
             let pathData = paths[path];
-            for (const selector of pathData["selectors"]) {
-                currentSelectors.push(selector);
+            if (pathData["selectors"]) {
+                for (const selector of pathData["selectors"]) {
+                    currentSelectors.push(selector);
+                }
             }
         }
         return currentSelectors;
