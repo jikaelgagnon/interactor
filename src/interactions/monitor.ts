@@ -33,6 +33,7 @@ export class Monitor {
         this.currentPageData = new PageData();
         this.interactionAttribute = "monitoring-interactions"
 
+
         // Check if this page should be monitored
         if (window.location.origin === this.baseURL) {
             this.initializeMonitor();

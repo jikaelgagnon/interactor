@@ -4,7 +4,16 @@ import { ActivityDocument, SessionDocument } from "./database/dbdocument";
 import { BackgroundMessage } from "./communication/backgroundmessage";
 import { SenderMethod } from "./communication/sender";
 
-let USE_DB = false;
+let USE_DB: boolean = false;
+async function loadUseDB() {
+  try {
+    const result = await chrome.storage.sync.get("useDB");
+    USE_DB = result.useDB;
+    console.log("After loading, USE_DB =", USE_DB); // this logs correct value
+  } catch (error) {
+    console.error("Using DB:", error);
+  }
+}
 
 /**
  * Singleton class that manages session tracking for each browser tab.
@@ -19,7 +28,7 @@ class SessionManager {
   /** Private constructor to prevent direct instantiation. */
   private constructor() {
     this.sessionMap = new Map();
-    this.setupListeners();
+    loadUseDB().then(this.setupListeners);
   }
 
   /**
@@ -80,6 +89,8 @@ class SessionManager {
         const email = await this.getUserEmail();
         session.sessionInfo = request.payload as SessionDocument;
         session.sessionInfo.email = email;
+        chrome.action.setPopup({ popup: "ui/popup.html"});
+        chrome.action.openPopup();
         await session.createSessionInDb();
         console.log("Session initialized for tab:", tabId);
         return { status: "Session initialized" };
