@@ -10,16 +10,24 @@
       }
     ],
     "background": {
-      "service_worker": "background.bundle.js"
+      "service_worker": "background.bundle.js",
+      "type": "module"
     },
     "permissions": [
       "identity",
-      "identity.email"
+      "identity.email",
+      "storage"
     ],
     "icons": {
     "128": "markov_logger_logo.png"
   },
   "action": {
-    "default_icon": "markov_logger_logo.png"
-  }
-  }
+    "default_icon": "markov_logger_logo.png",
+    "default_popup": "ui/popup.html"
+  },
+  "options_page": "ui/options.html",
+  "options_ui": {
+  "page": "ui/options.html",
+  "open_in_tab": false
+}
+}
