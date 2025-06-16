@@ -28,7 +28,7 @@ class SessionManager {
   /** Private constructor to prevent direct instantiation. */
   private constructor() {
     this.sessionMap = new Map();
-    loadUseDB().then(this.setupListeners);
+    loadUseDB().then(() => this.setupListeners());
   }
 
   /**

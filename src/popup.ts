@@ -547,6 +547,12 @@ class DataManager {
         this.updateUI();
     }
 
+    baseName(url: String)
+    {
+    let base = url.split(".")[1]
+    return base;
+    }
+
     createSessionElement(session: SessionData): HTMLElement {
         const sessionDiv = document.createElement('div');
         sessionDiv.className = 'session-group';
@@ -565,11 +571,10 @@ class DataManager {
             <div class="session-info">
                 <div class="session-checkbox">
                     <input type="checkbox" id="session_${session.id}" ${isSessionSelected ? 'checked' : ''}>
-                    <span class="session-title">📋 ${session.sessionInfo.title || 'Untitled Session'}</span>
+                    <span class="session-title">📋 ${session.id} - ${this.baseName(session.sessionInfo.url)}</span>
                 </div>
                 <div class="session-meta">
                     <span class="session-time">${startTime} - ${endTime}</span>
-                    <span class="session-url">${session.sessionInfo.url || ''}</span>
                     <span class="activity-count">${session.activities.length} activities</span>
                 </div>
             </div>
@@ -607,14 +612,13 @@ class DataManager {
         const activityDiv = document.createElement('div');
         activityDiv.className = `activity-item ${isSelected ? 'selected' : ''}`;
         
-        const timestamp = activity.timestamp ? 
-            new Date(activity.timestamp).toLocaleString() : 'No timestamp';
+        const timestamp = activity.createdAt ? 
+            new Date(activity.createdAt).toLocaleString() : 'No timestamp';
         
         activityDiv.innerHTML = `
             <div class="activity-header">
                 <div class="activity-checkbox">
-                    <input type="checkbox" id="${activityId}" ${isSelected ? 'checked' : ''}>
-                    <span class="activity-label">🔄 Activity ${index + 1}</span>
+                    <span class="activity-label">Activity ${index + 1}</span>
                 </div>
                 <span class="activity-timestamp">${timestamp}</span>
             </div>
@@ -746,7 +750,7 @@ class DataManager {
 
         // Update delete button state
         deleteButton.disabled = this.selectedItems.size === 0;
-        deleteButton.textContent = `Delete Selected (${this.selectedItems.size})`;
+        deleteButton.textContent = `Delete Selected`;
 
         // Update item styling
         this.sessions.forEach(session => {
@@ -802,7 +806,7 @@ class DataManager {
             // Reset button state
             const deleteButton = document.getElementById('deleteSelected') as HTMLButtonElement;
             if (deleteButton) {
-                deleteButton.textContent = 'Delete Selected (0)';
+                deleteButton.textContent = 'Delete Selected';
                 deleteButton.disabled = true;
             }
         }
