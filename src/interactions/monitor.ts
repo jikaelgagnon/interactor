@@ -9,6 +9,13 @@ import {SenderMethod} from "../communication/sender"
  * This class reads from a provided Config object and attaches listeners to the elements specified in the selectors.
  * When these elements are interacted with, or when a navigation occurs, a document is sent to the background script
  * to be appended to the database. This class is instantiated in content.ts.
+ * 
+ * @param interactionEvents - A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
+ * @param debug - If true, highlight all selected HTML elements with coloured boxes
+ * @param paths - An object mapping path patterns to their corresponding CSS selectors Path patterns are consistent with the  URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
+ * @param baseURL - Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
+ * @param currentPageData - Contains data relevant to the current page.
+ * @param interactionAttribute - Attribute added to all elements being monitored
  */
 export class Monitor {
     // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
