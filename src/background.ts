@@ -89,9 +89,11 @@ class SessionManager {
         const email = await this.getUserEmail();
         session.sessionInfo = request.payload as SessionDocument;
         session.sessionInfo.email = email;
-        chrome.action.setPopup({ popup: "ui/popup.html"});
-        chrome.action.openPopup();
-        await session.createSessionInDb();
+        await session.createSessionInDb().then(() => {
+          chrome.action.setPopup({ popup: "ui/popup.html"});
+          chrome.action.openPopup();
+        });
+
         console.log("Session initialized for tab:", tabId);
         return { status: "Session initialized" };
 
