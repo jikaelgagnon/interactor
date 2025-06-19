@@ -79,6 +79,26 @@
             cursor: not-allowed;
         }
 
+        .export-selected {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-selected:hover:not(:disabled) {
+            background: #214888;
+        }
+
+        .export-selected:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
         .data-container {
             flex: 1;
             overflow-y: auto;
@@ -423,6 +443,7 @@
         <button class="delete-selected" id="deleteSelected" disabled>
             Delete Selected
         </button>
+        <button class="export-selected" id="exportToJson">Export to JSON</button>
     </div>
 
     <div class="data-container" id="dataContainer">
