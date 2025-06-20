@@ -1,5 +1,6 @@
 import { db } from "./database/firebase";
 import { collection, query, where, getDocs, doc, writeBatch} from "firebase/firestore";
+import { utils, writeFile } from "xlsx";
 
 interface SessionData {
     id: string;
@@ -164,16 +165,102 @@ class DataManager {
             });
         }
 
-        const exportButton = document.getElementById('exportToJson') as HTMLButtonElement;
-        if (exportButton) {
+        const exportToJSONButton = document.getElementById('exportToJson') as HTMLButtonElement;
+        if (exportToJSONButton) {
             const hasSessionsSelected = Array.from(this.selectedItems).some(id => id.startsWith('session_'));
-            exportButton.disabled = !hasSessionsSelected;
-            exportButton.addEventListener('click', () => {
+            exportToJSONButton.disabled = !hasSessionsSelected;
+            exportToJSONButton.addEventListener('click', () => {
                 this.exportSessionsToJson();
             });
         }
 
+        const exportToXLSXButton = document.getElementById('exportToXLSX') as HTMLButtonElement;
+        if (exportToXLSXButton) {
+            const hasSessionsSelected = Array.from(this.selectedItems).some(id => id.startsWith('session_'));
+            exportToXLSXButton.disabled = !hasSessionsSelected;
+            exportToXLSXButton.addEventListener('click', () => {
+                // this.exportSessionsToJson();
+                this.exportSessionsToXlsx();
+            });
+        }
+
     }
+
+    // exportSessionsToXlsx(): void {
+    // const selectedSessionIds = Array.from(this.selectedItems)
+    //     .filter(id => id.startsWith('session_'))
+    //     .map(id => id.split('_')[1]);
+
+    //     const sessionsToExport = this.sessions.filter(session => selectedSessionIds.includes(session.id));
+
+    //     if (sessionsToExport.length === 0) {
+    //         this.showStatus('No sessions selected for export', 'error');
+    //         return;
+    //     }
+
+    //     // Convert session objects to worksheet
+    //     const worksheet = utils.json_to_sheet(sessionsToExport);
+
+    //     // Create a new workbook and append the worksheet
+    //     const workbook = utils.book_new();
+    //     utils.book_append_sheet(workbook, worksheet, "Sessions");
+
+    //     // Filename with ISO timestamp
+    //     const filename = `sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+    //     // Trigger download
+    //     writeFile(workbook, filename);
+
+    //     this.showStatus(`Exported ${sessionsToExport.length} session(s) to XLSX`);
+    // }
+
+    exportSessionsToXlsx(): void {
+        const selectedSessionIds = Array.from(this.selectedItems)
+            .filter(id => id.startsWith('session_'))
+            .map(id => id.split('_')[1]);
+
+        const sessionsToExport = this.sessions.filter(session => selectedSessionIds.includes(session.id));
+
+        if (sessionsToExport.length === 0) {
+            this.showStatus('No sessions selected for export', 'error');
+            return;
+        }
+
+        const workbook = utils.book_new();
+
+        sessionsToExport.forEach((session) => {
+            const activities = session.activities || [];
+
+            // Flatten metadata into a string
+            const flattenedActivities = activities.map(activity => {
+                const metadata = activity.metadata || {};
+                const metadataSummary = Object.entries(metadata)
+                    .map(([key, value]) => `${key}=${value}`)
+                    .join(', ');
+
+                return {
+                    ...activity,
+                    metadataSummary
+                };
+            });
+
+            // Optionally remove the raw metadata field to avoid [object Object]
+            flattenedActivities.forEach(a => delete a.metadata);
+
+            const worksheet = utils.json_to_sheet(flattenedActivities);
+
+            // Ensure sheet name is valid (max 31 chars, no special chars)
+            const safeSheetName = session.id.replace(/[:\/\\?\[\]*]/g, "").slice(0, 31);
+
+            utils.book_append_sheet(workbook, worksheet, safeSheetName);
+        });
+
+        const filename = `sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+        writeFile(workbook, filename);
+
+        this.showStatus(`Exported ${sessionsToExport.length} session(s) to XLSX`);
+    }
+
 
     exportSessionsToJson(): void {
         const selectedSessionIds = Array.from(this.selectedItems)
@@ -478,7 +565,9 @@ class DataManager {
     updateUI(): void {
         const selectAllCheckbox = document.getElementById('selectAll') as HTMLInputElement;
         const deleteButton = document.getElementById('deleteSelected') as HTMLButtonElement;
-        const exportButton = document.getElementById('exportToJson') as HTMLButtonElement;
+        const exportToJsonButton = document.getElementById('exportToJson') as HTMLButtonElement;
+        const exportToXLSXButton = document.getElementById('exportToXLSX') as HTMLButtonElement;
+
 
         if (!selectAllCheckbox || !deleteButton) return;
 
@@ -494,7 +583,9 @@ class DataManager {
 
         // Update delete button state
         deleteButton.disabled = this.selectedItems.size === 0;
-        exportButton.disabled = deleteButton.disabled;
+        exportToJsonButton.disabled = deleteButton.disabled;
+        exportToXLSXButton.disabled = deleteButton.disabled;
+    
         const sessionsToDelete = Array.from(this.selectedItems).filter((name) => name.startsWith("session_"));
         deleteButton.textContent = `Delete Selected (${sessionsToDelete.length})`;
 

@@ -215,4 +215,3 @@ class SessionData {
 
 // Instantiate the singleton to ensure listeners are active
 SessionManager.getInstance();
-
