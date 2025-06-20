@@ -148,7 +148,7 @@ class SessionData {
 
   constructor() {
     this.documents = [];
-    this.sessionInfo = new SessionDocument("Cleared session");
+    this.sessionInfo = new SessionDocument("", "");
   }
 
   /**

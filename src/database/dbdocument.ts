@@ -5,9 +5,11 @@ import { ActivityType } from "../communication/activity";
 class DBDocument {
     // URL at whicht the event was created
     url: string;
+    title: string;
 
-    constructor(url: string) {
+    constructor(url: string, title: string) {
         this.url = url;
+        this.title = title;
     }
 }
 
@@ -24,8 +26,8 @@ class ActivityDocument extends DBDocument{
     eventType: string
     // Metadata about the event
     metadata: Object;
-    constructor(type: ActivityType, event: Event, metadata: Object, url: string) {
-        super(url);
+    constructor(type: ActivityType, event: Event, metadata: Object, url: string, title: string) {
+        super(url, title);
         this.activityType = type;
         this.createdAt = new Date();
         this.eventType = event.type
@@ -41,8 +43,9 @@ class SessionDocument extends DBDocument{
     startTime: Date;
     endTime?: Date;
     email: string = "Email not set";
-    constructor(url: string) {
-        super(url);
+    constructor(url: string, title: string) {
+        super(url, title);
+        this.title = title;
         this.startTime = new Date();
     }
     setEmail(email: string){
