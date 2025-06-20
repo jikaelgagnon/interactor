@@ -125,14 +125,14 @@ export class Monitor {
 
     private createStateChangeRecord(event: Event): DBDocument {
         
-        const metadata: {id?: string } = {};
+        const metadata: {id?: string} = {};
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
             metadata.id = id;
         }
 
 
-        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
 
     /**
@@ -144,13 +144,13 @@ export class Monitor {
    */
 
     private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
-        const metadata: {id?: string } = {};
+        const metadata: {id?: string} = {};
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
 
     /**
@@ -163,7 +163,7 @@ export class Monitor {
 
     private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
 
-        const metadata: {html: string, name: string; id?: string } = {
+        const metadata: {html: string, name: string; id?: string} = {
             html: element.getHTML(),
             name: name,
         };
@@ -172,7 +172,7 @@ export class Monitor {
             metadata.id = id;
         }
 
-        return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url);
+        return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }
 
     /**
@@ -229,35 +229,13 @@ export class Monitor {
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }
     }
-
-//     /**
-//    * Converts a URL into a "state", which is a condensed version of the URL, which
-//    * excludes the params. 
-//    * If the pattern matching the page includes an ID (eg. /shorts:id), then 
-//    * if will be removed.
-//    * @returns The clean state name
-//    * 
-//    * @example
-//    * `https://www.youtube.com/shorts/ic-xaIpMB1E` is converted to `shorts`
-//    */
-
-//     private getCleanStateName(): string {
-//         let path = new URL(this.currentPageData.url).pathname;
-//         let groups = path.split("/");
-        
-//         if (this.currentPageData.urlUsesId) {
-//             groups = groups.slice(0, groups.length - 1);
-//         }
-//         return groups.join("/");
-//     }
-
     /**
    * Gets the current state of the page.
    * @returns Current state 
    */
 
     private getCurrentState(): SessionDocument {
-        return new SessionDocument(this.currentPageData.url);
+        return new SessionDocument(this.currentPageData.url, document.title);
     }
 
     /**

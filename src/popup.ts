@@ -179,7 +179,6 @@ class DataManager {
             const hasSessionsSelected = Array.from(this.selectedItems).some(id => id.startsWith('session_'));
             exportToXLSXButton.disabled = !hasSessionsSelected;
             exportToXLSXButton.addEventListener('click', () => {
-                // this.exportSessionsToJson();
                 this.exportSessionsToXlsx();
             });
         }
@@ -255,7 +254,7 @@ class DataManager {
             utils.book_append_sheet(workbook, worksheet, safeSheetName);
         });
 
-        const filename = `sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const filename = `sessions_export_${new Date().toISOString()}.xlsx`;
         writeFile(workbook, filename);
 
         this.showStatus(`Exported ${sessionsToExport.length} session(s) to XLSX`);
@@ -355,7 +354,7 @@ class DataManager {
             <div class="session-info">
                 <div class="session-checkbox">
                     <input type="checkbox" id="session_${session.id}" ${isSessionSelected ? 'checked' : ''}>
-                    <span class="session-title">${session.id} - ${this.baseName(session.sessionInfo.url)}</span>
+                    <span class="session-title">${session.id} - ${(session.sessionInfo.title)}</span>
                 </div>
                 <div class="session-meta">
                     <span class="session-time">${startTime} - ${endTime}</span>
