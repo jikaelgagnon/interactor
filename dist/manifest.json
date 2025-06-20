@@ -1,33 +1,34 @@
 {
-    "manifest_version": 3,
-    "name": "Markov Logger",
-    "version": "1.0",
-    "description": "Logs user interactions for selected websites",
-    "content_scripts": [
-      {
-        "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://www.linkedin.com/*"],
-        "js": ["content.bundle.js"]
-      }
-    ],
-    "background": {
-      "service_worker": "background.bundle.js",
-      "type": "module"
-    },
-    "permissions": [
-      "identity",
-      "identity.email",
-      "storage"
-    ],
-    "icons": {
-    "128": "markov_logger_logo.png"
+  "manifest_version": 3,
+  "name": "Markov Logger",
+  "version": "1.0",
+  "description": "Logs user interactions for selected websites",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://www.linkedin.com/*"],
+      "js": ["content.bundle.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.bundle.js",
+    "type": "module"
+  },
+  "permissions": [
+    "identity",
+    "identity.email",
+    "storage"
+  ],
+  "icons": {
+  "128": "markov_logger_logo.png"
   },
   "action": {
     "default_icon": "markov_logger_logo.png",
-    "default_popup": "ui/popup.html"
+    "default_popup": "ui/popup.html",
+    "open_in_tab": true
   },
   "options_page": "ui/options.html",
   "options_ui": {
   "page": "ui/options.html",
   "open_in_tab": false
-}
+  }
 }
