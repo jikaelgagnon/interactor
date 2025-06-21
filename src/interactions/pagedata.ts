@@ -62,8 +62,8 @@ export class PageData {
      * @returns Result of if it exsits`matchPathData.idSelector`, else it returns an empty string
      */
 
-    getIDFromPage(): string{
-        return this.matchPathData.idSelector?.() || "";
+    extractData(): object{
+        return this.matchPathData.dataExtractor?.() || {};
     }
 
     /**
