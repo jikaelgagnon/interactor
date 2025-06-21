@@ -4,12 +4,12 @@ import { ActivityType } from "../communication/activity";
  */
 class DBDocument {
     // URL at whicht the event was created
-    url: string;
-    title: string;
+    sourceURL: string;
+    sourceDocumentTitle: string;
 
     constructor(url: string, title: string) {
-        this.url = url;
-        this.title = title;
+        this.sourceURL = url;
+        this.sourceDocumentTitle = title;
     }
 }
 
@@ -45,7 +45,6 @@ class SessionDocument extends DBDocument{
     email: string = "Email not set";
     constructor(url: string, title: string) {
         super(url, title);
-        this.title = title;
         this.startTime = new Date();
     }
     setEmail(email: string){

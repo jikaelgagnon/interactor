@@ -8,8 +8,8 @@ interface SessionData {
         email: string;
         startTime: string;
         endTime?: string;
-        url: string;
-        title: string;
+        sourceURL: string;
+        sourceDocumentTitle: string;
     };
     activities: any[];
 }
@@ -354,7 +354,7 @@ class DataManager {
             <div class="session-info">
                 <div class="session-checkbox">
                     <input type="checkbox" id="session_${session.id}" ${isSessionSelected ? 'checked' : ''}>
-                    <span class="session-title">${session.id} - ${(session.sessionInfo.title)}</span>
+                    <span class="session-title">${session.id} - ${(session.sessionInfo.sourceDocumentTitle)}</span>
                 </div>
                 <div class="session-meta">
                     <span class="session-time">${startTime} - ${endTime}</span>
