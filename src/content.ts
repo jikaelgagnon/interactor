@@ -7,15 +7,17 @@ import { ConfigLoader } from "./interactions/config";
 const ytConfigLoader = new ConfigLoader(ytConfig);
 const ytInteractor = new Monitor(ytConfigLoader.config);
 
-const tiktokIDSelector = (): string => {
+const tiktokIDSelector = (): object => {
     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
     if (!vid){
         console.log("no url found!");
-        return "";
+        return {};
     }
     let id = vid.id.split("-").at(-1);
     let url = `https://tiktok.com/share/video/${id}`;
-    return url;
+    return {
+        "uniqueURL": url
+    };
 }
 
 // console.log(tiktokConfig);

@@ -29,7 +29,7 @@ interface PathData {
     // A list of selectors and names for the page
     selectors?: SelectorData[];
     // A function that extracts an ID from the current page and returns it as a string
-    idSelector?: () => string;
+    dataExtractor?: () => object;
 }
 
 interface Config {
@@ -57,20 +57,20 @@ class ConfigLoader {
     }
 
     /**
-     * A function that adds an ID selector for a given URL pattern. If the current URL
+     * A function that adds a data extractor for a given URL pattern. If the current URL
      * most closely matches this pattern out of all patterns in the config, then this
      * function will be called and the received ID will be included in the metadata of
      * each log that occurs on the page.
      * @param urlPattern - the pattern being matched
-     * @param idSelectorFunction - the function to extract a URL
+     * @param dataExtractor - the function to extract data
      */
-    addIDSelector(urlPattern: string, idSelectorFunction: () => string): void {
+    addIDSelector(urlPattern: string, dataExtractor: () => object): void {
         const paths = this.config.paths;
 
         if (!(urlPattern in paths)) {
             throw new Error("Trying to add ID selector to path that doesn't exist");
         }
 
-        paths[urlPattern].idSelector = idSelectorFunction;
+        paths[urlPattern].dataExtractor = dataExtractor;
     }
 }

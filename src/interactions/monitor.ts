@@ -125,12 +125,7 @@ export class Monitor {
 
     private createStateChangeRecord(event: Event): DBDocument {
         
-        const metadata: {id?: string} = {};
-        let id = this.currentPageData.getIDFromPage();
-        if (id != ""){
-            metadata.id = id;
-        }
-
+        const metadata = this.currentPageData.extractData();
 
         return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
@@ -144,12 +139,7 @@ export class Monitor {
    */
 
     private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
-        const metadata: {id?: string} = {};
-        let id = this.currentPageData.getIDFromPage();
-        if (id != ""){
-            metadata.id = id;
-        }
-
+        const metadata = this.currentPageData.extractData();
         return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
 
@@ -163,14 +153,13 @@ export class Monitor {
 
     private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
 
-        const metadata: {html: string, elementName: string; id?: string} = {
+        let metadata: {html: string, elementName: string; id?: string} = {
             html: element.getHTML(),
             elementName: name,
         };
-        let id = this.currentPageData.getIDFromPage();
-        if (id != ""){
-            metadata.id = id;
-        }
+        let extractedData = this.currentPageData.extractData();
+
+        metadata = {... metadata, ... extractedData};
 
         return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }

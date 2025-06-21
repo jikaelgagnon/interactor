@@ -329,11 +329,7 @@ class Monitor {
    * @returns A document describing the state change
    */
     createStateChangeRecord(event) {
-        const metadata = {};
-        let id = this.currentPageData.getIDFromPage();
-        if (id != "") {
-            metadata.id = id;
-        }
+        const metadata = this.currentPageData.getExtractedMetadata();
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -344,11 +340,7 @@ class Monitor {
    * @returns A document describing self loop
    */
     createSelfLoopRecord(event, urlChange) {
-        const metadata = {};
-        let id = this.currentPageData.getIDFromPage();
-        if (id != "") {
-            metadata.id = id;
-        }
+        const metadata = this.currentPageData.getExtractedMetadata();
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -359,14 +351,12 @@ class Monitor {
    * @returns A document interaction self loop
    */
     createInteractionRecord(element, name, event) {
-        const metadata = {
+        let metadata = {
             html: element.getHTML(),
             elementName: name,
         };
-        let id = this.currentPageData.getIDFromPage();
-        if (id != "") {
-            metadata.id = id;
-        }
+        let extractedMetadata = this.currentPageData.getExtractedMetadata();
+        metadata = Object.assign(Object.assign({}, metadata), extractedMetadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -488,9 +478,9 @@ class PageData {
     /**
      * @returns Result of if it exsits`matchPathData.idSelector`, else it returns an empty string
      */
-    getIDFromPage() {
+    getExtractedMetadata() {
         var _a, _b;
-        return ((_b = (_a = this.matchPathData).idSelector) === null || _b === void 0 ? void 0 : _b.call(_a)) || "";
+        return ((_b = (_a = this.matchPathData).idSelector) === null || _b === void 0 ? void 0 : _b.call(_a)) || {};
     }
     /**
      * @param matches: A list of all matching paths to the current url
@@ -594,11 +584,13 @@ const tiktokIDSelector = () => {
     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
     if (!vid) {
         console.log("no url found!");
-        return "";
+        return {};
     }
     let id = vid.id.split("-").at(-1);
     let url = `https://tiktok.com/share/video/${id}`;
-    return url;
+    return {
+        "uniqueURL": url
+    };
 };
 // console.log(tiktokConfig);
 const tiktokConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_4__.ConfigLoader(_configs_tiktok_config_json__WEBPACK_IMPORTED_MODULE_2__);
