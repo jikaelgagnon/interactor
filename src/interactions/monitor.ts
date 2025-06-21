@@ -163,9 +163,9 @@ export class Monitor {
 
     private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
 
-        const metadata: {html: string, name: string; id?: string} = {
+        const metadata: {html: string, elementName: string; id?: string} = {
             html: element.getHTML(),
-            name: name,
+            elementName: name,
         };
         let id = this.currentPageData.getIDFromPage();
         if (id != ""){
@@ -235,6 +235,8 @@ export class Monitor {
    */
 
     private getCurrentState(): SessionDocument {
+        console.log("getting current state");
+        console.log(document.title);
         return new SessionDocument(this.currentPageData.url, document.title);
     }
 
