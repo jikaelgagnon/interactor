@@ -27340,6 +27340,7 @@ var SenderMethod;
     SenderMethod["InitializeSession"] = "Initialize Session";
     SenderMethod["InteractionDetection"] = "Interaction Detection";
     SenderMethod["NavigationDetection"] = "Navigation Detection";
+    SenderMethod["CloseSession"] = "Close Session";
 })(SenderMethod || (SenderMethod = {}));
 
 
@@ -27542,14 +27543,17 @@ class SessionManager {
         }
         return SessionManager.instance;
     }
+    async closeSession(tabId) {
+        const session = await this.loadSession(tabId);
+        if (session) {
+            await session.flushAllActivitiesToDb();
+            await session.closeSessionInDb();
+            await this.removeSession(tabId);
+        }
+    }
     setupListeners() {
         chrome.tabs.onRemoved.addListener(async (tabId) => {
-            const session = await this.loadSession(tabId);
-            if (session) {
-                await session.flushAllActivitiesToDb();
-                await session.closeSessionInDb();
-                await this.removeSession(tabId);
-            }
+            this.closeSession(tabId);
         });
         chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             var _a, _b;
@@ -27562,6 +27566,18 @@ class SessionManager {
             });
             return true;
         });
+        chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+            console.log("tab update detected");
+            console.log(changeInfo);
+            if (changeInfo.url) {
+                console.log("url found");
+                const session = await this.loadSession(tabId);
+                if (session && !session.hasSameBaseUrl(changeInfo.url)) {
+                    console.log(`Base URL changed — closing session for tab ${tabId}`);
+                    await this.closeSession(tabId);
+                }
+            }
+        });
     }
     async handleMessage(request, tabId) {
         const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
@@ -27573,11 +27589,23 @@ class SessionManager {
                 console.log(doc);
                 session.addActivityDocument(doc);
                 return { status: "Activity added to local session." };
+            // case SenderMethod.InitializeSession:
+            //   console.log("Session started");
+            //   const email = await this.getUserEmail();
+            //   session.sessionInfo = request.payload as SessionDocument;
+            //   session.sessionInfo.email = email;
+            //   await session.createSessionInDb();
+            //   await this.persistSession(tabId!, session);
+            //   chrome.action.setPopup({ popup: "ui/popup.html" });
+            //   chrome.action.openPopup();
+            //   console.log("Session initialized for tab:", tabId);
+            //   return { status: "Session initialized" };
             case _communication_sender__WEBPACK_IMPORTED_MODULE_3__.SenderMethod.InitializeSession:
                 console.log("Session started");
                 const email = await this.getUserEmail();
                 session.sessionInfo = request.payload;
                 session.sessionInfo.email = email;
+                session.setBaseUrl(session.sessionInfo.sourceURL);
                 await session.createSessionInDb();
                 await this.persistSession(tabId, session);
                 chrome.action.setPopup({ popup: "ui/popup.html" });
@@ -27649,7 +27677,31 @@ class SessionData {
     constructor() {
         this.sessionId = "NO ID SET";
         this.documents = [];
+        this.baseUrl = ""; // <-- new field
         this.sessionInfo = new _database_dbdocument__WEBPACK_IMPORTED_MODULE_2__.SessionDocument("", "");
+    }
+    getHostname(url) {
+        return new URL(url).hostname;
+    }
+    setBaseUrl(url) {
+        try {
+            const parsed = new URL(url);
+            this.baseUrl = this.getHostname(url);
+        }
+        catch (e) {
+            console.warn("Could not parse base URL:", url);
+        }
+    }
+    hasSameBaseUrl(url) {
+        try {
+            console.log(`comparing ${this.baseUrl} to ${url}`);
+            const isMatch = this.baseUrl === this.getHostname(url);
+            console.log(`is match: ${isMatch}`);
+            return isMatch;
+        }
+        catch (_a) {
+            return false;
+        }
     }
     addActivityDocument(document) {
         this.documents.push(document);

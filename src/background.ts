@@ -15,6 +15,7 @@ async function loadUseDB() {
   }
 }
 
+
 class SessionManager {
   private static instance: SessionManager;
   private sessionCache: Map<number, SessionData>;
@@ -34,15 +35,19 @@ class SessionManager {
     return SessionManager.instance;
   }
 
+  private async closeSession(tabId: number): Promise<any>{
+        const session = await this.loadSession(tabId);
+        if (session) {
+          await session.flushAllActivitiesToDb();
+          await session.closeSessionInDb();
+          await this.removeSession(tabId);
+    }
+  }
+
   private setupListeners(): void {
     chrome.tabs.onRemoved.addListener(async (tabId: number) => {
-      const session = await this.loadSession(tabId);
-      if (session) {
-        await session.flushAllActivitiesToDb();
-        await session.closeSessionInDb();
-        await this.removeSession(tabId);
-      }
-    });
+      this.closeSession(tabId)
+    })
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const tabId = sender.tab?.id ?? null;
@@ -54,6 +59,19 @@ class SessionManager {
         });
       return true;
     });
+
+    chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+      console.log("tab update detected");
+      console.log(changeInfo);
+      if (changeInfo.url) {
+        console.log("url found");
+        const session = await this.loadSession(tabId);
+        if (session && !session.hasSameBaseUrl(changeInfo.url)) {
+          console.log(`Base URL changed — closing session for tab ${tabId}`);
+          await this.closeSession(tabId);
+        }
+      }
+});
   }
 
   private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<any> {
@@ -68,14 +86,28 @@ class SessionManager {
         session.addActivityDocument(doc);
         return { status: "Activity added to local session." };
 
+      // case SenderMethod.InitializeSession:
+      //   console.log("Session started");
+      //   const email = await this.getUserEmail();
+      //   session.sessionInfo = request.payload as SessionDocument;
+      //   session.sessionInfo.email = email;
+      //   await session.createSessionInDb();
+      //   await this.persistSession(tabId!, session);
+
+      //   chrome.action.setPopup({ popup: "ui/popup.html" });
+      //   chrome.action.openPopup();
+
+      //   console.log("Session initialized for tab:", tabId);
+      //   return { status: "Session initialized" };
+      
       case SenderMethod.InitializeSession:
         console.log("Session started");
         const email = await this.getUserEmail();
         session.sessionInfo = request.payload as SessionDocument;
         session.sessionInfo.email = email;
+        session.setBaseUrl(session.sessionInfo.sourceURL);
         await session.createSessionInDb();
         await this.persistSession(tabId!, session);
-
         chrome.action.setPopup({ popup: "ui/popup.html" });
         chrome.action.openPopup();
 
@@ -154,9 +186,34 @@ class SessionData {
   sessionInfo: SessionDocument;
   sessionId: string = "NO ID SET";
   documents: ActivityDocument[] = [];
+  baseUrl: string = ""; // <-- new field
 
   constructor() {
     this.sessionInfo = new SessionDocument("", "");
+  }
+
+  getHostname(url: string): string{
+    return new URL(url).hostname;
+  }
+
+  setBaseUrl(url: string): void {
+    try {
+      const parsed = new URL(url);
+      this.baseUrl = this.getHostname(url);
+    } catch (e) {
+      console.warn("Could not parse base URL:", url);
+    }
+  }
+
+  hasSameBaseUrl(url: string): boolean {
+    try {
+      console.log(`comparing ${this.baseUrl} to ${url}`);
+      const isMatch = this.baseUrl === this.getHostname(url);
+      console.log(`is match: ${isMatch}`)
+      return isMatch;
+    } catch {
+      return false;
+    }
   }
 
   addActivityDocument(document: ActivityDocument): void {

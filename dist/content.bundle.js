@@ -69,6 +69,7 @@ var SenderMethod;
     SenderMethod["InitializeSession"] = "Initialize Session";
     SenderMethod["InteractionDetection"] = "Interaction Detection";
     SenderMethod["NavigationDetection"] = "Navigation Detection";
+    SenderMethod["CloseSession"] = "Close Session";
 })(SenderMethod || (SenderMethod = {}));
 
 
@@ -172,19 +173,19 @@ class ConfigLoader {
         this.config = config;
     }
     /**
-     * A function that adds an ID selector for a given URL pattern. If the current URL
+     * A function that adds a data extractor for a given URL pattern. If the current URL
      * most closely matches this pattern out of all patterns in the config, then this
      * function will be called and the received ID will be included in the metadata of
      * each log that occurs on the page.
      * @param urlPattern - the pattern being matched
-     * @param idSelectorFunction - the function to extract a URL
+     * @param dataExtractor - the function to extract data
      */
-    addIDSelector(urlPattern, idSelectorFunction) {
+    addIDSelector(urlPattern, dataExtractor) {
         const paths = this.config.paths;
         if (!(urlPattern in paths)) {
             throw new Error("Trying to add ID selector to path that doesn't exist");
         }
-        paths[urlPattern].idSelector = idSelectorFunction;
+        paths[urlPattern].dataExtractor = dataExtractor;
     }
 }
 
@@ -329,7 +330,7 @@ class Monitor {
    * @returns A document describing the state change
    */
     createStateChangeRecord(event) {
-        const metadata = this.currentPageData.getExtractedMetadata();
+        const metadata = this.currentPageData.extractData();
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -340,7 +341,7 @@ class Monitor {
    * @returns A document describing self loop
    */
     createSelfLoopRecord(event, urlChange) {
-        const metadata = this.currentPageData.getExtractedMetadata();
+        const metadata = this.currentPageData.extractData();
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -355,8 +356,8 @@ class Monitor {
             html: element.getHTML(),
             elementName: name,
         };
-        let extractedMetadata = this.currentPageData.getExtractedMetadata();
-        metadata = Object.assign(Object.assign({}, metadata), extractedMetadata);
+        let extractedData = this.currentPageData.extractData();
+        metadata = Object.assign(Object.assign({}, metadata), extractedData);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -390,13 +391,17 @@ class Monitor {
      * @param name - the name of the element that triggered the callback (as defined in the config)
      */
     onNavigationDetection(navEvent) {
+        let baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1];
         let urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
         this.currentPageData.url = navEvent.destination.url;
         // let destState = this.getCleanStateName();
         console.log(`Navigation detected with event type: ${navEvent.type}`);
-        if (navEvent.navigationType === "push") {
+        if (baseURLChange) {
+            this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.CloseSession, new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.DBDocument(this.currentPageData.url, document.title));
+        }
+        else if (navEvent.navigationType === "push") {
             this.updateCurrentPageData(this.currentPageData.url);
             const record = this.createStateChangeRecord(navEvent);
             this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection, record);
@@ -478,9 +483,9 @@ class PageData {
     /**
      * @returns Result of if it exsits`matchPathData.idSelector`, else it returns an empty string
      */
-    getExtractedMetadata() {
+    extractData() {
         var _a, _b;
-        return ((_b = (_a = this.matchPathData).idSelector) === null || _b === void 0 ? void 0 : _b.call(_a)) || {};
+        return ((_b = (_a = this.matchPathData).dataExtractor) === null || _b === void 0 ? void 0 : _b.call(_a)) || {};
     }
     /**
      * @param matches: A list of all matching paths to the current url

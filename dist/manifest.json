@@ -16,7 +16,8 @@
   "permissions": [
     "identity",
     "identity.email",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "icons": {
   "128": "markov_logger_logo.png"
