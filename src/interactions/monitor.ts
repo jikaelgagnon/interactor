@@ -200,6 +200,7 @@ export class Monitor {
      */
 
     private onNavigationDetection(navEvent: any): void {
+        let baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1]
         let urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
@@ -208,8 +209,10 @@ export class Monitor {
         // let destState = this.getCleanStateName();
 
         console.log(`Navigation detected with event type: ${navEvent.type}`)
-        
-        if (navEvent.navigationType === "push") {
+        if (baseURLChange){
+            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.url, document.title));
+        }
+        else if (navEvent.navigationType === "push") {
             this.updateCurrentPageData(this.currentPageData.url);
             const record = this.createStateChangeRecord(navEvent);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
