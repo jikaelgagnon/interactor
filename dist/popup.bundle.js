@@ -55830,26 +55830,6 @@ class DataManager {
             });
         }
     }
-    // exportSessionsToXlsx(): void {
-    // const selectedSessionIds = Array.from(this.selectedItems)
-    //     .filter(id => id.startsWith('session_'))
-    //     .map(id => id.split('_')[1]);
-    //     const sessionsToExport = this.sessions.filter(session => selectedSessionIds.includes(session.id));
-    //     if (sessionsToExport.length === 0) {
-    //         this.showStatus('No sessions selected for export', 'error');
-    //         return;
-    //     }
-    //     // Convert session objects to worksheet
-    //     const worksheet = utils.json_to_sheet(sessionsToExport);
-    //     // Create a new workbook and append the worksheet
-    //     const workbook = utils.book_new();
-    //     utils.book_append_sheet(workbook, worksheet, "Sessions");
-    //     // Filename with ISO timestamp
-    //     const filename = `sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-    //     // Trigger download
-    //     writeFile(workbook, filename);
-    //     this.showStatus(`Exported ${sessionsToExport.length} session(s) to XLSX`);
-    // }
     exportSessionsToXlsx() {
         const selectedSessionIds = Array.from(this.selectedItems)
             .filter(id => id.startsWith('session_'))

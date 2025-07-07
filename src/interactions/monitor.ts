@@ -71,7 +71,8 @@ export class Monitor {
    * Creates a new entry in the DB describing the state at the start of the session
    */
     private initializeSession(): void {
-        this.sendMessageToBackground(SenderMethod.InitializeSession, this.getCurrentState());
+        const currentState = new SessionDocument(this.currentPageData.url, document.title);
+        this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
     }
 
     /**
@@ -221,17 +222,7 @@ export class Monitor {
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }
     }
-    /**
-   * Gets the current state of the page.
-   * @returns Current state 
-   */
-
-    private getCurrentState(): SessionDocument {
-        console.log("getting current state");
-        console.log(document.title);
-        return new SessionDocument(this.currentPageData.url, document.title);
-    }
-
+    
     /**
    * Generates a unique color from a given string
    * Source: https://stackoverflow.com/a/31037383 

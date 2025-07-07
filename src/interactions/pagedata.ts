@@ -85,36 +85,4 @@ export class PageData {
         }
         return currentSelectors;
     }
-
-    /**
-     * @param url: A URL to compare to `this.url`
-     * 
-     * @returns Whether the URLs are for the same state
-     * 
-     * @example
-     * ```ts
-     * this.url = "https://www.youtube.com/shorts/ic-xaIpMB1E";
-     * this.checkForMatch("https://www.youtube.com/shorts/Jl9cNLJ58uA"); // returns true
-     * this.checkForMatch("https://www.youtube.com/watch?v=Bt-7YiNBvLE"); // returns false
-     * ```
-     */
-
-    // checkForMatch(url: string): boolean {
-    //     let curPathname = new URL(this.url).pathname;
-    //     let otherPathname = new URL(url).pathname;
-    //     let l1 = curPathname.split("/");
-    //     let l2 = otherPathname.split("/");
-
-    //     if (curPathname.length !== otherPathname.length) {
-    //         return false;
-    //     }
-
-    //     let max_idx = l1.length - (this.urlUsesId ? 1 : 0);
-    //     for (let i = 0; i < max_idx; i++) {
-    //         if (l1[i] !== l2[i]) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
 }
