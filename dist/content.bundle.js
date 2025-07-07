@@ -284,7 +284,8 @@ class Monitor {
    * Creates a new entry in the DB describing the state at the start of the session
    */
     initializeSession() {
-        this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InitializeSession, this.getCurrentState());
+        const currentState = new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.SessionDocument(this.currentPageData.url, document.title);
+        this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InitializeSession, currentState);
     }
     /**
    * Binds event listeners for mutations and navigation
@@ -410,15 +411,6 @@ class Monitor {
             const record = this.createSelfLoopRecord(navEvent, urlChange);
             this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection, record);
         }
-    }
-    /**
-   * Gets the current state of the page.
-   * @returns Current state
-   */
-    getCurrentState() {
-        console.log("getting current state");
-        console.log(document.title);
-        return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.SessionDocument(this.currentPageData.url, document.title);
     }
 }
 
