@@ -256,11 +256,25 @@ class Monitor {
         this.currentPageData = new _pagedata__WEBPACK_IMPORTED_MODULE_2__.PageData();
         this.interactionAttribute = "monitoring-interactions";
         // Check if this page should be monitored
+        // if (window.location.origin === this.baseURL) {
+        //     this.initializeMonitor();
+        // } else {
+        //     console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
+        // }
         if (window.location.origin === this.baseURL) {
-            this.initializeMonitor();
-        }
-        else {
-            console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
+            const runWhenVisible = () => {
+                if (document.visibilityState === 'visible') {
+                    this.initializeMonitor();
+                    document.removeEventListener('visibilitychange', runWhenVisible);
+                }
+            };
+            if (document.readyState === 'complete') {
+                runWhenVisible();
+            }
+            else {
+                window.addEventListener('load', runWhenVisible);
+            }
+            document.addEventListener('visibilitychange', runWhenVisible);
         }
     }
     /**
