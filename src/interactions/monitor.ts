@@ -42,11 +42,28 @@ export class Monitor {
 
 
         // Check if this page should be monitored
+        // if (window.location.origin === this.baseURL) {
+        //     this.initializeMonitor();
+        // } else {
+        //     console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
+        // }
+
         if (window.location.origin === this.baseURL) {
-            this.initializeMonitor();
+            const runWhenVisible = () => {
+                if (document.visibilityState === 'visible') {
+                    this.initializeMonitor();
+                    document.removeEventListener('visibilitychange', runWhenVisible);
+                }
+            };
+
+        if (document.readyState === 'complete') {
+            runWhenVisible();
         } else {
-            console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
+            window.addEventListener('load', runWhenVisible);
         }
+
+        document.addEventListener('visibilitychange', runWhenVisible);
+    }
     }
 
         /**
