@@ -123,8 +123,10 @@ class SessionManager {
         await this.createSessionChromeStorage(tabId!, session);
         chrome.action.setPopup({ popup: "ui/popup.html" });
         chrome.action.openPopup();
+        const result = await chrome.storage.sync.get("highlightElements");
+        console.log(`Highlight elements: ${result.highlightElements}`)
 
-        return { status: "Session initialized" };
+        return { status: "Session initialized", highlight: result.highlightElements};
 
       default:
         return { status: `Unrecognized request type: ${request.senderMethod}` };
