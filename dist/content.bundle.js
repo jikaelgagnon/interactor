@@ -250,7 +250,7 @@ class Monitor {
             };
         })();
         this.interactionEvents = config.events ? config.events : ['click'];
-        this.debug = config.debug ? config.debug : true;
+        this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new _pagedata__WEBPACK_IMPORTED_MODULE_2__.PageData();
@@ -278,14 +278,19 @@ class Monitor {
         }
     }
     /**
- * Initializes the monitor if base URL matches the current URL
- */
-    initializeMonitor() {
+     * Initializes the monitor if base URL matches the current URL
+     */
+    async initializeMonitor() {
         this.updateCurrentPageData(document.location.href);
-        // Creates a new entry in the DB describing the state at the start of the session
-        this.initializeSession();
-        // Binds listeners to the HTML elements specified in the config for all matching path patterns
-        this.bindEvents();
+        try {
+            // Creates a new entry in the DB describing the state at the start of the session
+            await this.initializeSession();
+            // Binds listeners to the HTML elements specified in the config for all matching path patterns
+            this.bindEvents();
+        }
+        catch (err) {
+            console.error("Failed to initialize session:", err);
+        }
     }
     /**
    * Updates the page data whenever a new page is detected
@@ -297,9 +302,12 @@ class Monitor {
     /**
    * Creates a new entry in the DB describing the state at the start of the session
    */
-    initializeSession() {
+    async initializeSession() {
         const currentState = new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.SessionDocument(this.currentPageData.url, document.title);
-        this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InitializeSession, currentState);
+        console.log("Checking highlight");
+        const response = await this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InitializeSession, currentState);
+        this.highlight = response.highlight;
+        console.log(`Highlight is set to ${this.highlight}`);
     }
     /**
    * Binds event listeners for mutations and navigation
@@ -321,14 +329,15 @@ class Monitor {
    * If debug mode is on, this will add a colourful border to these elements.
    */
     addListenersToNewMatches() {
-        // console.log("adding selectors");
+        console.log("adding selectors");
+        console.log(`Value of highlight: ${this.highlight}`);
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
             let elements = document.querySelectorAll(`:is(${interaction["selector"]}):not([${this.interactionAttribute}])`);
             let name = interaction["name"];
             elements.forEach(element => {
-                if (this.debug)
+                if (this.highlight)
                     element.style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute(this.interactionAttribute, 'true');
                 for (let i = 0; i < this.interactionEvents.length; i++) {

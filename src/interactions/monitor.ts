@@ -21,7 +21,7 @@ export class Monitor {
     // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
     interactionEvents: string[];
     // If true, highlight all selected HTML elements with coloured boxes
-    debug: boolean;
+    highlight: boolean;
     // An object mapping path patterns to their corresponding CSS selectors
     // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
     paths: PathMap;
@@ -34,7 +34,7 @@ export class Monitor {
 
     constructor(config: Config) {
         this.interactionEvents = config.events ? config.events : ['click'];
-        this.debug = config.debug ? config.debug : true;
+        this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new PageData();
@@ -66,16 +66,21 @@ export class Monitor {
     }
     }
 
-        /**
+    /**
      * Initializes the monitor if base URL matches the current URL
      */
-    private initializeMonitor(){
-        this.updateCurrentPageData(document.location.href);
+    private async initializeMonitor() {
+    this.updateCurrentPageData(document.location.href);
+
+    try {
         // Creates a new entry in the DB describing the state at the start of the session
-        this.initializeSession();
+        await this.initializeSession();
         // Binds listeners to the HTML elements specified in the config for all matching path patterns
         this.bindEvents();
+    } catch (err) {
+        console.error("Failed to initialize session:", err);
     }
+}
     /**
    * Updates the page data whenever a new page is detected
    * @param url - the url of the new page
@@ -87,9 +92,12 @@ export class Monitor {
     /**
    * Creates a new entry in the DB describing the state at the start of the session
    */
-    private initializeSession(): void {
+    private async initializeSession(): Promise<void> {
         const currentState = new SessionDocument(this.currentPageData.url, document.title);
-        this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
+        console.log("Checking highlight");
+        const response = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
+        this.highlight = response.highlight   
+        console.log(`Highlight is set to ${this.highlight}`)
     }
 
     /**
@@ -116,14 +124,15 @@ export class Monitor {
    */
 
     private addListenersToNewMatches(): void {
-        // console.log("adding selectors");
+        console.log("adding selectors");
+        console.log(`Value of highlight: ${this.highlight}`);
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
             let elements = document.querySelectorAll(`:is(${interaction["selector"]}):not([${this.interactionAttribute}])`);
             let name = interaction["name"];
             elements.forEach(element => {
-                if (this.debug) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
+                if (this.highlight) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute(this.interactionAttribute, 'true');
 
                 for (let i = 0; i < this.interactionEvents.length; i++) {
