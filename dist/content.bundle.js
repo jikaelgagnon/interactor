@@ -76,33 +76,13 @@ var SenderMethod;
 
 /***/ }),
 
-/***/ "./src/configs/linkedin_config.json":
-/*!******************************************!*\
-  !*** ./src/configs/linkedin_config.json ***!
-  \******************************************/
-/***/ ((module) => {
-
-module.exports = /*#__PURE__*/JSON.parse('{"baseURL":"https://www.linkedin.com","events":["pause","play","seeked","seeking","scroll","click","ended","keypress"],"paths":{"/*":{"selectors":[{"selector":"button[aria-label^=\'React\']","name":"React Button"},{"selector":"button[aria-label=\'Comment\']","name":"Comment Button"},{"selector":"button[aria-label=\'Send in a private message\']","name":"Send Button"},{"selector":"button.social-reshare-button","name":"Repost Button"},{"selector":"button.follow","name":"Follow Button"},{"selector":"div.update-components-actor__container","name":"Profile Header"},{"selector":"button[aria-label$=\'to connect\']","name":"Connect Button"},{"selector":"button[aria-label^=\'Message\']","name":"Message Button"},{"selector":":has(> span[title^=\'Home\'])","name":"Home Button"},{"selector":":has(> span[title^=\'My network\'])","name":"My Network Button"},{"selector":":has(> span[title^=\'Jobs\'])","name":"Jobs Button"},{"selector":":has(> span[title^=\'Messaging\'])","name":"Messaging Button"},{"selector":":has(> span[title^=\'Notifications\'])","name":"Notifications Button"},{"selector":"div.feed-shared-update-v2__content","name":"Post Content"}]}}}');
-
-/***/ }),
-
-/***/ "./src/configs/tiktok_config.json":
-/*!****************************************!*\
-  !*** ./src/configs/tiktok_config.json ***!
-  \****************************************/
-/***/ ((module) => {
-
-module.exports = /*#__PURE__*/JSON.parse('{"baseURL":"https://www.tiktok.com","events":["pause","play","seeked","seeking","scroll","click","ended","keypress"],"paths":{"/*":{"selectors":[{"selector":"a[data-e2e=\\"tiktok-logo\\"]","name":"TikTok Logo"},{"selector":"span[data-e2e=\\"like-icon\\"]","name":"Like Button"},{"selector":"span[data-e2e=\\"comment-icon\\"]","name":"Comment Button"},{"selector":"span[data-e2e=\\"share-icon\\"]","name":"Share Button"},{"selector":"button[aria-label^=\\"Add to Favorites.\\"]","name":"Share Button"},{"selector":"button[aria-label=\\"For You\\"]","name":"Home Button"},{"selector":"button[aria-label=\\"Explore\\"]","name":"Explore Button"},{"selector":"button[aria-label=\\"Following\\"]","name":"Following Button"},{"selector":"button[aria-label=\\"Upload\\"]","name":"Upload Button"},{"selector":"button[aria-label=\\"LIVE\\"]","name":"LIVE Button"},{"selector":"button[aria-label=\\"Profile\\"]","name":"Profile Button"},{"selector":"button[aria-label=\\"Search\\"]","name":"Search Button"},{"selector":"button[aria-label=\\"Friends\\"]","name":"Friends Button"},{"selector":"button[aria-label=\\"Activity\\"]","name":"Activity Button"},{"selector":"button[aria-label=\\"Messages\\"]","name":"Messages Button"},{"selector":"video","name":"Video"},{"selector":"div[data-e2e=\\"recommend-card\\"]","name":"Profile Recommendation"},{"selector":"button[data-e2e=\\"card-followbutton\\"]","name":"Profile Recommendation Follow Button"},{"selector":"a[data-e2e=\\"video-author-avatar\\"]","name":"Author Avatar"},{"selector":"button[data-e2e=\\"feed-follow\\"]","name":"Feed Follow Button"},{"selector":"button[data-e2e=\\"follow-button\\"]","name":"Profile Follow Button"},{"selector":"button[data-e2e=\\"message-button\\"]","name":"Profile Message Button"},{"selector":"button[data-e2e=\\"share-btn\\"]","name":"Profile Share Button"},{"selector":"button[aria-label=\\"Latest\\"]","name":"Profile Latest Button"},{"selector":"button[aria-label=\\"Popular\\"]","name":"Profile Popular Button"},{"selector":"button[aria-label=\\"Oldest\\"]","name":"Profile Oldest Button"},{"selector":"button[aria-label*=\\"Likes\\"]","name":"Profile Video Like Button"},{"selector":"div[data-e2e*=\\"comment-like-icon\\"], div[aria-label^=\\"Like video\\"]","name":"Comment Like Button"},{"selector":"a[data-e2e=\\"video-music\\"]","name":"Video Music Button"},{"selector":"button.css-189kgrc-ButtonCategoryItemContainer.e13i6o248, button.css-qexeba-ButtonCategoryItemContainer.e13i6o248","name":"Category Button"}]}}}');
-
-/***/ }),
-
 /***/ "./src/configs/youtube_config.json":
 /*!*****************************************!*\
   !*** ./src/configs/youtube_config.json ***!
   \*****************************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"baseURL":"https://www.youtube.com","events":["pause","play","seeked","seeking","scroll","click","ended","keypress"],"paths":{"/*":{"selectors":[{"selector":"#logo-icon","name":"YouTube Logo"},{"selector":"ytm-shorts-lockup-view-model-v2","name":"Shorts on Miniplayer"},{"selector":"div#chip-shape-container, yt-tab-shape[tab-title]","name":"Category Button"},{"selector":"div#left-arrow-button","name":"Category back button"},{"selector":"div#right-arrow-button","name":"Category forward button"},{"selector":"a.yt-simple-endpoint.style-scope.ytd-guide-entry-renderer#endpoint, a.yt-simple-endpoint.style-scope.ytd-mini-guide-entry-renderer#endpoint","name":"Side Navigation Button"},{"selector":"yt-icon-button#guide-button","name":"Guide Button"},{"selector":"ytd-video-renderer, ytd-rich-item-renderer","name":"Video"},{"selector":"yt-lockup-view-model","name":"Content Collection"}]},"/":{},"/feed/*":{"selectors":[{"selector":"ytd-video-renderer[is-history]","name":"History Video"},{"selector":"ytd-grid-movie-renderer","name":"Movie Thumbnail"}]},"/channel/*":{"selectors":[{"selector":"ytd-default-promo-panel-renderer","name":"Promo Video"}]},"/@:id{/*}?":{"selectors":[{"selector":"yt-tab-shape[tab-title=\\"Home\\"]","name":"Creator Home"},{"selector":"yt-tab-shape[tab-title=\\"Videos\\"]","name":"Creator Videos"},{"selector":"yt-tab-shape[tab-title=\\"Playlists\\"]","name":"Creator Playlists"},{"selector":"yt-tab-shape[tab-title=\\"Shorts\\"]","name":"Creator Shorts"},{"selector":"yt-tab-shape[tab-title=\\"Live\\"]","name":"Creator Live"},{"selector":"yt-tab-shape[tab-title=\\"Posts\\"]","name":"Creator Posts"},{"selector":"div.yt-subscribe-button-view-model-wiz__container","name":"Creator Subscribe Button"},{"selector":"ytd-video-renderer.style-scope.ytd-channel-featured-content-renderer","name":"Creator Featured Video"},{"selector":"ytd-grid-video-renderer.style-scope.yt-horizontal-list-renderer","name":"Creator Video"}]},"/playlist?list=*":{"selectors":[{"selector":"div#content.style-scope.ytd-playlist-video-renderer","name":"Video Inside Playlist"}]},"/shorts/:id":{"selectors":[{"selector":"#like-button[is-shorts]","name":"Shorts Like Button"},{"selector":"#dislike-button[is-shorts]","name":"Shorts Dislike Button"},{"selector":"div#comments-button","name":"Comments Button"},{"selector":"ytd-player#player","name":"Shorts Video Player"}]},"/watch?v=*":{"selectors":[{"selector":"ytd-compact-video-renderer.style-scope.ytd-item-section-renderer","name":"Watch Page Recommended Video"},{"selector":"ytd-toggle-button-renderer#dislike-button","name":"Comment Dislike Button"},{"selector":"ytd-toggle-button-renderer#like-button","name":"Comment Like Button"},{"selector":"ytd-video-owner-renderer.style-scope.ytd-watch-metadata","name":"Channel Link"},{"selector":"like-button-view-model.ytLikeButtonViewModelHost","name":"Video Like Button"},{"selector":"dislike-button-view-model.ytDislikeButtonViewModelHost","name":"Video Dislike Button"},{"selector":"div#subscribe-button","name":"Subscribe Button"},{"selector":"div#player","name":"Video Player"},{"selector":"button[title=\'Share\']","name":"Share Button"}]},"/results?search_query=*":{"selectors":[{"selector":"ytd-video-renderer.style-scope.ytd-vertical-list-renderer","name":"Top Search Page Video"},{"selector":"ytd-video-renderer.style-scope.ytd-item-section-renderer","name":"Search Page Video"},{"selector":"yt-lockup-view-model.ytd-item-section-renderer","name":"Playlist"}]}}}');
+module.exports = /*#__PURE__*/JSON.parse('{"baseURL":"https://www.youtube.com","events":["click"],"paths":{"/*":{"selectors":[{"selector":"#logo-icon","name":"YouTube Logo"},{"selector":"ytm-shorts-lockup-view-model-v2","name":"Shorts on Miniplayer"},{"selector":"div#chip-shape-container, yt-tab-shape[tab-title]","name":"Category Button"},{"selector":"div#left-arrow-button","name":"Category back button"},{"selector":"div#right-arrow-button","name":"Category forward button"},{"selector":"a.yt-simple-endpoint.style-scope.ytd-guide-entry-renderer#endpoint, a.yt-simple-endpoint.style-scope.ytd-mini-guide-entry-renderer#endpoint","name":"Side Navigation Button"},{"selector":"yt-icon-button#guide-button","name":"Guide Button"},{"selector":"ytd-video-renderer, ytd-rich-item-renderer","name":"Video"},{"selector":"yt-lockup-view-model","name":"Content Collection"}]},"/":{},"/feed/*":{"selectors":[{"selector":"ytd-video-renderer[is-history]","name":"History Video"},{"selector":"ytd-grid-movie-renderer","name":"Movie Thumbnail"}]},"/channel/*":{"selectors":[{"selector":"ytd-default-promo-panel-renderer","name":"Promo Video"}]},"/@:id{/*}?":{"selectors":[{"selector":"yt-tab-shape[tab-title=\\"Home\\"]","name":"Creator Home"},{"selector":"yt-tab-shape[tab-title=\\"Videos\\"]","name":"Creator Videos"},{"selector":"yt-tab-shape[tab-title=\\"Playlists\\"]","name":"Creator Playlists"},{"selector":"yt-tab-shape[tab-title=\\"Shorts\\"]","name":"Creator Shorts"},{"selector":"yt-tab-shape[tab-title=\\"Live\\"]","name":"Creator Live"},{"selector":"yt-tab-shape[tab-title=\\"Posts\\"]","name":"Creator Posts"},{"selector":"div.yt-subscribe-button-view-model-wiz__container","name":"Creator Subscribe Button"},{"selector":"ytd-video-renderer.style-scope.ytd-channel-featured-content-renderer","name":"Creator Featured Video"},{"selector":"ytd-grid-video-renderer.style-scope.yt-horizontal-list-renderer","name":"Creator Video"}]},"/playlist?list=*":{"selectors":[{"selector":"div#content.style-scope.ytd-playlist-video-renderer","name":"Video Inside Playlist"}]},"/shorts/:id":{"selectors":[{"selector":"#like-button[is-shorts]","name":"Shorts Like Button"},{"selector":"#dislike-button[is-shorts]","name":"Shorts Dislike Button"},{"selector":"div#comments-button","name":"Comments Button"},{"selector":"ytd-player#player","name":"Shorts Video Player"}]},"/watch?v=*":{"selectors":[{"selector":"ytd-compact-video-renderer.style-scope.ytd-item-section-renderer","name":"Watch Page Recommended Video"},{"selector":"ytd-toggle-button-renderer#dislike-button","name":"Comment Dislike Button"},{"selector":"ytd-toggle-button-renderer#like-button","name":"Comment Like Button"},{"selector":"ytd-video-owner-renderer.style-scope.ytd-watch-metadata","name":"Channel Link"},{"selector":"like-button-view-model.ytLikeButtonViewModelHost","name":"Video Like Button"},{"selector":"dislike-button-view-model.ytDislikeButtonViewModelHost","name":"Video Dislike Button"},{"selector":"div#subscribe-button","name":"Subscribe Button"},{"selector":"div#player","name":"Video Player"},{"selector":"button[title=\'Share\']","name":"Share Button"}]},"/results?search_query=*":{"selectors":[{"selector":"ytd-video-renderer.style-scope.ytd-vertical-list-renderer","name":"Top Search Page Video"},{"selector":"ytd-video-renderer.style-scope.ytd-item-section-renderer","name":"Search Page Video"},{"selector":"yt-lockup-view-model.ytd-item-section-renderer","name":"Playlist"}]}}}');
 
 /***/ }),
 
@@ -180,12 +160,11 @@ class ConfigLoader {
      * @param urlPattern - the pattern being matched
      * @param dataExtractor - the function to extract data
      */
-    addIDSelector(urlPattern, dataExtractor) {
-        const paths = this.config.paths;
-        if (!(urlPattern in paths)) {
+    injectExtractor(urlPattern, dataExtractor) {
+        if (!(urlPattern in this.config.paths)) {
             throw new Error("Trying to add ID selector to path that doesn't exist");
         }
-        paths[urlPattern].dataExtractor = dataExtractor;
+        this.config.paths[urlPattern].dataExtractor = dataExtractor;
     }
 }
 
@@ -307,7 +286,7 @@ class Monitor {
         console.log("Checking highlight");
         const response = await this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InitializeSession, currentState);
         this.highlight = response.highlight;
-        console.log(`Highlight is set to ${this.highlight}`);
+        // console.log(`Highlight is set to ${this.highlight}`)
     }
     /**
    * Binds event listeners for mutations and navigation
@@ -329,8 +308,8 @@ class Monitor {
    * If debug mode is on, this will add a colourful border to these elements.
    */
     addListenersToNewMatches() {
-        console.log("adding selectors");
-        console.log(`Value of highlight: ${this.highlight}`);
+        // console.log("adding selectors");
+        // console.log(`Value of highlight: ${this.highlight}`);
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
@@ -355,6 +334,8 @@ class Monitor {
    */
     createStateChangeRecord(event) {
         const metadata = this.currentPageData.extractData();
+        console.log("printing metadata");
+        console.log(metadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -366,6 +347,8 @@ class Monitor {
    */
     createSelfLoopRecord(event, urlChange) {
         const metadata = this.currentPageData.extractData();
+        console.log("printing metadata");
+        console.log(metadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -382,6 +365,8 @@ class Monitor {
         };
         let extractedData = this.currentPageData.extractData();
         metadata = Object.assign(Object.assign({}, metadata), extractedData);
+        console.log("printing metadata");
+        console.log(metadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }
     /**
@@ -402,10 +387,11 @@ class Monitor {
    * @param name - the name of the element that triggered the callback (as defined in the config)
    */
     onInteractionDetection(element, e, name) {
+        console.log("interaction event detected");
         console.log(`Event detected with event type: ${e.type}`);
         console.log(`Event triggered by ${element}`);
-        console.log(element.innerHTML);
-        console.log(element.getHTML());
+        // console.log(element.innerHTML);
+        // console.log(element.getHTML());
         const record = this.createInteractionRecord(element, name, e);
         this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InteractionDetection, record);
     }
@@ -423,14 +409,17 @@ class Monitor {
         // let destState = this.getCleanStateName();
         console.log(`Navigation detected with event type: ${navEvent.type}`);
         if (baseURLChange) {
+            console.log("URL base change detected. Closing program.");
             this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.CloseSession, new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.DBDocument(this.currentPageData.url, document.title));
         }
         else if (navEvent.navigationType === "push") {
-            this.updateCurrentPageData(this.currentPageData.url);
+            console.log("Push event detected.");
             const record = this.createStateChangeRecord(navEvent);
             this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection, record);
+            this.updateCurrentPageData(this.currentPageData.url);
         }
         else if (navEvent.navigationType === "replace") {
+            console.log("Replace event detected.");
             const record = this.createSelfLoopRecord(navEvent, urlChange);
             this.sendMessageToBackground(_communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection, record);
         }
@@ -475,10 +464,11 @@ class PageData {
      * @returns A list of all paths in the config that match `baseURL`
      */
     updateMatchData(baseURL, paths) {
+        console.log("updating page data");
         let closestMatch = ""; // the pattern that most closely matches the current URL
         // Get a list of all the paths that match the current URL
         const matches = Object.keys(paths).filter((path) => {
-            console.log(path);
+            // console.log(path);
             // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, baseURL);
             const match = p.test(this.url);
@@ -488,6 +478,7 @@ class PageData {
             }
             return match;
         });
+        this.currentPath = closestMatch;
         if (matches.length === 0) {
             console.log("no matches found");
         }
@@ -500,6 +491,8 @@ class PageData {
      */
     extractData() {
         var _a, _b;
+        console.log(`Current closest match is ${this.currentPath}`);
+        console.log("Trying to extract data");
         return ((_b = (_a = this.matchPathData).dataExtractor) === null || _b === void 0 ? void 0 : _b.call(_a)) || {};
     }
     /**
@@ -590,35 +583,75 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./interactions/monitor */ "./src/interactions/monitor.ts");
 /* harmony import */ var _configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./configs/youtube_config.json */ "./src/configs/youtube_config.json");
-/* harmony import */ var _configs_tiktok_config_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./configs/tiktok_config.json */ "./src/configs/tiktok_config.json");
-/* harmony import */ var _configs_linkedin_config_json__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./configs/linkedin_config.json */ "./src/configs/linkedin_config.json");
-/* harmony import */ var _interactions_config__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./interactions/config */ "./src/interactions/config.ts");
+/* harmony import */ var _interactions_config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./interactions/config */ "./src/interactions/config.ts");
 
 
 
-
-
-const ytConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_4__.ConfigLoader(_configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__);
-const ytInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(ytConfigLoader.config);
-const tiktokIDSelector = () => {
-    let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
-    if (!vid) {
-        console.log("no url found!");
-        return {};
-    }
-    let id = vid.id.split("-").at(-1);
-    let url = `https://tiktok.com/share/video/${id}`;
-    return {
-        "uniqueURL": url
-    };
+const ytConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.ConfigLoader(_configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__);
+// NOTE: This shit doesn't work! Likely has to do with the weird way things are updated... Need to make 
+// that very clear first, then hopefully the bug will arise. Note that issue is that the data is displayed at
+// the wrong time somehow...
+// Gets a list of links from the home page
+const getHomepageVideos = () => {
+    // console.log("---- EXTRACTING HOMEPAGE LINKS ---");
+    const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'));
+    const links = contentDivs.map(contentDiv => {
+        // Get the direct anchor child
+        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
+        return anchor;
+    }).filter(x => x != null).map(x => x.href);
+    const titles = contentDivs.map(contentDiv => {
+        var _a, _b;
+        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+        return (_b = (_a = span === null || span === void 0 ? void 0 : span.textContent) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
+    });
+    // console.log("Printing the first 5 links");
+    // console.table(links.slice(0,5));
+    // console.log("Printing the first 5 titles");
+    // console.table(titles.slice(0,5));
+    return { "links": links, "titles": titles };
 };
+const getRecommendedVideos = () => {
+    // console.log("---- EXTRACTING RECOMMENDED LINKS ---")
+    const contentDivs = Array.from(document.querySelectorAll('yt-lockup-view-model'));
+    const links = contentDivs.map(contentDiv => {
+        // Get the direct anchor child
+        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
+        return anchor;
+    }).filter(x => x != null).map(x => x.href);
+    const titles = contentDivs.map(contentDiv => {
+        var _a, _b;
+        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+        return (_b = (_a = span === null || span === void 0 ? void 0 : span.textContent) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
+    });
+    // console.log("Printing the first 5 links");
+    // console.table(links.slice(0,5));
+    // console.log("Printing the first 5 titles");
+    // console.table(titles.slice(0,5));
+    return { "links": links, "titles": titles };
+};
+ytConfigLoader.injectExtractor("/*", getHomepageVideos);
+// ytConfigLoader.injectExtractor("/watch?v=*", getRecommendedVideos);
+const ytInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(ytConfigLoader.config);
+// const tiktokIDSelector = (): object => {
+//     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
+//     if (!vid){
+//         console.log("no url found!");
+//         return {};
+//     }
+//     let id = vid.id.split("-").at(-1);
+//     let url = `https://tiktok.com/share/video/${id}`;
+//     return {
+//         "uniqueURL": url
+//     };
+// }
 // console.log(tiktokConfig);
-const tiktokConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_4__.ConfigLoader(_configs_tiktok_config_json__WEBPACK_IMPORTED_MODULE_2__);
-tiktokConfigLoader.addIDSelector("/*", tiktokIDSelector);
-const tiktokInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(tiktokConfigLoader.config);
-// console.log(tiktokConfig);
-const linkedinConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_4__.ConfigLoader(_configs_linkedin_config_json__WEBPACK_IMPORTED_MODULE_3__);
-const linkedinInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(linkedinConfigLoader.config);
+// const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
+// tiktokConfigLoader.injectExtractor("/*", tiktokIDSelector);
+// const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
+// // console.log(tiktokConfig);
+// const linkedinConfigLoader = new ConfigLoader(linkedinConfig);
+// const linkedinInteractor = new Monitor(linkedinConfigLoader.config);
 
 })();
 

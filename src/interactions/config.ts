@@ -28,7 +28,7 @@ interface PathData {
      */
     // A list of selectors and names for the page
     selectors?: SelectorData[];
-    // A function that extracts an ID from the current page and returns it as a string
+    // A function that extracts metadata from the page
     dataExtractor?: () => object;
 }
 
@@ -64,13 +64,12 @@ class ConfigLoader {
      * @param urlPattern - the pattern being matched
      * @param dataExtractor - the function to extract data
      */
-    addIDSelector(urlPattern: string, dataExtractor: () => object): void {
-        const paths = this.config.paths;
+    injectExtractor(urlPattern: string, dataExtractor: () => object): void {
 
-        if (!(urlPattern in paths)) {
+        if (!(urlPattern in this.config.paths)) {
             throw new Error("Trying to add ID selector to path that doesn't exist");
         }
 
-        paths[urlPattern].dataExtractor = dataExtractor;
+        this.config.paths[urlPattern].dataExtractor = dataExtractor;
     }
 }
