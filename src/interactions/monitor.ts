@@ -70,16 +70,16 @@ export class Monitor {
      * Initializes the monitor if base URL matches the current URL
      */
     private async initializeMonitor() {
-    this.updateCurrentPageData(document.location.href);
+        this.updateCurrentPageData(document.location.href);
 
-    try {
-        // Creates a new entry in the DB describing the state at the start of the session
-        await this.initializeSession();
-        // Binds listeners to the HTML elements specified in the config for all matching path patterns
-        this.bindEvents();
-    } catch (err) {
-        console.error("Failed to initialize session:", err);
-    }
+        try {
+            // Creates a new entry in the DB describing the state at the start of the session
+            await this.initializeSession();
+            // Binds listeners to the HTML elements specified in the config for all matching path patterns
+            this.bindEvents();
+        } catch (err) {
+            console.error("Failed to initialize session:", err);
+        }
 }
     /**
    * Updates the page data whenever a new page is detected
@@ -97,7 +97,7 @@ export class Monitor {
         console.log("Checking highlight");
         const response = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
         this.highlight = response.highlight   
-        console.log(`Highlight is set to ${this.highlight}`)
+        // console.log(`Highlight is set to ${this.highlight}`)
     }
 
     /**
@@ -124,8 +124,8 @@ export class Monitor {
    */
 
     private addListenersToNewMatches(): void {
-        console.log("adding selectors");
-        console.log(`Value of highlight: ${this.highlight}`);
+        // console.log("adding selectors");
+        // console.log(`Value of highlight: ${this.highlight}`);
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
@@ -153,6 +153,8 @@ export class Monitor {
     private createStateChangeRecord(event: Event): DBDocument {
         
         const metadata = this.currentPageData.extractData();
+        console.log("printing metadata");
+        console.log(metadata);
 
         return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
     }
@@ -167,6 +169,8 @@ export class Monitor {
 
     private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
         const metadata = this.currentPageData.extractData();
+        console.log("printing metadata");
+        console.log(metadata);
         return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
     }
 
@@ -187,6 +191,10 @@ export class Monitor {
         let extractedData = this.currentPageData.extractData();
 
         metadata = {... metadata, ... extractedData};
+
+        console.log("printing metadata");
+        console.log(metadata);
+
 
         return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
     }
@@ -212,10 +220,11 @@ export class Monitor {
    */
 
     private onInteractionDetection(element: Element, e: Event, name: string): void {
-        console.log(`Event detected with event type: ${e.type}`)
-        console.log(`Event triggered by ${element}`)
-        console.log(element.innerHTML);
-        console.log(element.getHTML());
+        console.log("interaction event detected");
+        console.log(`Event detected with event type: ${e.type}`);
+        console.log(`Event triggered by ${element}`);
+        // console.log(element.innerHTML);
+        // console.log(element.getHTML());
         const record = this.createInteractionRecord(element, name, e);
         this.sendMessageToBackground(SenderMethod.InteractionDetection, record);
     }
@@ -237,13 +246,16 @@ export class Monitor {
 
         console.log(`Navigation detected with event type: ${navEvent.type}`)
         if (baseURLChange){
+            console.log("URL base change detected. Closing program.");
             this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.url, document.title));
         }
         else if (navEvent.navigationType === "push") {
-            this.updateCurrentPageData(this.currentPageData.url);
+            console.log("Push event detected.");
             const record = this.createStateChangeRecord(navEvent);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
+            this.updateCurrentPageData(this.currentPageData.url);
         } else if (navEvent.navigationType === "replace") {
+            console.log("Replace event detected.");
             const record = this.createSelfLoopRecord(navEvent, urlChange);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
         }

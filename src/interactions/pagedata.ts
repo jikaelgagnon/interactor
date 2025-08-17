@@ -12,6 +12,7 @@ export class PageData {
     // Ex: If the url is www.youtube.com/shorts/ABC and the patterns are /* and /shorts/:id, then 
     // matchPathData would contain the PathData for /shorts/:id, since its a closer match to the URL.
     matchPathData!: PathData; 
+    currentPath!: string;
     /**
      * Updates the state of the PageData
      * @param baseURL: The base url for the page (eg. www.youtube.com)
@@ -34,11 +35,12 @@ export class PageData {
      */
 
     private updateMatchData(baseURL: string, paths: PathMap): string[]{
+        console.log("updating page data");
         let closestMatch = ""; // the pattern that most closely matches the current URL
 
         // Get a list of all the paths that match the current URL
         const matches = Object.keys(paths).filter((path) => {
-            console.log(path);
+            // console.log(path);
             // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, baseURL);
             const match = p.test(this.url);
@@ -48,6 +50,8 @@ export class PageData {
             }
             return match;
         });
+
+        this.currentPath = closestMatch;
 
         if (matches.length === 0) {
             console.log("no matches found");
@@ -63,6 +67,8 @@ export class PageData {
      */
 
     extractData(): object{
+        console.log(`Current closest match is ${this.currentPath}`);
+        console.log("Trying to extract data");
         return this.matchPathData.dataExtractor?.() || {};
     }
 
