@@ -592,9 +592,34 @@ const ytConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.Con
 // that very clear first, then hopefully the bug will arise. Note that issue is that the data is displayed at
 // the wrong time somehow...
 // Gets a list of links from the home page
+// const getHomepageVideos = (): object => {
+//     console.log("---- EXTRACTING HOMEPAGE LINKS ---");
+//     const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
+//     const links = contentDivs.map(contentDiv => {
+//     // Get the direct anchor child
+//         const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
+//         return anchor;
+//     }).filter(x => x != null).map(x => (x as HTMLAnchorElement).href);
+//     const titles = contentDivs.map(contentDiv => {
+//         const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+//         return span?.textContent?.trim() ?? '';
+//     }
+//     )
+//     // console.log("Printing the first 5 links");
+//     // console.table(links.slice(0,5));
+//     // console.log("Printing the first 5 titles");
+//     // console.table(titles.slice(0,5));
+//     return {"links": links, "titles": titles};
+// }
 const getHomepageVideos = () => {
     // console.log("---- EXTRACTING HOMEPAGE LINKS ---");
-    const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'));
+    const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
+        .filter(div => {
+        // Check if element is actually visible
+        const rect = div.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 &&
+            getComputedStyle(div).visibility !== 'hidden';
+    });
     const links = contentDivs.map(contentDiv => {
         // Get the direct anchor child
         const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
@@ -605,15 +630,16 @@ const getHomepageVideos = () => {
         const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
         return (_b = (_a = span === null || span === void 0 ? void 0 : span.textContent) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
     });
-    // console.log("Printing the first 5 links");
-    // console.table(links.slice(0,5));
-    // console.log("Printing the first 5 titles");
-    // console.table(titles.slice(0,5));
     return { "links": links, "titles": titles };
 };
 const getRecommendedVideos = () => {
-    // console.log("---- EXTRACTING RECOMMENDED LINKS ---")
-    const contentDivs = Array.from(document.querySelectorAll('yt-lockup-view-model'));
+    console.log("---- EXTRACTING RECOMMENDED LINKS ---");
+    const contentDivs = Array.from(document.querySelectorAll('yt-lockup-view-model')).filter(div => {
+        // Check if element is actually visible
+        const rect = div.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0 &&
+            getComputedStyle(div).visibility !== 'hidden';
+    });
     const links = contentDivs.map(contentDiv => {
         // Get the direct anchor child
         const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
@@ -631,7 +657,7 @@ const getRecommendedVideos = () => {
     return { "links": links, "titles": titles };
 };
 ytConfigLoader.injectExtractor("/*", getHomepageVideos);
-// ytConfigLoader.injectExtractor("/watch?v=*", getRecommendedVideos);
+ytConfigLoader.injectExtractor("/watch?v=*", getRecommendedVideos);
 const ytInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(ytConfigLoader.config);
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
