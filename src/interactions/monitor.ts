@@ -1,6 +1,6 @@
 import { BackgroundMessage } from "../communication/backgroundmessage";
 import {DBDocument, ActivityDocument, SessionDocument} from "../database/dbdocument";
-import { Config, PathData, PathMap} from "./config";
+import { Config, ConfigLoader, ExtractorList, PathData, PathMap} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
@@ -32,13 +32,17 @@ export class Monitor {
     // Attribute added to all elements being monitored
     interactionAttribute: string;
 
-    constructor(config: Config) {
+    extractorList: ExtractorList;
+
+    constructor(configLoader: ConfigLoader) {
+        const config = configLoader.config;
         this.interactionEvents = config.events ? config.events : ['click'];
         this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new PageData();
         this.interactionAttribute = "monitoring-interactions"
+        this.extractorList = configLoader.extractorList;
 
 
         // Check if this page should be monitored
@@ -151,8 +155,8 @@ export class Monitor {
    */
 
     private createStateChangeRecord(event: Event): DBDocument {
-        
-        const metadata = this.currentPageData.extractData();
+        console.log("Detected state change event");
+        const metadata = this.extractorList.extract(this.currentPageData.url, SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
 
@@ -168,7 +172,8 @@ export class Monitor {
    */
 
     private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
-        const metadata = this.currentPageData.extractData();
+        console.log("Detected self loop change event");
+        const metadata = this.extractorList.extract(this.currentPageData.url, SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
         return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
@@ -183,12 +188,12 @@ export class Monitor {
    */
 
     private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
-
+        console.log("Detected interaction event");
         let metadata: {html: string, elementName: string; id?: string} = {
             html: element.getHTML(),
             elementName: name,
         };
-        let extractedData = this.currentPageData.extractData();
+        let extractedData = this.extractorList.extract(this.currentPageData.url, SenderMethod.InteractionDetection);
 
         metadata = {... metadata, ... extractedData};
 

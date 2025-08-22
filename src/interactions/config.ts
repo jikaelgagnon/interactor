@@ -1,4 +1,6 @@
-export {SelectorData, Config, ConfigLoader, PathData, PathMap};
+import { SenderMethod } from "../communication/sender";
+
+export {SelectorData, Config, ConfigLoader, PathData, PathMap, ExtractorData, ExtractorList};
 
 interface SelectorData{
     /**
@@ -49,27 +51,47 @@ interface Config {
     events?: string[];
 }
 
-class ConfigLoader {
-    public config: Config;
+class ExtractorData {
+    eventType: SenderMethod;
+    urlPattern: string;
+    extractor: () => object;
+    constructor(activityType: SenderMethod, urlPattern: string, extractor: () => object){
+        this.eventType = activityType;
+        this.urlPattern = urlPattern;
+        this.extractor = extractor;
+    }
+}
 
-    constructor(config: Config) {
-        this.config = config;
+class ExtractorList {
+    private extractors: ExtractorData[];
+    private baseURL: string;
+    constructor(extractors: ExtractorData[] = [], baseURL: string){
+        this.extractors = extractors;
+        this.baseURL = baseURL;
     }
 
-    /**
-     * A function that adds a data extractor for a given URL pattern. If the current URL
-     * most closely matches this pattern out of all patterns in the config, then this
-     * function will be called and the received ID will be included in the metadata of
-     * each log that occurs on the page.
-     * @param urlPattern - the pattern being matched
-     * @param dataExtractor - the function to extract data
-     */
-    injectExtractor(urlPattern: string, dataExtractor: () => object): void {
+    public extract(currentURL: string, eventType: SenderMethod){
+        console.log(`Attempting extraction for url: ${currentURL} and event type ${eventType}`);
+        let extractedData: object = {};
+        this.extractors.filter(e => {
+                const isCorrectActivity = (e.eventType == eventType || e.eventType == SenderMethod.Any);
+                // @ts-ignore: Ignoring TypeScript error for URLPattern not found
+                const p = new URLPattern(e.urlPattern, this.baseURL);
+                const isURLMatch = p.test(currentURL);
+                return isCorrectActivity && isURLMatch;
+            }).forEach(e =>
+                extractedData = {... extractedData, ... e.extractor()}
+            )
+        return extractedData;
+    }
+}
 
-        if (!(urlPattern in this.config.paths)) {
-            throw new Error("Trying to add ID selector to path that doesn't exist");
-        }
+class ConfigLoader {
+    public config: Config;
+    public extractorList: ExtractorList;
 
-        this.config.paths[urlPattern].dataExtractor = dataExtractor;
+    constructor(config: Config, extractorList: ExtractorData[] = []){
+        this.config = config;
+        this.extractorList = new ExtractorList(extractorList, config.baseURL);
     }
 }

@@ -20,6 +20,7 @@ var ActivityType;
     ActivityType["SelfLoop"] = "Self-Loop";
     ActivityType["StateChange"] = "State Change";
     ActivityType["Interaction"] = "Interaction";
+    ActivityType["Both"] = "Both";
 })(ActivityType || (ActivityType = {}));
 
 
@@ -70,6 +71,7 @@ var SenderMethod;
     SenderMethod["InteractionDetection"] = "Interaction Detection";
     SenderMethod["NavigationDetection"] = "Navigation Detection";
     SenderMethod["CloseSession"] = "Close Session";
+    SenderMethod["Any"] = "Any";
 })(SenderMethod || (SenderMethod = {}));
 
 
@@ -145,26 +147,42 @@ class SessionDocument extends DBDocument {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   ConfigLoader: () => (/* binding */ ConfigLoader)
+/* harmony export */   ConfigLoader: () => (/* binding */ ConfigLoader),
+/* harmony export */   ExtractorData: () => (/* binding */ ExtractorData),
+/* harmony export */   ExtractorList: () => (/* binding */ ExtractorList)
 /* harmony export */ });
+/* harmony import */ var _communication_sender__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../communication/sender */ "./src/communication/sender.ts");
 
-class ConfigLoader {
-    constructor(config) {
-        this.config = config;
+
+class ExtractorData {
+    constructor(activityType, urlPattern, extractor) {
+        this.eventType = activityType;
+        this.urlPattern = urlPattern;
+        this.extractor = extractor;
     }
-    /**
-     * A function that adds a data extractor for a given URL pattern. If the current URL
-     * most closely matches this pattern out of all patterns in the config, then this
-     * function will be called and the received ID will be included in the metadata of
-     * each log that occurs on the page.
-     * @param urlPattern - the pattern being matched
-     * @param dataExtractor - the function to extract data
-     */
-    injectExtractor(urlPattern, dataExtractor) {
-        if (!(urlPattern in this.config.paths)) {
-            throw new Error("Trying to add ID selector to path that doesn't exist");
-        }
-        this.config.paths[urlPattern].dataExtractor = dataExtractor;
+}
+class ExtractorList {
+    constructor(extractors = [], baseURL) {
+        this.extractors = extractors;
+        this.baseURL = baseURL;
+    }
+    extract(currentURL, eventType) {
+        console.log(`Attempting extraction for url: ${currentURL} and event type ${eventType}`);
+        let extractedData = {};
+        this.extractors.filter(e => {
+            const isCorrectActivity = (e.eventType == eventType || e.eventType == _communication_sender__WEBPACK_IMPORTED_MODULE_0__.SenderMethod.Any);
+            // @ts-ignore: Ignoring TypeScript error for URLPattern not found
+            const p = new URLPattern(e.urlPattern, this.baseURL);
+            const isURLMatch = p.test(currentURL);
+            return isCorrectActivity && isURLMatch;
+        }).forEach(e => extractedData = Object.assign(Object.assign({}, extractedData), e.extractor()));
+        return extractedData;
+    }
+}
+class ConfigLoader {
+    constructor(config, extractorList = []) {
+        this.config = config;
+        this.extractorList = new ExtractorList(extractorList, config.baseURL);
     }
 }
 
@@ -204,7 +222,7 @@ __webpack_require__.r(__webpack_exports__);
  * @param interactionAttribute - Attribute added to all elements being monitored
  */
 class Monitor {
-    constructor(config) {
+    constructor(configLoader) {
         /**
        * Generates a unique color from a given string
        * Source: https://stackoverflow.com/a/31037383
@@ -228,12 +246,14 @@ class Monitor {
                 }
             };
         })();
+        const config = configLoader.config;
         this.interactionEvents = config.events ? config.events : ['click'];
         this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new _pagedata__WEBPACK_IMPORTED_MODULE_2__.PageData();
         this.interactionAttribute = "monitoring-interactions";
+        this.extractorList = configLoader.extractorList;
         // Check if this page should be monitored
         // if (window.location.origin === this.baseURL) {
         //     this.initializeMonitor();
@@ -333,7 +353,8 @@ class Monitor {
    * @returns A document describing the state change
    */
     createStateChangeRecord(event) {
-        const metadata = this.currentPageData.extractData();
+        console.log("Detected state change event");
+        const metadata = this.extractorList.extract(this.currentPageData.url, _communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
@@ -346,7 +367,8 @@ class Monitor {
    * @returns A document describing self loop
    */
     createSelfLoopRecord(event, urlChange) {
-        const metadata = this.currentPageData.extractData();
+        console.log("Detected self loop change event");
+        const metadata = this.extractorList.extract(this.currentPageData.url, _communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
         return new _database_dbdocument__WEBPACK_IMPORTED_MODULE_1__.ActivityDocument(_communication_activity__WEBPACK_IMPORTED_MODULE_3__.ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
@@ -359,11 +381,12 @@ class Monitor {
    * @returns A document interaction self loop
    */
     createInteractionRecord(element, name, event) {
+        console.log("Detected interaction event");
         let metadata = {
             html: element.getHTML(),
             elementName: name,
         };
-        let extractedData = this.currentPageData.extractData();
+        let extractedData = this.extractorList.extract(this.currentPageData.url, _communication_sender__WEBPACK_IMPORTED_MODULE_4__.SenderMethod.InteractionDetection);
         metadata = Object.assign(Object.assign({}, metadata), extractedData);
         console.log("printing metadata");
         console.log(metadata);
@@ -584,33 +607,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./interactions/monitor */ "./src/interactions/monitor.ts");
 /* harmony import */ var _configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./configs/youtube_config.json */ "./src/configs/youtube_config.json");
 /* harmony import */ var _interactions_config__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./interactions/config */ "./src/interactions/config.ts");
+/* harmony import */ var _communication_sender__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./communication/sender */ "./src/communication/sender.ts");
 
 
 
-const ytConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.ConfigLoader(_configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__);
-// NOTE: This shit doesn't work! Likely has to do with the weird way things are updated... Need to make 
-// that very clear first, then hopefully the bug will arise. Note that issue is that the data is displayed at
-// the wrong time somehow...
-// Gets a list of links from the home page
-// const getHomepageVideos = (): object => {
-//     console.log("---- EXTRACTING HOMEPAGE LINKS ---");
-//     const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
-//     const links = contentDivs.map(contentDiv => {
-//     // Get the direct anchor child
-//         const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
-//         return anchor;
-//     }).filter(x => x != null).map(x => (x as HTMLAnchorElement).href);
-//     const titles = contentDivs.map(contentDiv => {
-//         const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
-//         return span?.textContent?.trim() ?? '';
-//     }
-//     )
-//     // console.log("Printing the first 5 links");
-//     // console.table(links.slice(0,5));
-//     // console.log("Printing the first 5 titles");
-//     // console.table(titles.slice(0,5));
-//     return {"links": links, "titles": titles};
-// }
+
 const getHomepageVideos = () => {
     // console.log("---- EXTRACTING HOMEPAGE LINKS ---");
     const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
@@ -620,17 +621,17 @@ const getHomepageVideos = () => {
         return rect.width > 0 && rect.height > 0 &&
             getComputedStyle(div).visibility !== 'hidden';
     });
-    const links = contentDivs.map(contentDiv => {
+    const videos = contentDivs.map(contentDiv => {
+        var _a, _b, _c;
         // Get the direct anchor child
         const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
-        return anchor;
-    }).filter(x => x != null).map(x => x.href);
-    const titles = contentDivs.map(contentDiv => {
-        var _a, _b;
         const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
-        return (_b = (_a = span === null || span === void 0 ? void 0 : span.textContent) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
-    });
-    return { "links": links, "titles": titles };
+        return {
+            link: (_a = anchor === null || anchor === void 0 ? void 0 : anchor.href) !== null && _a !== void 0 ? _a : '',
+            title: (_c = (_b = span === null || span === void 0 ? void 0 : span.textContent) === null || _b === void 0 ? void 0 : _b.trim()) !== null && _c !== void 0 ? _c : ''
+        };
+    }).filter(video => video.link !== '');
+    return { "videos": videos };
 };
 const getRecommendedVideos = () => {
     console.log("---- EXTRACTING RECOMMENDED LINKS ---");
@@ -640,25 +641,24 @@ const getRecommendedVideos = () => {
         return rect.width > 0 && rect.height > 0 &&
             getComputedStyle(div).visibility !== 'hidden';
     });
-    const links = contentDivs.map(contentDiv => {
-        // Get the direct anchor child
-        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a');
-        return anchor;
-    }).filter(x => x != null).map(x => x.href);
-    const titles = contentDivs.map(contentDiv => {
-        var _a, _b;
+    const videos = contentDivs.map(contentDiv => {
+        var _a, _b, _c;
+        // Get the anchor with the video link
+        const anchor = contentDiv.querySelector('a[href^="/watch"]');
         const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
-        return (_b = (_a = span === null || span === void 0 ? void 0 : span.textContent) === null || _a === void 0 ? void 0 : _a.trim()) !== null && _b !== void 0 ? _b : '';
-    });
-    // console.log("Printing the first 5 links");
-    // console.table(links.slice(0,5));
-    // console.log("Printing the first 5 titles");
-    // console.table(titles.slice(0,5));
-    return { "links": links, "titles": titles };
+        return {
+            link: (_a = anchor === null || anchor === void 0 ? void 0 : anchor.href) !== null && _a !== void 0 ? _a : '',
+            title: (_c = (_b = span === null || span === void 0 ? void 0 : span.textContent) === null || _b === void 0 ? void 0 : _b.trim()) !== null && _c !== void 0 ? _c : ''
+        };
+    }).filter(video => video.link !== '');
+    // console.log("Printing the first 5 videos");
+    // console.table(videos.slice(0,5));
+    return { "videos": videos };
 };
-ytConfigLoader.injectExtractor("/*", getHomepageVideos);
-ytConfigLoader.injectExtractor("/watch?v=*", getRecommendedVideos);
-const ytInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(ytConfigLoader.config);
+const extractors = [new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.ExtractorData(_communication_sender__WEBPACK_IMPORTED_MODULE_3__.SenderMethod.InteractionDetection, "/", getHomepageVideos),
+    new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.ExtractorData(_communication_sender__WEBPACK_IMPORTED_MODULE_3__.SenderMethod.InteractionDetection, "/watch?v=*", getRecommendedVideos)];
+const ytConfigLoader = new _interactions_config__WEBPACK_IMPORTED_MODULE_2__.ConfigLoader(_configs_youtube_config_json__WEBPACK_IMPORTED_MODULE_1__, extractors);
+const ytInteractor = new _interactions_monitor__WEBPACK_IMPORTED_MODULE_0__.Monitor(ytConfigLoader);
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
 //     if (!vid){
