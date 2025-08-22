@@ -254,12 +254,6 @@ class Monitor {
         this.currentPageData = new _pagedata__WEBPACK_IMPORTED_MODULE_2__.PageData();
         this.interactionAttribute = "monitoring-interactions";
         this.extractorList = configLoader.extractorList;
-        // Check if this page should be monitored
-        // if (window.location.origin === this.baseURL) {
-        //     this.initializeMonitor();
-        // } else {
-        //     console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
-        // }
         if (window.location.origin === this.baseURL) {
             const runWhenVisible = () => {
                 if (document.visibilityState === 'visible') {
@@ -482,15 +476,15 @@ class PageData {
      * and returns a list of all matches. Additionally, it updates whether the current path
      * includes an id.
      * @param baseURL: The base url for the page (eg. www.youtube.com)
-     * @param paths: A list of all the paths defined in a config
+     * @param patterns: A list of all the paths defined in a config
      *
-     * @returns A list of all paths in the config that match `baseURL`
+     * @returns A list of all patterns in the config that match `baseURL`
      */
-    updateMatchData(baseURL, paths) {
+    updateMatchData(baseURL, patterns) {
         console.log("updating page data");
         let closestMatch = ""; // the pattern that most closely matches the current URL
         // Get a list of all the paths that match the current URL
-        const matches = Object.keys(paths).filter((path) => {
+        const matches = Object.keys(patterns).filter((path) => {
             // console.log(path);
             // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, baseURL);
@@ -501,22 +495,13 @@ class PageData {
             }
             return match;
         });
-        this.currentPath = closestMatch;
+        this.currentPattern = closestMatch;
         if (matches.length === 0) {
             console.log("no matches found");
         }
         // this.urlUsesId = closestMatch.endsWith(":id");
-        this.matchPathData = paths[closestMatch];
+        this.matchPathData = patterns[closestMatch];
         return matches;
-    }
-    /**
-     * @returns Result of if it exsits`matchPathData.idSelector`, else it returns an empty string
-     */
-    extractData() {
-        var _a, _b;
-        console.log(`Current closest match is ${this.currentPath}`);
-        console.log("Trying to extract data");
-        return ((_b = (_a = this.matchPathData).dataExtractor) === null || _b === void 0 ? void 0 : _b.call(_a)) || {};
     }
     /**
      * @param matches: A list of all matching paths to the current url

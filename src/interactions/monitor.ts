@@ -1,6 +1,6 @@
 import { BackgroundMessage } from "../communication/backgroundmessage";
 import {DBDocument, ActivityDocument, SessionDocument} from "../database/dbdocument";
-import { Config, ConfigLoader, ExtractorList, PathData, PathMap} from "./config";
+import { Config, ConfigLoader, ExtractorList, PatternSelectorMap} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
@@ -24,7 +24,7 @@ export class Monitor {
     highlight: boolean;
     // An object mapping path patterns to their corresponding CSS selectors
     // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-    paths: PathMap;
+    paths: PatternSelectorMap;
     // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
     baseURL: string;
     // Contains data relevant to the current page.
@@ -43,14 +43,6 @@ export class Monitor {
         this.currentPageData = new PageData();
         this.interactionAttribute = "monitoring-interactions"
         this.extractorList = configLoader.extractorList;
-
-
-        // Check if this page should be monitored
-        // if (window.location.origin === this.baseURL) {
-        //     this.initializeMonitor();
-        // } else {
-        //     console.log(`Skipping monitoring. Current origin (${window.location.origin}) does not match base URL (${this.baseURL}).`);
-        // }
 
         if (window.location.origin === this.baseURL) {
             const runWhenVisible = () => {
