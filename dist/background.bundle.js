@@ -27341,6 +27341,7 @@ var SenderMethod;
     SenderMethod["InteractionDetection"] = "Interaction Detection";
     SenderMethod["NavigationDetection"] = "Navigation Detection";
     SenderMethod["CloseSession"] = "Close Session";
+    SenderMethod["Any"] = "Any";
 })(SenderMethod || (SenderMethod = {}));
 
 

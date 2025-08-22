@@ -4,7 +4,8 @@
 enum ActivityType {
     SelfLoop = "Self-Loop",
     StateChange = "State Change",
-    Interaction = "Interaction"
+    Interaction = "Interaction",
+    Both = "Both"
 }
 
 export {ActivityType}
