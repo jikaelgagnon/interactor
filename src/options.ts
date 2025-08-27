@@ -7,7 +7,7 @@ const saveOptions = (): void => {
     { highlightElements, useDB },
     () => {
       // Update status to let user know options were saved.
-      const status = document.getElementById('status') as HTMLElement;
+      const status = document.getElementById('status')!;
       if (status) {
         status.textContent = 'Options saved.';
         setTimeout(() => {
@@ -32,4 +32,4 @@ const restoreOptions = (): void => {
 
 document.addEventListener('DOMContentLoaded', restoreOptions);
 
-(document.getElementById('save') as HTMLElement).addEventListener('click', saveOptions);
+(document.getElementById('save')!).addEventListener('click', saveOptions);

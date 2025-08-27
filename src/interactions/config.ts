@@ -12,15 +12,7 @@ interface SelectorNamePair{
     name: string;
 }
 
-interface PatternSelectorMap {
-    /**
-     * A mapping of URL patterns to path data.
-     * The URL Pattern should follow the URL Pattern API syntax.
-     * These are appended to the baseURL when checking for matches.
-     * Ex: baseURL: www.youtube.com, path: /shorts/:id -> www.youtube.com/shorts/:id
-     */
-    [path: string]: PatternData;
-}
+type PatternSelectorMap = Record<string, PatternData>;
 
 interface PatternData {
     /**

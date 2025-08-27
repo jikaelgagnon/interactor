@@ -4,7 +4,7 @@ import { ActivityDocument, SessionDocument } from "./database/dbdocument";
 import { BackgroundMessage } from "./communication/backgroundmessage";
 import { SenderMethod } from "./communication/sender";
 
-let USE_DB: boolean = false;
+let USE_DB = false;
 
 class SessionManager {
   private static instance: SessionManager;
@@ -122,7 +122,18 @@ class SessionManager {
         await session.createSessionInDb();
         await this.createSessionChromeStorage(tabId!, session);
         chrome.action.setPopup({ popup: "popup.html" });
-        chrome.action.openPopup();
+          chrome.action.setPopup({ popup: "popup.html" });
+  
+        try {
+          await chrome.action.openPopup();
+        } catch (error) {
+          if (error instanceof Error) {
+            console.warn("Could not open popup:", error.message);
+          } else {
+            console.warn("Could not open popup:", error);
+          }
+          // Optionally, you could try to open in a new window or handle differently
+        }
         const result = await chrome.storage.sync.get("highlightElements");
         console.log(`Highlight elements: ${result.highlightElements}`)
 
@@ -226,9 +237,9 @@ class SessionManager {
 
 class SessionData {
   sessionInfo: SessionDocument;
-  sessionId: string = "NO ID SET";
+  sessionId = "NO ID SET";
   documents: ActivityDocument[] = [];
-  baseUrl: string = "";
+  baseUrl = "";
   private tabId: number | null = null;
 
   constructor() {

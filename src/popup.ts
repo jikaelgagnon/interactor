@@ -24,11 +24,11 @@ class DataManager {
     // A list of all sessions obtained when querying the database for the user's data
     private sessions: SessionData[] = [];
     // A list of strings identifying all sessions that are selected to be deleted
-    private selectedItems: Set<string> = new Set();
+    private selectedItems = new Set<string>();
     // The user's email address. If not found it's set to an empty string.
-    private userEmail: string = '';
+    private userEmail = '';
     // A set of session IDs that are currently expanded in the UI
-    private expandedSessions: Set<string> = new Set();
+    private expandedSessions = new Set<string>();
 
     /**
      * Creates a new DataManager instance and initializes the application.
@@ -300,8 +300,8 @@ class DataManager {
      * @param url - The URL string to extract the base name from
      * @returns The base domain name (e.g., "google" from "www.google.com")
      */
-    baseName(url: String): string {
-        let base = url.split(".")[1]
+    baseName(url: string): string {
+        const base = url.split(".")[1]
         return base;
     }
 
@@ -401,7 +401,7 @@ class DataManager {
         }
         
         // Add event listener for activity checkbox
-        const checkbox = activityDiv.querySelector(`#${activityId}`) as HTMLInputElement;
+        const checkbox = activityDiv.querySelector(`#${activityId}`)!;
         if (checkbox) {
             checkbox.addEventListener('change', (e) => {
                 this.toggleItemSelection(activityId, (e.target as HTMLInputElement).checked);
@@ -418,7 +418,7 @@ class DataManager {
      */
     addSessionEventListeners(sessionDiv: HTMLElement, session: SessionData): void {
         // Session checkbox
-        const sessionCheckbox = sessionDiv.querySelector(`#session_${session.id}`) as HTMLInputElement;
+        const sessionCheckbox = sessionDiv.querySelector(`#session_${session.id}`)!;
         if (sessionCheckbox) {
             sessionCheckbox.addEventListener('change', (e) => {
                 this.toggleSessionSelection(session.id, (e.target as HTMLInputElement).checked);
@@ -426,7 +426,7 @@ class DataManager {
         }
         
         // Toggle button
-        const toggleButton = sessionDiv.querySelector('.toggle-activities') as HTMLButtonElement;
+        const toggleButton = sessionDiv.querySelector('.toggle-activities')!;
         if (toggleButton) {
             toggleButton.addEventListener('click', () => {
                 this.toggleSessionExpansion(session.id);
@@ -565,7 +565,7 @@ class DataManager {
         // Update item styling
         this.sessions.forEach(session => {
             // Update session styling
-            const sessionElement = document.getElementById(`session_${session.id}`)?.closest('.session-group') as HTMLElement;
+            const sessionElement = document.getElementById(`session_${session.id}`)?.closest('.session-group')!;
             if (sessionElement) {
                 sessionElement.classList.toggle('selected', this.selectedItems.has(`session_${session.id}`));
             }
@@ -573,7 +573,7 @@ class DataManager {
             // Update activity styling
             session.activities.forEach((_, index) => {
                 const activityId = `activity_${session.id}_${index}`;
-                const activityElement = document.getElementById(activityId)?.closest('.activity-item') as HTMLElement;
+                const activityElement = document.getElementById(activityId)?.closest('.activity-item')!;
                 if (activityElement) {
                     activityElement.classList.toggle('selected', this.selectedItems.has(activityId));
                 }
@@ -667,7 +667,7 @@ class DataManager {
      * @param message - The message text to display
      * @param type - The type of message ('success' or 'error'), defaults to 'success'
      */
-    showStatus(message: string, type: string = 'success'): void {
+    showStatus(message: string, type = 'success'): void {
         const statusElement = document.getElementById('statusMessage');
         if (statusElement) {
             statusElement.textContent = message;
