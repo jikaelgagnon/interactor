@@ -1,46 +1,15 @@
 
 > interactor@1.0.0 lint
-> eslint . --fix
+> eslint .
 
-
-/home/jikael/mcgill/interactor/src/background.ts
-   15:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-   17:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-   25:38  error  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
-   28:7   error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-   51:54  error  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
-   72:39  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
-   72:61  error  Async arrow function has no 'await' expression                                                                                                                      @typescript-eslint/require-await
-   73:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-   78:26  error  Unsafe argument of type `any` assigned to a parameter of type `BackgroundMessage`                                                                                   @typescript-eslint/no-unsafe-argument
-   82:43  error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-   82:58  error  Unsafe member access .message on an `any` value                                                                                                                     @typescript-eslint/no-unsafe-member-access
-   87:39  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
-   87:65  error  'tab' is defined but never used                                                                                                                                     @typescript-eslint/no-unused-vars
-  106:90  error  Unexpected any. Specify a different type                                                                                                                            @typescript-eslint/no-explicit-any
-  112:9   error  Unexpected lexical declaration in case block                                                                                                                        no-case-declarations
-  117:9   error  Unexpected lexical declaration in case block                                                                                                                        no-case-declarations
-  124:9   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-  125:11  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-  137:9   error  Unexpected lexical declaration in case block                                                                                                                        no-case-declarations
-  140:49  error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-  200:5   error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-  200:39  error  Unsafe member access .sessionId on an `any` value                                                                                                                   @typescript-eslint/no-unsafe-member-access
-  201:5   error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-  201:41  error  Unsafe member access .sessionInfo on an `any` value                                                                                                                 @typescript-eslint/no-unsafe-member-access
-  202:5   error  Unsafe assignment of an `any` value                                                                                                                                 @typescript-eslint/no-unsafe-assignment
-  202:39  error  Unsafe member access .documents on an `any` value                                                                                                                   @typescript-eslint/no-unsafe-member-access
-  202:49  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
-  263:14  error  'e' is defined but never used                                                                                                                                       @typescript-eslint/no-unused-vars
-  293:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
 
 /home/jikael/mcgill/interactor/src/content.ts
-   3:8   error  'tiktokConfig' is defined but never used           @typescript-eslint/no-unused-vars
-   4:8   error  'linkedinConfig' is defined but never used         @typescript-eslint/no-unused-vars
-   6:10  error  'ActivityType' is defined but never used           @typescript-eslint/no-unused-vars
-  26:13  error  Unsafe assignment of an error typed value          @typescript-eslint/no-unsafe-assignment
-  49:13  error  Unsafe assignment of an error typed value          @typescript-eslint/no-unsafe-assignment
-  64:7   error  'ytInteractor' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   3:8   error  'tiktokConfig' is defined but never used                                           @typescript-eslint/no-unused-vars
+   4:8   error  'linkedinConfig' is defined but never used                                         @typescript-eslint/no-unused-vars
+   6:10  error  'ActivityType' is defined but never used                                           @typescript-eslint/no-unused-vars
+  22:24  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  45:24  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  64:7   error  'ytInteractor' is assigned a value but never used                                  @typescript-eslint/no-unused-vars
 
 /home/jikael/mcgill/interactor/src/interactions/config.ts
   70:17  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
@@ -134,5 +103,6 @@
   576:41  error  Optional chain expressions can return undefined by design - using a non-null assertion is unsafe and wrong                                                          @typescript-eslint/no-non-null-asserted-optional-chain
   614:52  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
 
-✖ 119 problems (119 errors, 0 warnings)
+✖ 90 problems (90 errors, 0 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
 
