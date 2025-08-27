@@ -6,29 +6,37 @@ import { SenderMethod } from "./communication/sender";
 
 let USE_DB = false;
 
+interface StoredSessionData {
+  sessionId: string;
+  sessionInfo: SessionDocument;
+  documents?: ActivityDocument[];
+  baseUrl?: string;
+}
+
 class SessionManager {
   private static instance: SessionManager;
   private sessionCache: Map<number, SessionData>;
 
   private constructor() {
     this.sessionCache = new Map();
-    this.loadUseDB().then(() => {
-      this.setupListeners();
-      this.pruneStaleSessions();
-    });
   }
 
   /**
    * Loads the useDB flag from the chrome storage settings.
    * If true, activities will be logged to the database.
    */
-  private async loadUseDB(): Promise<any> {
+  private static async loadUseDB(): Promise<void> {
     try {
-      const result = await chrome.storage.sync.get("useDB");
-      USE_DB = result.useDB;
-      console.log("After loading, USE_DB =", USE_DB);
+      const { useDB }: {useDB?: boolean} = await chrome.storage.sync.get("useDB");
+      if (useDB !== undefined) {
+        USE_DB = useDB;
+        console.log("After loading, USE_DB =", USE_DB);
+      } else {
+        console.error("useDB not found in storage, using default");
+        USE_DB = false;
+      }
     } catch (error) {
-      console.error("Using DB:", error);
+      console.error("Error detected when trying to load USE_DB:", error);
     }
   }
 
@@ -36,9 +44,12 @@ class SessionManager {
    * Gets the singleton instance of the session manager class
    * @returns The singleton instance
    */
-  public static getInstance(): SessionManager {
+  public static async getInstance(): Promise<SessionManager> {
     if (!SessionManager.instance) {
       SessionManager.instance = new SessionManager();
+      await SessionManager.loadUseDB();
+      SessionManager.instance.setupListeners();
+      await SessionManager.instance.pruneStaleSessions();
     }
     return SessionManager.instance;
   }
@@ -48,7 +59,7 @@ class SessionManager {
    * to the database
    * @param tabId - the unique ID for the related tab
    */
-  private async closeSession(tabId: number): Promise<any> {
+  private async closeSession(tabId: number): Promise<void> {
     const session = await this.loadSession(tabId);
     if (session) {
       await session.flushAllActivitiesToDb();
@@ -69,28 +80,36 @@ class SessionManager {
    */
 
   private setupListeners(): void {
-    chrome.tabs.onRemoved.addListener(async (tabId: number) => {
-      this.closeSession(tabId);
+    chrome.tabs.onRemoved.addListener((tabId: number) => {
+      this.closeSession(tabId).catch(error => {
+        console.error("Error closing session:", error);
+      });
     });
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const tabId = sender.tab?.id ?? null;
-      this.handleMessage(message, tabId)
+      this.handleMessage(message as BackgroundMessage, tabId)
         .then((response) => sendResponse(response))
         .catch((error) => {
           console.error("Error handling message:", error);
-          sendResponse({ status: "Error", message: error.message });
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          sendResponse({ status: "Error", message: errorMessage });
         });
       return true;
     });
 
-    chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       if (changeInfo.url) {
-        const session = await this.loadSession(tabId);
-        if (session && !session.hasSameBaseUrl(changeInfo.url)) {
-          console.log("URL CHANGED... CLOSING SESSION");
-          await this.closeSession(tabId);
-        }
+        this.loadSession(tabId)
+          .then(session => {
+            if (session && !session.hasSameBaseUrl(changeInfo.url!)) {
+              console.log("URL CHANGED... CLOSING SESSION");
+              return this.closeSession(tabId);
+            }
+          })
+          .catch(error => {
+            console.error("Error handling tab update:", error);
+          });
       }
     });
   }
@@ -103,17 +122,18 @@ class SessionManager {
    * @returns 
    */
 
-  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<any> {
+  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<object> {
     const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
 
     switch (request.senderMethod) {
       case SenderMethod.InteractionDetection:
-      case SenderMethod.NavigationDetection:
+      case SenderMethod.NavigationDetection: {
         const doc = request.payload as ActivityDocument;
-        session.addActivityDocument(doc);
+        await session.addActivityDocument(doc);
         return { status: "Activity added to local session." };
+      }
 
-      case SenderMethod.InitializeSession:
+      case SenderMethod.InitializeSession:{
         const email = await this.getUserEmail();
         session.sessionInfo = request.payload as SessionDocument;
         session.sessionInfo.email = email;
@@ -121,8 +141,7 @@ class SessionManager {
         session.setTabId(tabId!);
         await session.createSessionInDb();
         await this.createSessionChromeStorage(tabId!, session);
-        chrome.action.setPopup({ popup: "popup.html" });
-          chrome.action.setPopup({ popup: "popup.html" });
+        await chrome.action.setPopup({ popup: "popup.html" });
   
         try {
           await chrome.action.openPopup();
@@ -134,13 +153,20 @@ class SessionManager {
           }
           // Optionally, you could try to open in a new window or handle differently
         }
-        const result = await chrome.storage.sync.get("highlightElements");
-        console.log(`Highlight elements: ${result.highlightElements}`)
+        let {highlightElements} : {highlightElements?: boolean} = await chrome.storage.sync.get("highlightElements");
+        if (highlightElements !== undefined) {
+          console.log(`Highlight elements: ${highlightElements}`)
+        } else {
+          console.error("highlightElements not found in storage, using default");
+          highlightElements = true;
+        }
+        console.log(`Highlight elements: ${highlightElements}}`)
 
-        return { status: "Session initialized", highlight: result.highlightElements};
-
-      default:
+        return { status: "Session initialized", highlight: highlightElements};
+      }
+      default:{
         return { status: `Unrecognized request type: ${request.senderMethod}` };
+      }
     }
   }
 
@@ -195,11 +221,14 @@ class SessionManager {
 
     const result = await chrome.storage.local.get(String(tabId));
     if (!result[tabId]) return null;
+    const typedResult = result as Record<number, StoredSessionData>;
+    const storedData = typedResult[tabId];
 
     const session = new SessionData();
-    session.sessionId = result[tabId].sessionId;
-    session.sessionInfo = result[tabId].sessionInfo;
-    session.documents = result[tabId].documents || [];
+    session.sessionId = storedData.sessionId;
+    session.sessionInfo = storedData.sessionInfo;
+    session.documents = storedData.documents ?? [];
+    session.baseUrl = storedData.baseUrl ?? "";
     session.setTabId(tabId);
     this.sessionCache.set(tabId, session);
     return session;
@@ -260,8 +289,8 @@ class SessionData {
   setBaseUrl(url: string): void {
     try {
       this.baseUrl = this.getHostname(url);
-    } catch (e) {
-      console.warn("Could not parse base URL:", url);
+    } catch {
+      console.error("Could not parse base URL:", url);
     }
   }
 
@@ -276,12 +305,12 @@ class SessionData {
   /**
    * Adds a document to memory and persists the session to chrome.storage.local.
    */
-  addActivityDocument(document: ActivityDocument): void {
+  async addActivityDocument(document: ActivityDocument): Promise<void> {
     this.documents.push(document);
-    this.addToChromeLocalStorage();
+    await this.addToChromeLocalStorage();
   }
 
-  private addToChromeLocalStorage(): void {
+  private async addToChromeLocalStorage(): Promise<void> {
     if (this.tabId === null) return;
 
     const data = {
@@ -290,7 +319,7 @@ class SessionData {
       documents: this.documents,
     };
 
-    chrome.storage.local.set({ [this.tabId]: data });
+    await chrome.storage.local.set({ [this.tabId]: data });
   }
 
   async flushAllActivitiesToDb(): Promise<void> {
@@ -303,7 +332,7 @@ class SessionData {
       });
       console.log(`Flushed ${this.documents.length} activities to session:`, this.sessionId);
       this.documents = [];
-      this.addToChromeLocalStorage(); // persist cleared docs
+      await this.addToChromeLocalStorage(); // persist cleared docs
     } catch (e) {
       console.error("Error flushing activities:", e);
     }
@@ -342,4 +371,4 @@ class SessionData {
   }
 }
 
-SessionManager.getInstance();
+SessionManager.getInstance().catch((e) => console.error("Error when creating instance of SessionManager:", e));
