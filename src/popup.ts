@@ -2,6 +2,8 @@ import { db } from "./database/firebase";
 import { collection, query, where, getDocs, doc, writeBatch} from "firebase/firestore";
 import { utils, writeFile } from "xlsx";
 
+console.log("printing from popup");
+
 interface SessionData {
     id: string;
     sessionInfo: {

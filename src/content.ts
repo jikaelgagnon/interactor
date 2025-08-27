@@ -6,82 +6,87 @@ import { ConfigLoader, ExtractorData } from "./interactions/config";
 import { ActivityType } from "./communication/activity";
 import { SenderMethod } from "./communication/sender";
 
-const getHomepageVideos = (): object => {
-    // console.log("---- EXTRACTING HOMEPAGE LINKS ---");
-    const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
-        .filter(div => {
+try
+{
+    const getHomepageVideos = (): object => {
+        // console.log("---- EXTRACTING HOMEPAGE LINKS ---");
+        const contentDivs = Array.from(document.querySelectorAll('#content.ytd-rich-item-renderer'))
+            .filter(div => {
+                // Check if element is actually visible
+                const rect = div.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0 && 
+                    getComputedStyle(div).visibility !== 'hidden';
+            });
+        
+        const videos = contentDivs.map(contentDiv => {
+            // Get the direct anchor child
+            const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a') as HTMLAnchorElement | null;
+            const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+            
+            return {
+                link: anchor?.href ?? '',
+                title: span?.textContent?.trim() ?? ''
+            };
+        }).filter(video => video.link !== '');
+        
+        return {"videos": videos};
+    };
+
+    const getRecommendedVideos = (): object => {
+        console.log("---- EXTRACTING RECOMMENDED LINKS ---");
+        const contentDivs = Array.from(document.querySelectorAll('yt-lockup-view-model')).filter(div => {
             // Check if element is actually visible
             const rect = div.getBoundingClientRect();
             return rect.width > 0 && rect.height > 0 && 
-                   getComputedStyle(div).visibility !== 'hidden';
+                getComputedStyle(div).visibility !== 'hidden';
         });
-    
-    const videos = contentDivs.map(contentDiv => {
-        // Get the direct anchor child
-        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a') as HTMLAnchorElement | null;
-        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
         
-        return {
-            link: anchor?.href ?? '',
-            title: span?.textContent?.trim() ?? ''
-        };
-    }).filter(video => video.link !== '');
-    
-    return {"videos": videos};
-};
-
-const getRecommendedVideos = (): object => {
-    console.log("---- EXTRACTING RECOMMENDED LINKS ---");
-    const contentDivs = Array.from(document.querySelectorAll('yt-lockup-view-model')).filter(div => {
-        // Check if element is actually visible
-        const rect = div.getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0 && 
-               getComputedStyle(div).visibility !== 'hidden';
-    });
-    
-    const videos: object = contentDivs.map(contentDiv => {
-        // Get the anchor with the video link
-        const anchor = contentDiv.querySelector('a[href^="/watch"]') as HTMLAnchorElement | null;
-        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+        const videos: object = contentDivs.map(contentDiv => {
+            // Get the anchor with the video link
+            const anchor = contentDiv.querySelector('a[href^="/watch"]') as HTMLAnchorElement | null;
+            const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
+            
+            return {
+                link: anchor?.href ?? '',
+                title: span?.textContent?.trim() ?? ''
+            };
+        }).filter(video => video.link !== '');
         
-        return {
-            link: anchor?.href ?? '',
-            title: span?.textContent?.trim() ?? ''
-        };
-    }).filter(video => video.link !== '');
-    
-    // console.log("Printing the first 5 videos");
-    // console.table(videos.slice(0,5));
-    return {"videos": videos};
-};
+        // console.log("Printing the first 5 videos");
+        // console.table(videos.slice(0,5));
+        return {"videos": videos};
+    };
 
-const extractors = [new ExtractorData(SenderMethod.InteractionDetection, "/", getHomepageVideos), 
-                        new ExtractorData(SenderMethod.InteractionDetection, "/watch?v=*", getRecommendedVideos)]
+    const extractors = [new ExtractorData(SenderMethod.InteractionDetection, "/", getHomepageVideos), 
+                            new ExtractorData(SenderMethod.InteractionDetection, "/watch?v=*", getRecommendedVideos)]
 
-const ytConfigLoader = new ConfigLoader(ytConfig, extractors);
+    const ytConfigLoader = new ConfigLoader(ytConfig, extractors);
 
-const ytInteractor = new Monitor(ytConfigLoader);
+    const ytInteractor = new Monitor(ytConfigLoader);
 
-// const tiktokIDSelector = (): object => {
-//     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
-//     if (!vid){
-//         console.log("no url found!");
-//         return {};
-//     }
-//     let id = vid.id.split("-").at(-1);
-//     let url = `https://tiktok.com/share/video/${id}`;
-//     return {
-//         "uniqueURL": url
-//     };
-// }
+    // const tiktokIDSelector = (): object => {
+    //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
+    //     if (!vid){
+    //         console.log("no url found!");
+    //         return {};
+    //     }
+    //     let id = vid.id.split("-").at(-1);
+    //     let url = `https://tiktok.com/share/video/${id}`;
+    //     return {
+    //         "uniqueURL": url
+    //     };
+    // }
 
 
 
-// console.log(tiktokConfig);
-// const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
-// tiktokConfigLoader.injectExtractor("/*", tiktokIDSelector);
-// const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
+    // console.log(tiktokConfig);
+    // const tiktokConfigLoader = new ConfigLoader(tiktokConfig);
+    // tiktokConfigLoader.injectExtractor("/*", tiktokIDSelector);
+    // const tiktokInteractor = new Monitor(tiktokConfigLoader.config);
 
-// // console.log(tiktokConfig);
-// const linkedinConfigLoader = new ConfigLoader(linkedinConfig);
-// const linkedinInteractor = new Monitor(linkedinConfigLoader.config);
+    // // console.log(tiktokConfig);
+    // const linkedinConfigLoader = new ConfigLoader(linkedinConfig);
+    // const linkedinInteractor = new Monitor(linkedinConfigLoader.config);
+} catch (error){
+    console.error('Content script error:', error);
+}

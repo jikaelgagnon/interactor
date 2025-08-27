@@ -66,8 +66,8 @@ export class Monitor {
      * Initializes the monitor if base URL matches the current URL
      */
     private async initializeMonitor() {
+        console.log("initializing monitor");
         this.updateCurrentPageData(document.location.href);
-
         try {
             // Creates a new entry in the DB describing the state at the start of the session
             await this.initializeSession();
@@ -92,8 +92,8 @@ export class Monitor {
         const currentState = new SessionDocument(this.currentPageData.url, document.title);
         console.log("Checking highlight");
         const response = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
-        this.highlight = response.highlight   
-        // console.log(`Highlight is set to ${this.highlight}`)
+        this.highlight = response.highlight;
+        console.log(`Highlight is set to ${this.highlight}`)
     }
 
     /**
