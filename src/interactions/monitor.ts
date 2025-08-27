@@ -125,8 +125,8 @@ export class Monitor {
         // console.log("Current page data:");
         // console.log(this.currentPageData);
         this.currentPageData.selectors.forEach(interaction => {
-            let elements = document.querySelectorAll(`:is(${interaction["selector"]}):not([${this.interactionAttribute}])`);
-            let name = interaction["name"];
+            const elements = document.querySelectorAll(`:is(${interaction.selector}):not([${this.interactionAttribute}])`);
+            const name = interaction.name;
             elements.forEach(element => {
                 if (this.highlight) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute(this.interactionAttribute, 'true');
@@ -185,7 +185,7 @@ export class Monitor {
             html: element.getHTML(),
             elementName: name,
         };
-        let extractedData = this.extractorList.extract(this.currentPageData.url, SenderMethod.InteractionDetection);
+        const extractedData = this.extractorList.extract(this.currentPageData.url, SenderMethod.InteractionDetection);
 
         metadata = {... metadata, ... extractedData};
 
@@ -205,9 +205,26 @@ export class Monitor {
    */
 
     private async sendMessageToBackground(senderMethod: SenderMethod, payload: DBDocument): Promise<any> {
-        let message = new BackgroundMessage(senderMethod, payload);
-        const response = await chrome.runtime.sendMessage(message);
-        return response;
+        try {
+            // Check if runtime is available (extension context still valid)
+            if (!chrome.runtime?.id) {
+                throw new Error('Extension context invalidated');
+            }
+
+            const message = new BackgroundMessage(senderMethod, payload);
+            const response = await chrome.runtime.sendMessage(message);
+            
+            // Chrome returns undefined if no listeners, check if that's expected
+            if (response === undefined) {
+                console.warn('No response from background script');
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('Background message failed:', error);
+            // Decide whether to throw or handle gracefully based on your needs
+            return null; // or throw error;
+        }
     }
 
     /**
@@ -223,7 +240,11 @@ export class Monitor {
         // console.log(element.innerHTML);
         // console.log(element.getHTML());
         const record = this.createInteractionRecord(element, name, e);
-        this.sendMessageToBackground(SenderMethod.InteractionDetection, record);
+        this.sendMessageToBackground(SenderMethod.InteractionDetection, record)
+        .catch(error => {
+            console.error('Failed to send interaction data:', error);
+            // Maybe queue for retry, or just log and continue
+        });
     }
 
     /**
@@ -233,8 +254,8 @@ export class Monitor {
      */
 
     private onNavigationDetection(navEvent: any): void {
-        let baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1]
-        let urlChange = !(navEvent.destination.url === this.currentPageData.url);
+        const baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1]
+        const urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
 
@@ -244,17 +265,23 @@ export class Monitor {
         console.log(`Navigation detected with event type: ${navEvent.type}`)
         if (baseURLChange){
             console.log("URL base change detected. Closing program.");
-            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.url, document.title));
+            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.url, document.title)).catch(error => {
+            console.error('Failed to send interaction data:', error);
+            });
         }
         else if (navEvent.navigationType === "push") {
             console.log("Push event detected.");
             const record = this.createStateChangeRecord(navEvent);
-            this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
+            this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
+            console.error('Failed to send interaction data:', error);
+            });
             this.updateCurrentPageData(this.currentPageData.url);
         } else if (navEvent.navigationType === "replace") {
             console.log("Replace event detected.");
             const record = this.createSelfLoopRecord(navEvent, urlChange);
-            this.sendMessageToBackground(SenderMethod.NavigationDetection, record);
+            this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
+            console.error('Failed to send interaction data:', error);
+            });
         }
     }
     

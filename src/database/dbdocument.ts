@@ -25,8 +25,8 @@ class ActivityDocument extends DBDocument{
     // Event type (eg. click, scroll, etc...)
     eventType: string
     // Metadata about the event
-    metadata: Object;
-    constructor(type: ActivityType, event: Event, metadata: Object, url: string, title: string) {
+    metadata: object;
+    constructor(type: ActivityType, event: Event, metadata: object, url: string, title: string) {
         super(url, title);
         this.activityType = type;
         this.createdAt = new Date();
@@ -42,7 +42,7 @@ class ActivityDocument extends DBDocument{
 class SessionDocument extends DBDocument{
     startTime: Date;
     endTime?: Date;
-    email: string = "Email not set";
+    email = "Email not set";
     constructor(url: string, title: string) {
         super(url, title);
         this.startTime = new Date();

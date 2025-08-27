@@ -21,7 +21,7 @@ export class PageData {
      */
     update(baseURL: string, url: string, paths: PatternSelectorMap){
         this.url = url;
-        let matches = this.updateMatchData(baseURL, paths);
+        const matches = this.updateMatchData(baseURL, paths);
         this.selectors = this.getSelectors(matches, paths);
     }
     /**
@@ -70,11 +70,11 @@ export class PageData {
      */
 
     private getSelectors(matches: string[], paths: PatternSelectorMap): SelectorNamePair[] {
-        let currentSelectors = [];
+        const currentSelectors = [];
         for (const path of matches) {
-            let pathData = paths[path];
-            if (pathData["selectors"]) {
-                for (const selector of pathData["selectors"]) {
+            const pathData = paths[path];
+            if (pathData.selectors) {
+                for (const selector of pathData.selectors) {
                     currentSelectors.push(selector);
                 }
             }

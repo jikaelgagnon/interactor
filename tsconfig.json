@@ -21,7 +21,9 @@
  "extends": "@tsconfig/recommended/tsconfig.json",
  "compilerOptions": {
   "sourceMap": true,
-  "resolveJsonModule": true
+  "resolveJsonModule": true,
+  "module": "commonjs",
+  "esModuleInterop": true
  },
     "paths": {
     "firebase/*": ["src/database/firebase/*"]
