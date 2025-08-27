@@ -121,7 +121,7 @@ class SessionManager {
         session.setTabId(tabId!);
         await session.createSessionInDb();
         await this.createSessionChromeStorage(tabId!, session);
-        chrome.action.setPopup({ popup: "ui/popup.html" });
+        chrome.action.setPopup({ popup: "popup.html" });
         chrome.action.openPopup();
         const result = await chrome.storage.sync.get("highlightElements");
         console.log(`Highlight elements: ${result.highlightElements}`)

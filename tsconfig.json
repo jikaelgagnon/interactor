@@ -1,19 +1,29 @@
+// {
+//   "compilerOptions": {
+//     "resolveJsonModule": true,
+//     "target": "es2017",
+//     "module": "esnext",
+//     "moduleResolution": "node",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "outDir": "./dist",
+//     "baseUrl": ".",
+//     "paths": {
+//       "firebase/*": ["src/database/firebase/*"]
+//     },
+//   },
+//   "include": [
+//     "src/**/*"
+//   ]
+// }
 {
-  "compilerOptions": {
-    "resolveJsonModule": true,
-    "target": "es2017",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-    "baseUrl": ".",
+ "extends": "@tsconfig/recommended/tsconfig.json",
+ "compilerOptions": {
+  "sourceMap": true,
+  "resolveJsonModule": true
+ },
     "paths": {
-      "firebase/*": ["src/database/firebase/*"]
-    },
-  },
-  "include": [
-    "src/**/*"
-  ]
+    "firebase/*": ["src/database/firebase/*"]
+},
 }
