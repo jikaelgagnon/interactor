@@ -1,0 +1,5 @@
+{
+  "modifiers": true,
+  "memberAssociations": true,
+  "outMermaidDsl": "./diagrams/mermaid_diagram.dsl"
+}

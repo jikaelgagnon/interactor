@@ -1,0 +1,671 @@
+<svg version="1.1" baseProfile="full" width="2153.3" height="1720.0" viewBox="0 0 2153.25 1720" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events">
+<desc >#.interface: fill=lightblue
+#.enumeration: fill=lightgreen
+#.type: fill=lightgray
+
+[SessionManager|-static instance: SessionManager;-sessionCache: Map&lt;number, SessionData&gt;|-static loadUseDB(): Promise&lt;void&gt;;+static getInstance(): Promise&lt;SessionManager&gt;;-closeSession(): Promise&lt;void&gt;;-setupListeners(): void;-handleMessage(): Promise&lt;MessageResponse&gt;;-getOrCreateSessionForTab(): Promise&lt;SessionData&gt;;-createSessionChromeStorage(): Promise&lt;void&gt;;-removeSession(): Promise&lt;void&gt;;-loadSession(): Promise&lt;SessionData&gt;;-pruneStaleSessions(): Promise&lt;void&gt;;-getUserEmail(): Promise&lt;string&gt;]
+[SessionData|+sessionInfo: SessionDocument;+sessionId: string;+documents: ActivityDocument\[\];+baseUrl: string;-tabId: number|+setTabId(): void;+getHostname(): string;+setBaseUrl(): void;+hasSameBaseUrl(): boolean;+addActivityDocument(): Promise&lt;void&gt;;-addToChromeLocalStorage(): Promise&lt;void&gt;;+flushAllActivitiesToDb(): Promise&lt;void&gt;;+createSessionInDb(): Promise&lt;string&gt;;+closeSessionInDb(): Promise&lt;void&gt;]
+[&lt;interface&gt;StoredSessionData|+sessionId: string;+sessionInfo: SessionDocument;+documents?: ActivityDocument\[\];+baseUrl?: string|]
+[SessionManager]  -  [SessionManager]
+[SessionData]  -  [SessionDocument]
+[SessionData]  - 0..* [ActivityDocument]
+[StoredSessionData]  -  [SessionDocument]
+[StoredSessionData]  - 0..* [ActivityDocument]
+[DataManager|-sessions: SessionData\[\];-selectedItems: Set&lt;string&gt;;-userEmail: string;-expandedSessions: Set&lt;string&gt;|+static init(): Promise&lt;void&gt;;+getUserEmail(): Promise&lt;string&gt;;+loadData(): Promise&lt;void&gt;;+getUserDataFromFirebase(): Promise&lt;FirebaseSessionData\[\]&gt;;+transformFirebaseData(): SessionData\[\];+setupEventListeners(): void;+exportSessionsToXlsx(): void;+exportSessionsToJson(): void;+render(): void;+baseName(): string;+createSessionElement(): HTMLElement;+createActivityElement(): HTMLElement;+addSessionEventListeners(): void;+toggleSessionSelection(): void;+toggleItemSelection(): void;+toggleSelectAll(): void;+toggleSessionExpansion(): void;+isSessionExpanded(): boolean;+updateUI(): void;+deleteSelected(): Promise&lt;void&gt;;+deleteUserDataFromFirebase(): Promise&lt;{ success: boolean; error?: string; }&gt;;+showStatus(): void]
+[&lt;interface&gt;SessionData|+id: string;+sessionInfo: { email: string; startTime: string; endTime?: string; sourceURL: string; sourceDocumentTitle: string; };+activities: ActivityDocument\[\]|]
+[&lt;interface&gt;FirebaseSessionData|+id: string;+sessionInfo?: { email: string; startTime: string; endTime?: string; sourceURL: string; sourceDocumentTitle: string; };+documents?: ActivityDocument\[\]|]
+[DataManager]  - 0..* [SessionData]
+[SessionData]  - 0..* [ActivityDocument]
+[FirebaseSessionData]  - 0..* [ActivityDocument]
+[&lt;enumeration&gt;ActivityType|SelfLoop;StateChange;Interaction;Both]
+[BackgroundMessage|+senderMethod: SenderMethod;+payload: DBDocument|]
+[&lt;interface&gt;MessageResponse|+status: string;+highlight?: boolean|]
+[BackgroundMessage]  -  [SenderMethod]
+[BackgroundMessage]  -  [DBDocument]
+[&lt;enumeration&gt;SenderMethod|InitializeSession;InteractionDetection;NavigationDetection;CloseSession;Any]
+[DBDocument|+sourceURL: string;+sourceDocumentTitle: string|]
+[ActivityDocument|+activityType: string;+createdAt: string \| Date;+eventType: string;+metadata?: object|]
+[SessionDocument|+startTime: Date;+endTime?: Date;+email: string|+setEmail(): void]
+[DBDocument]&lt;:-[ActivityDocument]
+[DBDocument]&lt;:-[SessionDocument]
+[ExtractorData|+eventType: SenderMethod;+urlPattern: string;+extractor: () =&gt; object|]
+[ExtractorList|-extractors: ExtractorData\[\];-baseURL: string|+extract(): object]
+[ConfigLoader|+config: Config;+extractorList: ExtractorList|]
+[&lt;interface&gt;SelectorNamePair|+selector: string;+name: string|]
+[&lt;interface&gt;PatternData|+selectors?: SelectorNamePair\[\];+dataExtractor?: () =&gt; object|]
+[&lt;interface&gt;Config|+baseURL: string;+paths: PatternSelectorMap;+debug?: boolean;+events?: string\[\]|]
+[ExtractorData]  -  [SenderMethod]
+[ExtractorList]  - 0..* [ExtractorData]
+[ConfigLoader]  -  [Config]
+[ConfigLoader]  -  [ExtractorList]
+[PatternData]  - 0..* [SelectorNamePair]
+[Monitor|+interactionEvents: string\[\];+highlight: boolean;+paths: PatternSelectorMap;+baseURL: string;+currentPageData: PageData;+interactionAttribute: string;+extractorList: ExtractorList;-StringToColor: { next: (str: string) =&gt; string; }|-initializeMonitor(): Promise&lt;void&gt;;-updateCurrentPageData(): void;-initializeSession(): Promise&lt;void&gt;;-bindEvents(): void;-addListenersToNewMatches(): void;-createStateChangeRecord(): DBDocument;-createSelfLoopRecord(): DBDocument;-createInteractionRecord(): DBDocument;-sendMessageToBackground(): Promise&lt;MessageResponse&gt;;-onInteractionDetection(): void;-onNavigationDetection(): void]
+[Monitor]  -  [PageData]
+[Monitor]  -  [ExtractorList]
+[PageData|+url: string;+selectors: SelectorNamePair\[\];+matchPathData: PatternData;+currentPattern: string|+update(): void;-updateMatchData(): string\[\];-getSelectors(): SelectorNamePair\[\]]
+[PageData]  - 0..* [SelectorNamePair]
+[PageData]  -  [PatternData]</desc>
+<g stroke-width="1.0" text-align="left" font="12pt Helvetica, Arial, sans-serif" font-size="12pt" font-family="Helvetica" font-weight="normal" font-style="normal">
+<g font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" stroke-width="3.0" stroke-linejoin="round" stroke-linecap="round" stroke="#33322E">
+<g stroke="transparent" fill="transparent">
+<rect x="0.0" y="0.0" height="1720.0" width="2153.3" stroke="none"></rect>
+</g>
+<g transform="translate(8, 8)" fill="#33322E">
+<g transform="translate(20, 20)" fill="#33322E" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal">
+<path d="M785.0 73.3 L815 57 L822.5 57 L822.5 57 L830 194 L830 194 L822.5 331 L822.5 331 L815 331 L815 331 L785 314.6904761904762 L785.0 314.7 " fill="none"></path>
+<path d="M319.0 1435.4 L143.75 1515 L360.5 1576.8240506329114 L360.5 1576.8 " fill="none"></path>
+<text x="847.3" y="1554.7" stroke="none">0..*</text>
+<path d="M680.5 1495.0 L704.25 1515 L839.25 1562.7301255230125 L839.3 1562.7 " fill="none"></path>
+<path d="M155.7 1410.0 L183.75 1515 L360.5 1573.2843902439024 L360.5 1573.3 " fill="none"></path>
+<text x="906.3" y="1531.0" stroke="none">0..*</text>
+<path d="M279.0 1380.7 L880.5 1515 L898.3224852071006 1539 L898.3 1539.0 " fill="none"></path>
+<text x="473.0" y="1196.0" stroke="none">0..*</text>
+<path d="M508.0 1164.0 L508 1184 L508 1204 L508.0 1204.0 " fill="none"></path>
+<text x="935.0" y="1531.0" stroke="none">0..*</text>
+<path d="M697.0 1425.3 L920.5 1515 L926.9615384615385 1539 L927.0 1539.0 " fill="none"></path>
+<text x="988.4" y="1531.0" stroke="none">0..*</text>
+<path d="M1462.8 1391.7 L1055.25 1515 L1023.439349112426 1539 L1023.4 1539.0 " fill="none"></path>
+<path d="M957.1 949.0 L1046 1184 L1146.8474320241692 1285 L1146.8 1285.0 " fill="none"></path>
+<path d="M934.2 949.0 L900.5 1184 L900.5 1305.5 L900.5 1305.5 " fill="none"></path>
+<path d="M980.6 1400.7 L1159.5 1515 L1047.25 1558.8618497109826 L1047.3 1558.9 " fill="none"></path>
+<path d="M983.5 1396.2 L980.6 1400.7 L977.7 1405.2 L969.4 1393.5 Z"></path>
+<path d="M803.4 1399.6 L580 1515 L519.5 1551.5160714285714 L519.5 1551.5 " fill="none"></path>
+<path d="M805.9 1404.4 L803.4 1399.6 L801.0 1394.9 L815.3 1393.5 Z"></path>
+<path d="M1231.3 957.5 L1231.25 1184 L1219.0445619335349 1285 L1219.0 1285.0 " fill="none"></path>
+<text x="1196.3" y="844.5" stroke="none">0..*</text>
+<path d="M1231.3 573.0 L1231.25 626 L1231.25 852.5 L1231.3 852.5 " fill="none"></path>
+<path d="M1413.7 238.0 L1592.25 408 L1592.25 456.5 L1592.3 456.5 " fill="none"></path>
+<path d="M1335.4 238.0 L1211.25 408 L1220.9747706422017 461 L1221.0 461.0 " fill="none"></path>
+<text x="1900.7" y="1297.5" stroke="none">0..*</text>
+<path d="M1735.0 949.0 L1735 1184 L1892.656344410876 1305.5 L1892.7 1305.5 " fill="none"></path>
+<path d="M1933.6 388.0 L1949.75 408 L1949.75 428 L1949.8 428.0 " fill="none"></path>
+<path d="M1524.0 344.0 L1416 408 L1326.1674311926606 461 L1326.2 461.0 " fill="none"></path>
+<text x="1932.7" y="1297.5" stroke="none">0..*</text>
+<path d="M2004.9 606.0 L2017.25 626 L2017.25 905 L2017.25 905 L2017.25 1184 L2017.25 1184 L1967.6956193353474 1305.5 L1967.7 1305.5 " fill="none"></path>
+<path d="M1802.3 591.9 L1735 626 L1735 861 L1735.0 861.0 " fill="none"></path>
+<g data-name="SessionManager">
+<g fill="#eee8d5" stroke="#33322E" data-name="SessionManager">
+<rect x="341.0" y="57.0" height="274.0" width="444.0" data-name="SessionManager"></rect>
+<path d="M341.0 89.0 L785.0 89.0" fill="none" data-name="SessionManager"></path>
+<path d="M341.0 137.0 L785.0 137.0" fill="none" data-name="SessionManager"></path>
+</g>
+<g transform="translate(341, 57)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="SessionManager" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="SessionManager" data-compartment="0">
+<a id="src/background.ts.SessionManager" xlink:href="src/background.ts"><text x="214.0" y="14.1" stroke="none" text-anchor="middle" data-name="SessionManager" data-compartment="0">SessionManager</text></a>
+
+</g>
+</g>
+<g transform="translate(341, 89)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionManager" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionManager" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionManager" data-compartment="1">-static instance: SessionManager</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SessionManager" data-compartment="1">-sessionCache: Map&lt;number, SessionData&gt;</text>
+
+</g>
+</g>
+<g transform="translate(341, 137)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionManager" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionManager" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionManager" data-compartment="2">-static loadUseDB(): Promise&lt;void&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SessionManager" data-compartment="2">+static getInstance(): Promise&lt;SessionManager&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="SessionManager" data-compartment="2">-closeSession(): Promise&lt;void&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="SessionManager" data-compartment="2">-setupListeners(): void</text>
+<text x="0.0" y="78.9" stroke="none" data-name="SessionManager" data-compartment="2">-handleMessage(): Promise&lt;MessageResponse&gt;</text>
+<text x="0.0" y="95.1" stroke="none" data-name="SessionManager" data-compartment="2">-getOrCreateSessionForTab(): Promise&lt;SessionData&gt;</text>
+<text x="0.0" y="111.3" stroke="none" data-name="SessionManager" data-compartment="2">-createSessionChromeStorage(): Promise&lt;void&gt;</text>
+<text x="0.0" y="127.5" stroke="none" data-name="SessionManager" data-compartment="2">-removeSession(): Promise&lt;void&gt;</text>
+<text x="0.0" y="143.7" stroke="none" data-name="SessionManager" data-compartment="2">-loadSession(): Promise&lt;SessionData&gt;</text>
+<text x="0.0" y="159.9" stroke="none" data-name="SessionManager" data-compartment="2">-pruneStaleSessions(): Promise&lt;void&gt;</text>
+<text x="0.0" y="176.1" stroke="none" data-name="SessionManager" data-compartment="2">-getUserEmail(): Promise&lt;string&gt;</text>
+
+</g>
+</g>
+</g>
+<g data-name="SessionData">
+<g fill="#eee8d5" stroke="#33322E" data-name="SessionData">
+<rect x="319.0" y="1204.0" height="291.0" width="378.0" data-name="SessionData"></rect>
+<path d="M319.0 1236.0 L697.0 1236.0" fill="none" data-name="SessionData"></path>
+<path d="M319.0 1333.0 L697.0 1333.0" fill="none" data-name="SessionData"></path>
+</g>
+<g transform="translate(319, 1204)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="SessionData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="SessionData" data-compartment="0">
+<a id="src/background.ts.SessionData" xlink:href="src/background.ts"><text x="181.0" y="14.1" stroke="none" text-anchor="middle" data-name="SessionData" data-compartment="0">SessionData</text></a>
+
+</g>
+</g>
+<g transform="translate(319, 1236)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionData" data-compartment="1">+sessionInfo: SessionDocument</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SessionData" data-compartment="1">+sessionId: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="SessionData" data-compartment="1">+documents: ActivityDocument[]</text>
+<text x="0.0" y="62.7" stroke="none" data-name="SessionData" data-compartment="1">+baseUrl: string</text>
+<text x="0.0" y="78.9" stroke="none" data-name="SessionData" data-compartment="1">-tabId: number</text>
+
+</g>
+</g>
+<g transform="translate(319, 1333)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionData" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionData" data-compartment="2">+setTabId(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SessionData" data-compartment="2">+getHostname(): string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="SessionData" data-compartment="2">+setBaseUrl(): void</text>
+<text x="0.0" y="62.7" stroke="none" data-name="SessionData" data-compartment="2">+hasSameBaseUrl(): boolean</text>
+<text x="0.0" y="78.9" stroke="none" data-name="SessionData" data-compartment="2">+addActivityDocument(): Promise&lt;void&gt;</text>
+<text x="0.0" y="95.1" stroke="none" data-name="SessionData" data-compartment="2">-addToChromeLocalStorage(): Promise&lt;void&gt;</text>
+<text x="0.0" y="111.3" stroke="none" data-name="SessionData" data-compartment="2">+flushAllActivitiesToDb(): Promise&lt;void&gt;</text>
+<text x="0.0" y="127.5" stroke="none" data-name="SessionData" data-compartment="2">+createSessionInDb(): Promise&lt;string&gt;</text>
+<text x="0.0" y="143.7" stroke="none" data-name="SessionData" data-compartment="2">+closeSessionInDb(): Promise&lt;void&gt;</text>
+
+</g>
+</g>
+</g>
+<g data-name="StoredSessionData">
+<g fill="lightblue" stroke="#33322E" data-name="StoredSessionData">
+<rect x="0.0" y="1289.0" height="121.0" width="279.0" data-name="StoredSessionData"></rect>
+<path d="M0.0 1321.0 L279.0 1321.0" fill="none" data-name="StoredSessionData"></path>
+<path d="M0.0 1402.0 L279.0 1402.0" fill="none" data-name="StoredSessionData"></path>
+</g>
+<g transform="translate(0, 1289)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="StoredSessionData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="StoredSessionData" data-compartment="0">
+<a id="src/background.ts.StoredSessionData" xlink:href="src/background.ts"><text x="131.5" y="14.1" stroke="none" text-anchor="middle" data-name="StoredSessionData" data-compartment="0">StoredSessionData</text></a>
+
+</g>
+</g>
+<g transform="translate(0, 1321)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="StoredSessionData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="StoredSessionData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="StoredSessionData" data-compartment="1">+sessionId: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="StoredSessionData" data-compartment="1">+sessionInfo: SessionDocument</text>
+<text x="0.0" y="46.5" stroke="none" data-name="StoredSessionData" data-compartment="1">+documents?: ActivityDocument[]</text>
+<text x="0.0" y="62.7" stroke="none" data-name="StoredSessionData" data-compartment="1">+baseUrl?: string</text>
+
+</g>
+</g>
+<g transform="translate(0, 1402)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="StoredSessionData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="StoredSessionData" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="SessionDocument">
+<g fill="#eee8d5" stroke="#33322E" data-name="SessionDocument">
+<rect x="360.5" y="1535.0" height="129.0" width="159.0" data-name="SessionDocument"></rect>
+<path d="M360.5 1567.0 L519.5 1567.0" fill="none" data-name="SessionDocument"></path>
+<path d="M360.5 1632.0 L519.5 1632.0" fill="none" data-name="SessionDocument"></path>
+</g>
+<g transform="translate(360.5, 1535)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="SessionDocument" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="SessionDocument" data-compartment="0">
+<a id="src/database/dbdocument.ts.SessionDocument" xlink:href="src/database/dbdocument.ts"><text x="71.5" y="14.1" stroke="none" text-anchor="middle" data-name="SessionDocument" data-compartment="0">SessionDocument</text></a>
+
+</g>
+</g>
+<g transform="translate(360.5, 1567)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionDocument" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionDocument" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionDocument" data-compartment="1">+startTime: Date</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SessionDocument" data-compartment="1">+endTime?: Date</text>
+<text x="0.0" y="46.5" stroke="none" data-name="SessionDocument" data-compartment="1">+email: string</text>
+
+</g>
+</g>
+<g transform="translate(360.5, 1632)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SessionDocument" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SessionDocument" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="SessionDocument" data-compartment="2">+setEmail(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="ActivityDocument">
+<g fill="#eee8d5" stroke="#33322E" data-name="ActivityDocument">
+<rect x="839.3" y="1539.0" height="121.0" width="208.0" data-name="ActivityDocument"></rect>
+<path d="M839.3 1571.0 L1047.3 1571.0" fill="none" data-name="ActivityDocument"></path>
+<path d="M839.3 1652.0 L1047.3 1652.0" fill="none" data-name="ActivityDocument"></path>
+</g>
+<g transform="translate(839.25, 1539)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="ActivityDocument" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="ActivityDocument" data-compartment="0">
+<a id="src/database/dbdocument.ts.ActivityDocument" xlink:href="src/database/dbdocument.ts"><text x="96.0" y="14.1" stroke="none" text-anchor="middle" data-name="ActivityDocument" data-compartment="0">ActivityDocument</text></a>
+
+</g>
+</g>
+<g transform="translate(839.25, 1571)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ActivityDocument" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ActivityDocument" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="ActivityDocument" data-compartment="1">+activityType: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="ActivityDocument" data-compartment="1">+createdAt: string | Date</text>
+<text x="0.0" y="46.5" stroke="none" data-name="ActivityDocument" data-compartment="1">+eventType: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="ActivityDocument" data-compartment="1">+metadata?: object</text>
+
+</g>
+</g>
+<g transform="translate(839.25, 1652)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ActivityDocument" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="ActivityDocument" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="DataManager">
+<g fill="#eee8d5" stroke="#33322E" data-name="DataManager">
+<rect x="248.5" y="646.0" height="518.0" width="519.0" data-name="DataManager"></rect>
+<path d="M248.5 678.0 L767.5 678.0" fill="none" data-name="DataManager"></path>
+<path d="M248.5 759.0 L767.5 759.0" fill="none" data-name="DataManager"></path>
+</g>
+<g transform="translate(248.5, 646)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="DataManager" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="DataManager" data-compartment="0">
+<a id="src/popup.ts.DataManager" xlink:href="src/popup.ts"><text x="251.5" y="14.1" stroke="none" text-anchor="middle" data-name="DataManager" data-compartment="0">DataManager</text></a>
+
+</g>
+</g>
+<g transform="translate(248.5, 678)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DataManager" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="DataManager" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="DataManager" data-compartment="1">-sessions: SessionData[]</text>
+<text x="0.0" y="30.3" stroke="none" data-name="DataManager" data-compartment="1">-selectedItems: Set&lt;string&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="DataManager" data-compartment="1">-userEmail: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="DataManager" data-compartment="1">-expandedSessions: Set&lt;string&gt;</text>
+
+</g>
+</g>
+<g transform="translate(248.5, 759)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DataManager" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="DataManager" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="DataManager" data-compartment="2">+static init(): Promise&lt;void&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="DataManager" data-compartment="2">+getUserEmail(): Promise&lt;string&gt;</text>
+<text x="0.0" y="46.5" stroke="none" data-name="DataManager" data-compartment="2">+loadData(): Promise&lt;void&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="DataManager" data-compartment="2">+getUserDataFromFirebase(): Promise&lt;FirebaseSessionData[]&gt;</text>
+<text x="0.0" y="78.9" stroke="none" data-name="DataManager" data-compartment="2">+transformFirebaseData(): SessionData[]</text>
+<text x="0.0" y="95.1" stroke="none" data-name="DataManager" data-compartment="2">+setupEventListeners(): void</text>
+<text x="0.0" y="111.3" stroke="none" data-name="DataManager" data-compartment="2">+exportSessionsToXlsx(): void</text>
+<text x="0.0" y="127.5" stroke="none" data-name="DataManager" data-compartment="2">+exportSessionsToJson(): void</text>
+<text x="0.0" y="143.7" stroke="none" data-name="DataManager" data-compartment="2">+render(): void</text>
+<text x="0.0" y="159.9" stroke="none" data-name="DataManager" data-compartment="2">+baseName(): string</text>
+<text x="0.0" y="176.1" stroke="none" data-name="DataManager" data-compartment="2">+createSessionElement(): HTMLElement</text>
+<text x="0.0" y="192.3" stroke="none" data-name="DataManager" data-compartment="2">+createActivityElement(): HTMLElement</text>
+<text x="0.0" y="208.5" stroke="none" data-name="DataManager" data-compartment="2">+addSessionEventListeners(): void</text>
+<text x="0.0" y="224.7" stroke="none" data-name="DataManager" data-compartment="2">+toggleSessionSelection(): void</text>
+<text x="0.0" y="240.9" stroke="none" data-name="DataManager" data-compartment="2">+toggleItemSelection(): void</text>
+<text x="0.0" y="257.1" stroke="none" data-name="DataManager" data-compartment="2">+toggleSelectAll(): void</text>
+<text x="0.0" y="273.3" stroke="none" data-name="DataManager" data-compartment="2">+toggleSessionExpansion(): void</text>
+<text x="0.0" y="289.5" stroke="none" data-name="DataManager" data-compartment="2">+isSessionExpanded(): boolean</text>
+<text x="0.0" y="305.7" stroke="none" data-name="DataManager" data-compartment="2">+updateUI(): void</text>
+<text x="0.0" y="321.9" stroke="none" data-name="DataManager" data-compartment="2">+deleteSelected(): Promise&lt;void&gt;</text>
+<text x="0.0" y="338.1" stroke="none" data-name="DataManager" data-compartment="2">+deleteUserDataFromFirebase(): Promise&lt;{ success: boolean</text>
+<text x="0.0" y="354.3" stroke="none" data-name="DataManager" data-compartment="2">error?: string</text>
+<text x="0.0" y="370.5" stroke="none" data-name="DataManager" data-compartment="2">}&gt;</text>
+<text x="0.0" y="386.7" stroke="none" data-name="DataManager" data-compartment="2">+showStatus(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="FirebaseSessionData">
+<g fill="lightblue" stroke="#33322E" data-name="FirebaseSessionData">
+<rect x="1462.8" y="1256.5" height="186.0" width="279.0" data-name="FirebaseSessionData"></rect>
+<path d="M1462.8 1288.5 L1741.8 1288.5" fill="none" data-name="FirebaseSessionData"></path>
+<path d="M1462.8 1434.5 L1741.8 1434.5" fill="none" data-name="FirebaseSessionData"></path>
+</g>
+<g transform="translate(1462.75, 1256.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="FirebaseSessionData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="FirebaseSessionData" data-compartment="0">
+<a id="src/popup.ts.FirebaseSessionData" xlink:href="src/popup.ts"><text x="131.5" y="14.1" stroke="none" text-anchor="middle" data-name="FirebaseSessionData" data-compartment="0">FirebaseSessionData</text></a>
+
+</g>
+</g>
+<g transform="translate(1462.75, 1288.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="FirebaseSessionData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="FirebaseSessionData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="FirebaseSessionData" data-compartment="1">+id: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="FirebaseSessionData" data-compartment="1">+sessionInfo?: { email: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="FirebaseSessionData" data-compartment="1">startTime: string</text>
+<text x="0.0" y="62.7" stroke="none" data-name="FirebaseSessionData" data-compartment="1">endTime?: string</text>
+<text x="0.0" y="78.9" stroke="none" data-name="FirebaseSessionData" data-compartment="1">sourceURL: string</text>
+<text x="0.0" y="95.1" stroke="none" data-name="FirebaseSessionData" data-compartment="1">sourceDocumentTitle: string</text>
+<text x="0.0" y="111.3" stroke="none" data-name="FirebaseSessionData" data-compartment="1">}</text>
+<text x="0.0" y="127.5" stroke="none" data-name="FirebaseSessionData" data-compartment="1">+documents?: ActivityDocument[]</text>
+
+</g>
+</g>
+<g transform="translate(1462.75, 1434.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="FirebaseSessionData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="FirebaseSessionData" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="ActivityType">
+<g fill="lightgreen" stroke="#33322E" data-name="ActivityType">
+<rect x="875.0" y="137.5" height="113.0" width="119.0" data-name="ActivityType"></rect>
+<path d="M875.0 169.5 L994.0 169.5" fill="none" data-name="ActivityType"></path>
+</g>
+<g transform="translate(875, 137.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ActivityType" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="ActivityType" data-compartment="0">
+<a id="src/communication/activity.ts.ActivityType" xlink:href="src/communication/activity.ts"><text x="51.5" y="14.1" stroke="none" text-anchor="middle" data-name="ActivityType" data-compartment="0">ActivityType</text></a>
+
+</g>
+</g>
+<g transform="translate(875, 169.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ActivityType" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ActivityType" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="ActivityType" data-compartment="1">SelfLoop</text>
+<text x="0.0" y="30.3" stroke="none" data-name="ActivityType" data-compartment="1">StateChange</text>
+<text x="0.0" y="46.5" stroke="none" data-name="ActivityType" data-compartment="1">Interaction</text>
+<text x="0.0" y="62.7" stroke="none" data-name="ActivityType" data-compartment="1">Both</text>
+
+</g>
+</g>
+</g>
+<g data-name="BackgroundMessage">
+<g fill="#eee8d5" stroke="#33322E" data-name="BackgroundMessage">
+<rect x="807.5" y="861.0" height="88.0" width="266.0" data-name="BackgroundMessage"></rect>
+<path d="M807.5 893.0 L1073.5 893.0" fill="none" data-name="BackgroundMessage"></path>
+<path d="M807.5 941.0 L1073.5 941.0" fill="none" data-name="BackgroundMessage"></path>
+</g>
+<g transform="translate(807.5, 861)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="BackgroundMessage" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="BackgroundMessage" data-compartment="0">
+<a id="src/communication/backgroundmessage.ts.BackgroundMessage" xlink:href="src/communication/backgroundmessage.ts"><text x="125.0" y="14.1" stroke="none" text-anchor="middle" data-name="BackgroundMessage" data-compartment="0">BackgroundMessage</text></a>
+
+</g>
+</g>
+<g transform="translate(807.5, 893)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="BackgroundMessage" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="BackgroundMessage" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="BackgroundMessage" data-compartment="1">+senderMethod: SenderMethod</text>
+<text x="0.0" y="30.3" stroke="none" data-name="BackgroundMessage" data-compartment="1">+payload: DBDocument</text>
+
+</g>
+</g>
+<g transform="translate(807.5, 941)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="BackgroundMessage" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="BackgroundMessage" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="MessageResponse">
+<g fill="lightblue" stroke="#33322E" data-name="MessageResponse">
+<rect x="1034.0" y="150.0" height="88.0" width="177.0" data-name="MessageResponse"></rect>
+<path d="M1034.0 182.0 L1211.0 182.0" fill="none" data-name="MessageResponse"></path>
+<path d="M1034.0 230.0 L1211.0 230.0" fill="none" data-name="MessageResponse"></path>
+</g>
+<g transform="translate(1034, 150)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="MessageResponse" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="MessageResponse" data-compartment="0">
+<a id="src/communication/backgroundmessage.ts.MessageResponse" xlink:href="src/communication/backgroundmessage.ts"><text x="80.5" y="14.1" stroke="none" text-anchor="middle" data-name="MessageResponse" data-compartment="0">MessageResponse</text></a>
+
+</g>
+</g>
+<g transform="translate(1034, 182)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="MessageResponse" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="MessageResponse" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="MessageResponse" data-compartment="1">+status: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="MessageResponse" data-compartment="1">+highlight?: boolean</text>
+
+</g>
+</g>
+<g transform="translate(1034, 230)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="MessageResponse" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="MessageResponse" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="SenderMethod">
+<g fill="lightgreen" stroke="#33322E" data-name="SenderMethod">
+<rect x="1123.8" y="1285.0" height="129.0" width="175.0" data-name="SenderMethod"></rect>
+<path d="M1123.8 1317.0 L1298.8 1317.0" fill="none" data-name="SenderMethod"></path>
+</g>
+<g transform="translate(1123.75, 1285)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SenderMethod" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="SenderMethod" data-compartment="0">
+<a id="src/communication/sender.ts.SenderMethod" xlink:href="src/communication/sender.ts"><text x="79.5" y="14.1" stroke="none" text-anchor="middle" data-name="SenderMethod" data-compartment="0">SenderMethod</text></a>
+
+</g>
+</g>
+<g transform="translate(1123.75, 1317)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SenderMethod" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SenderMethod" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="SenderMethod" data-compartment="1">InitializeSession</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SenderMethod" data-compartment="1">InteractionDetection</text>
+<text x="0.0" y="46.5" stroke="none" data-name="SenderMethod" data-compartment="1">NavigationDetection</text>
+<text x="0.0" y="62.7" stroke="none" data-name="SenderMethod" data-compartment="1">CloseSession</text>
+<text x="0.0" y="78.9" stroke="none" data-name="SenderMethod" data-compartment="1">Any</text>
+
+</g>
+</g>
+</g>
+<g data-name="DBDocument">
+<g fill="#eee8d5" stroke="#33322E" data-name="DBDocument">
+<rect x="777.0" y="1305.5" height="88.0" width="247.0" data-name="DBDocument"></rect>
+<path d="M777.0 1337.5 L1024.0 1337.5" fill="none" data-name="DBDocument"></path>
+<path d="M777.0 1385.5 L1024.0 1385.5" fill="none" data-name="DBDocument"></path>
+</g>
+<g transform="translate(777, 1305.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="DBDocument" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="DBDocument" data-compartment="0">
+<a id="src/database/dbdocument.ts.DBDocument" xlink:href="src/database/dbdocument.ts"><text x="115.5" y="14.1" stroke="none" text-anchor="middle" data-name="DBDocument" data-compartment="0">DBDocument</text></a>
+
+</g>
+</g>
+<g transform="translate(777, 1337.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DBDocument" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="DBDocument" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="DBDocument" data-compartment="1">+sourceURL: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="DBDocument" data-compartment="1">+sourceDocumentTitle: string</text>
+
+</g>
+</g>
+<g transform="translate(777, 1385.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="DBDocument" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="DBDocument" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="ExtractorData">
+<g fill="#eee8d5" stroke="#33322E" data-name="ExtractorData">
+<rect x="1113.8" y="852.5" height="105.0" width="235.0" data-name="ExtractorData"></rect>
+<path d="M1113.8 884.5 L1348.8 884.5" fill="none" data-name="ExtractorData"></path>
+<path d="M1113.8 949.5 L1348.8 949.5" fill="none" data-name="ExtractorData"></path>
+</g>
+<g transform="translate(1113.75, 852.5)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="ExtractorData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="ExtractorData" data-compartment="0">
+<a id="src/interactions/config.ts.ExtractorData" xlink:href="src/interactions/config.ts"><text x="109.5" y="14.1" stroke="none" text-anchor="middle" data-name="ExtractorData" data-compartment="0">ExtractorData</text></a>
+
+</g>
+</g>
+<g transform="translate(1113.75, 884.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ExtractorData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ExtractorData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="ExtractorData" data-compartment="1">+eventType: SenderMethod</text>
+<text x="0.0" y="30.3" stroke="none" data-name="ExtractorData" data-compartment="1">+urlPattern: string</text>
+<text x="0.0" y="46.5" stroke="none" data-name="ExtractorData" data-compartment="1">+extractor: () =&gt; object</text>
+
+</g>
+</g>
+<g transform="translate(1113.75, 949.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ExtractorData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="ExtractorData" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="ExtractorList">
+<g fill="#eee8d5" stroke="#33322E" data-name="ExtractorList">
+<rect x="1116.8" y="461.0" height="112.0" width="229.0" data-name="ExtractorList"></rect>
+<path d="M1116.8 493.0 L1345.8 493.0" fill="none" data-name="ExtractorList"></path>
+<path d="M1116.8 541.0 L1345.8 541.0" fill="none" data-name="ExtractorList"></path>
+</g>
+<g transform="translate(1116.75, 461)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="ExtractorList" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="ExtractorList" data-compartment="0">
+<a id="src/interactions/config.ts.ExtractorList" xlink:href="src/interactions/config.ts"><text x="106.5" y="14.1" stroke="none" text-anchor="middle" data-name="ExtractorList" data-compartment="0">ExtractorList</text></a>
+
+</g>
+</g>
+<g transform="translate(1116.75, 493)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ExtractorList" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ExtractorList" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="ExtractorList" data-compartment="1">-extractors: ExtractorData[]</text>
+<text x="0.0" y="30.3" stroke="none" data-name="ExtractorList" data-compartment="1">-baseURL: string</text>
+
+</g>
+</g>
+<g transform="translate(1116.75, 541)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ExtractorList" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ExtractorList" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="ExtractorList" data-compartment="2">+extract(): object</text>
+
+</g>
+</g>
+</g>
+<g data-name="ConfigLoader">
+<g fill="#eee8d5" stroke="#33322E" data-name="ConfigLoader">
+<rect x="1251.0" y="150.0" height="88.0" width="233.0" data-name="ConfigLoader"></rect>
+<path d="M1251.0 182.0 L1484.0 182.0" fill="none" data-name="ConfigLoader"></path>
+<path d="M1251.0 230.0 L1484.0 230.0" fill="none" data-name="ConfigLoader"></path>
+</g>
+<g transform="translate(1251, 150)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="ConfigLoader" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="ConfigLoader" data-compartment="0">
+<a id="src/interactions/config.ts.ConfigLoader" xlink:href="src/interactions/config.ts"><text x="108.5" y="14.1" stroke="none" text-anchor="middle" data-name="ConfigLoader" data-compartment="0">ConfigLoader</text></a>
+
+</g>
+</g>
+<g transform="translate(1251, 182)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ConfigLoader" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="ConfigLoader" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="ConfigLoader" data-compartment="1">+config: Config</text>
+<text x="0.0" y="30.3" stroke="none" data-name="ConfigLoader" data-compartment="1">+extractorList: ExtractorList</text>
+
+</g>
+</g>
+<g transform="translate(1251, 230)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="ConfigLoader" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="ConfigLoader" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="SelectorNamePair">
+<g fill="lightblue" stroke="#33322E" data-name="SelectorNamePair">
+<rect x="1870.8" y="1305.5" height="88.0" width="158.0" data-name="SelectorNamePair"></rect>
+<path d="M1870.8 1337.5 L2028.8 1337.5" fill="none" data-name="SelectorNamePair"></path>
+<path d="M1870.8 1385.5 L2028.8 1385.5" fill="none" data-name="SelectorNamePair"></path>
+</g>
+<g transform="translate(1870.75, 1305.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SelectorNamePair" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="SelectorNamePair" data-compartment="0">
+<a id="src/interactions/config.ts.SelectorNamePair" xlink:href="src/interactions/config.ts"><text x="71.0" y="14.1" stroke="none" text-anchor="middle" data-name="SelectorNamePair" data-compartment="0">SelectorNamePair</text></a>
+
+</g>
+</g>
+<g transform="translate(1870.75, 1337.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SelectorNamePair" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="SelectorNamePair" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="SelectorNamePair" data-compartment="1">+selector: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="SelectorNamePair" data-compartment="1">+name: string</text>
+
+</g>
+</g>
+<g transform="translate(1870.75, 1385.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="SelectorNamePair" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="SelectorNamePair" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="PatternData">
+<g fill="lightblue" stroke="#33322E" data-name="PatternData">
+<rect x="1600.0" y="861.0" height="88.0" width="270.0" data-name="PatternData"></rect>
+<path d="M1600.0 893.0 L1870.0 893.0" fill="none" data-name="PatternData"></path>
+<path d="M1600.0 941.0 L1870.0 941.0" fill="none" data-name="PatternData"></path>
+</g>
+<g transform="translate(1600, 861)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="PatternData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="PatternData" data-compartment="0">
+<a id="src/interactions/config.ts.PatternData" xlink:href="src/interactions/config.ts"><text x="127.0" y="14.1" stroke="none" text-anchor="middle" data-name="PatternData" data-compartment="0">PatternData</text></a>
+
+</g>
+</g>
+<g transform="translate(1600, 893)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="PatternData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="PatternData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="PatternData" data-compartment="1">+selectors?: SelectorNamePair[]</text>
+<text x="0.0" y="30.3" stroke="none" data-name="PatternData" data-compartment="1">+dataExtractor?: () =&gt; object</text>
+
+</g>
+</g>
+<g transform="translate(1600, 941)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="PatternData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="PatternData" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="Config">
+<g fill="lightblue" stroke="#33322E" data-name="Config">
+<rect x="1474.3" y="456.5" height="121.0" width="236.0" data-name="Config"></rect>
+<path d="M1474.3 488.5 L1710.3 488.5" fill="none" data-name="Config"></path>
+<path d="M1474.3 569.5 L1710.3 569.5" fill="none" data-name="Config"></path>
+</g>
+<g transform="translate(1474.25, 456.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="Config" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="Config" data-compartment="0">
+<a id="src/interactions/config.ts.Config" xlink:href="src/interactions/config.ts"><text x="110.0" y="14.1" stroke="none" text-anchor="middle" data-name="Config" data-compartment="0">Config</text></a>
+
+</g>
+</g>
+<g transform="translate(1474.25, 488.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="Config" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="Config" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="Config" data-compartment="1">+baseURL: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="Config" data-compartment="1">+paths: PatternSelectorMap</text>
+<text x="0.0" y="46.5" stroke="none" data-name="Config" data-compartment="1">+debug?: boolean</text>
+<text x="0.0" y="62.7" stroke="none" data-name="Config" data-compartment="1">+events?: string[]</text>
+
+</g>
+</g>
+<g transform="translate(1474.25, 569.5)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="Config" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" data-name="Config" data-compartment="2">
+
+</g>
+</g>
+</g>
+<g data-name="Monitor">
+<g fill="#eee8d5" stroke="#33322E" data-name="Monitor">
+<rect x="1524.0" y="0.0" height="388.0" width="506.0" data-name="Monitor"></rect>
+<path d="M1524.0 32.0 L2030.0 32.0" fill="none" data-name="Monitor"></path>
+<path d="M1524.0 194.0 L2030.0 194.0" fill="none" data-name="Monitor"></path>
+</g>
+<g transform="translate(1524, 0)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="Monitor" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="Monitor" data-compartment="0">
+<a id="src/interactions/monitor.ts.Monitor" xlink:href="src/interactions/monitor.ts"><text x="245.0" y="14.1" stroke="none" text-anchor="middle" data-name="Monitor" data-compartment="0">Monitor</text></a>
+
+</g>
+</g>
+<g transform="translate(1524, 32)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="Monitor" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="Monitor" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="Monitor" data-compartment="1">+interactionEvents: string[]</text>
+<text x="0.0" y="30.3" stroke="none" data-name="Monitor" data-compartment="1">+highlight: boolean</text>
+<text x="0.0" y="46.5" stroke="none" data-name="Monitor" data-compartment="1">+paths: PatternSelectorMap</text>
+<text x="0.0" y="62.7" stroke="none" data-name="Monitor" data-compartment="1">+baseURL: string</text>
+<text x="0.0" y="78.9" stroke="none" data-name="Monitor" data-compartment="1">+currentPageData: PageData</text>
+<text x="0.0" y="95.1" stroke="none" data-name="Monitor" data-compartment="1">+interactionAttribute: string</text>
+<text x="0.0" y="111.3" stroke="none" data-name="Monitor" data-compartment="1">+extractorList: ExtractorList</text>
+<text x="0.0" y="127.5" stroke="none" data-name="Monitor" data-compartment="1">-StringToColor: { next: (str: string) =&gt; string</text>
+<text x="0.0" y="143.7" stroke="none" data-name="Monitor" data-compartment="1">}</text>
+
+</g>
+</g>
+<g transform="translate(1524, 194)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="Monitor" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="Monitor" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="Monitor" data-compartment="2">-initializeMonitor(): Promise&lt;void&gt;</text>
+<text x="0.0" y="30.3" stroke="none" data-name="Monitor" data-compartment="2">-updateCurrentPageData(): void</text>
+<text x="0.0" y="46.5" stroke="none" data-name="Monitor" data-compartment="2">-initializeSession(): Promise&lt;void&gt;</text>
+<text x="0.0" y="62.7" stroke="none" data-name="Monitor" data-compartment="2">-bindEvents(): void</text>
+<text x="0.0" y="78.9" stroke="none" data-name="Monitor" data-compartment="2">-addListenersToNewMatches(): void</text>
+<text x="0.0" y="95.1" stroke="none" data-name="Monitor" data-compartment="2">-createStateChangeRecord(): DBDocument</text>
+<text x="0.0" y="111.3" stroke="none" data-name="Monitor" data-compartment="2">-createSelfLoopRecord(): DBDocument</text>
+<text x="0.0" y="127.5" stroke="none" data-name="Monitor" data-compartment="2">-createInteractionRecord(): DBDocument</text>
+<text x="0.0" y="143.7" stroke="none" data-name="Monitor" data-compartment="2">-sendMessageToBackground(): Promise&lt;MessageResponse&gt;</text>
+<text x="0.0" y="159.9" stroke="none" data-name="Monitor" data-compartment="2">-onInteractionDetection(): void</text>
+<text x="0.0" y="176.1" stroke="none" data-name="Monitor" data-compartment="2">-onNavigationDetection(): void</text>
+
+</g>
+</g>
+</g>
+<g data-name="PageData">
+<g fill="#eee8d5" stroke="#33322E" data-name="PageData">
+<rect x="1802.3" y="428.0" height="178.0" width="295.0" data-name="PageData"></rect>
+<path d="M1802.3 460.0 L2097.3 460.0" fill="none" data-name="PageData"></path>
+<path d="M1802.3 541.0 L2097.3 541.0" fill="none" data-name="PageData"></path>
+</g>
+<g transform="translate(1802.25, 428)" font-family="Helvetica" font-size="12pt" font-weight="bold" font-style="normal" data-name="PageData" data-compartment="0">
+<g transform="translate(8, 8)" fill="#33322E" text-align="center" data-name="PageData" data-compartment="0">
+<a id="src/interactions/pagedata.ts.PageData" xlink:href="src/interactions/pagedata.ts"><text x="139.5" y="14.1" stroke="none" text-anchor="middle" data-name="PageData" data-compartment="0">PageData</text></a>
+
+</g>
+</g>
+<g transform="translate(1802.25, 460)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="PageData" data-compartment="1">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="PageData" data-compartment="1">
+<text x="0.0" y="14.1" stroke="none" data-name="PageData" data-compartment="1">+url: string</text>
+<text x="0.0" y="30.3" stroke="none" data-name="PageData" data-compartment="1">+selectors: SelectorNamePair[]</text>
+<text x="0.0" y="46.5" stroke="none" data-name="PageData" data-compartment="1">+matchPathData: PatternData</text>
+<text x="0.0" y="62.7" stroke="none" data-name="PageData" data-compartment="1">+currentPattern: string</text>
+
+</g>
+</g>
+<g transform="translate(1802.25, 541)" font-family="Helvetica" font-size="12pt" font-weight="normal" font-style="normal" data-name="PageData" data-compartment="2">
+<g transform="translate(8, 8)" fill="#33322E" text-align="left" data-name="PageData" data-compartment="2">
+<text x="0.0" y="14.1" stroke="none" data-name="PageData" data-compartment="2">+update(): void</text>
+<text x="0.0" y="30.3" stroke="none" data-name="PageData" data-compartment="2">-updateMatchData(): string[]</text>
+<text x="0.0" y="46.5" stroke="none" data-name="PageData" data-compartment="2">-getSelectors(): SelectorNamePair[]</text>
+
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>
