@@ -1,6 +1,6 @@
-import { BackgroundMessage } from "../communication/backgroundmessage";
+import { BackgroundMessage, MessageResponse} from "../communication/backgroundmessage";
 import {DBDocument, ActivityDocument, SessionDocument} from "../database/dbdocument";
-import { Config, ConfigLoader, ExtractorList, PatternSelectorMap} from "./config";
+import {ConfigLoader, ExtractorList, PatternSelectorMap} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../communication/activity";
 import {SenderMethod} from "../communication/sender"
@@ -36,30 +36,40 @@ export class Monitor {
 
     constructor(configLoader: ConfigLoader) {
         const config = configLoader.config;
-        this.interactionEvents = config.events ? config.events : ['click'];
+        this.interactionEvents = config.events ?? ['click'];
         this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
         this.currentPageData = new PageData();
         this.interactionAttribute = "monitoring-interactions"
-        this.extractorList = configLoader.extractorList;
+        this.extractorList = configLoader.extractorList; 
 
         if (window.location.origin === this.baseURL) {
-            const runWhenVisible = () => {
+            const runWhenVisible = () => {  // Remove async here
                 if (document.visibilityState === 'visible') {
-                    this.initializeMonitor();
-                    document.removeEventListener('visibilitychange', runWhenVisible);
+                    // Wrap the async call and handle errors
+                    this.initializeMonitor()
+                        .then(() => {
+                            document.removeEventListener('visibilitychange', runWhenVisible);
+                        })
+                        .catch(error => {
+                            console.error('Error initializing monitor:', error);
+                            // Still remove listener even if there's an error
+                            document.removeEventListener('visibilitychange', runWhenVisible);
+                        });
                 }
             };
 
-        if (document.readyState === 'complete') {
-            runWhenVisible();
-        } else {
-            window.addEventListener('load', runWhenVisible);
-        }
+            if (document.readyState === 'complete') {
+                runWhenVisible(); // This will now be synchronous
+            } else {
+                window.addEventListener('load', () => {  // Remove async here
+                    runWhenVisible();
+                });
+            }
 
-        document.addEventListener('visibilitychange', runWhenVisible);
-    }
+            document.addEventListener('visibilitychange', runWhenVisible);
+        }  
     }
 
     /**
@@ -92,7 +102,9 @@ export class Monitor {
         const currentState = new SessionDocument(this.currentPageData.url, document.title);
         console.log("Checking highlight");
         const response = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
-        this.highlight = response.highlight;
+        if (response?.status === "Session initialized" && response.highlight) {
+            this.highlight = response.highlight; // TypeScript knows highlight exists here
+        }
         console.log(`Highlight is set to ${this.highlight}`)
     }
 
@@ -102,7 +114,7 @@ export class Monitor {
 
     private bindEvents(): void {
         // Whenever new content is loaded, attach observers to each HTML element that matches the selectors in the configs
-        const observer = new MutationObserver((mutations: MutationRecord[], obs: MutationObserver) => this.addListenersToNewMatches());
+        const observer = new MutationObserver(() => this.addListenersToNewMatches());
         // Make the mutation observer observe the entire document for changes
         observer.observe(document.body, {
             childList: true,
@@ -127,16 +139,16 @@ export class Monitor {
         this.currentPageData.selectors.forEach(interaction => {
             const elements = document.querySelectorAll(`:is(${interaction.selector}):not([${this.interactionAttribute}])`);
             const name = interaction.name;
-            elements.forEach(element => {
+            for (const element of elements){
                 if (this.highlight) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
                 element.setAttribute(this.interactionAttribute, 'true');
 
-                for (let i = 0; i < this.interactionEvents.length; i++) {
-                    element.addEventListener(this.interactionEvents[i], (e: Event) => {
+                for (const ie of this.interactionEvents) {
+                    element.addEventListener(ie, (e: Event) => {
                         this.onInteractionDetection(element, e, name);
                     }, true);
                 }
-            });
+            }
         });
     }
 
@@ -163,7 +175,7 @@ export class Monitor {
    * @returns A document describing self loop
    */
 
-    private createSelfLoopRecord(event: Event, urlChange: boolean): DBDocument {
+    private createSelfLoopRecord(event: Event): DBDocument {
         console.log("Detected self loop change event");
         const metadata = this.extractorList.extract(this.currentPageData.url, SenderMethod.NavigationDetection);
         console.log("printing metadata");
@@ -204,7 +216,7 @@ export class Monitor {
    * @returns Response indicating whether the message succeeded
    */
 
-    private async sendMessageToBackground(senderMethod: SenderMethod, payload: DBDocument): Promise<any> {
+    private async sendMessageToBackground(senderMethod: SenderMethod, payload: DBDocument): Promise<MessageResponse | null> {
         try {
             // Check if runtime is available (extension context still valid)
             if (!chrome.runtime?.id) {
@@ -212,13 +224,12 @@ export class Monitor {
             }
 
             const message = new BackgroundMessage(senderMethod, payload);
-            const response = await chrome.runtime.sendMessage(message);
+            const response : MessageResponse = await chrome.runtime.sendMessage(message);
             
             // Chrome returns undefined if no listeners, check if that's expected
             if (response === undefined) {
-                console.warn('No response from background script');
+                console.error('No response from background script');
             }
-            
             return response;
         } catch (error) {
             console.error('Background message failed:', error);
@@ -252,10 +263,10 @@ export class Monitor {
      * @param e - the event that triggered the callback
      * @param name - the name of the element that triggered the callback (as defined in the config)
      */
-
+    // @ts-ignore: Ignoring TypeScript error for NavigateEvent not found
     private onNavigationDetection(navEvent: any): void {
         const baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1]
-        const urlChange = !(navEvent.destination.url === this.currentPageData.url);
+        // const urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
 
@@ -278,7 +289,7 @@ export class Monitor {
             this.updateCurrentPageData(this.currentPageData.url);
         } else if (navEvent.navigationType === "replace") {
             console.log("Replace event detected.");
-            const record = this.createSelfLoopRecord(navEvent, urlChange);
+            const record = this.createSelfLoopRecord(navEvent);
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
             console.error('Failed to send interaction data:', error);
             });
@@ -292,15 +303,22 @@ export class Monitor {
    */
 
     private StringToColor = (function () {
-        let instance: any = null;
+        interface ColorInstance {
+            stringToColorHash: Record<string, string>;
+            nextVeryDifferntColorIdx: number;
+            veryDifferentColors: string[];
+        }
+
+        let instance: ColorInstance | null = null;
 
         return {
             next: function stringToColor(str: string): string {
                 if (instance === null) {
-                    instance = {};
-                    instance.stringToColorHash = {};
-                    instance.nextVeryDifferntColorIdx = 0;
-                    instance.veryDifferentColors = ["#00FF00", "#0000FF", "#FF0000", "#01FFFE", "#FFA6FE", "#FFDB66", "#006401", "#010067", "#95003A", "#007DB5", "#FF00F6", "#FFEEE8", "#774D00", "#90FB92", "#0076FF", "#D5FF00", "#FF937E", "#6A826C", "#FF029D", "#FE8900", "#7A4782", "#7E2DD2", "#85A900", "#FF0056", "#A42400", "#00AE7E", "#683D3B", "#BDC6FF", "#263400", "#BDD393", "#00B917", "#9E008E", "#001544", "#C28C9F", "#FF74A3", "#01D0FF", "#004754", "#E56FFE", "#788231", "#0E4CA1", "#91D0CB", "#BE9970", "#968AE8", "#BB8800", "#43002C", "#DEFF74", "#00FFC6", "#FFE502", "#620E00", "#008F9C", "#98FF52", "#7544B1", "#B500FF", "#00FF78", "#FF6E41", "#005F39", "#6B6882", "#5FAD4E", "#A75740", "#A5FFD2", "#FFB167", "#009BFF", "#E85EBE"];
+                    instance = {
+                        stringToColorHash: {},
+                        nextVeryDifferntColorIdx: 0,
+                        veryDifferentColors: ["#00FF00", "#0000FF", "#FF0000", "#01FFFE", "#FFA6FE", "#FFDB66", "#006401", "#010067", "#95003A", "#007DB5", "#FF00F6", "#FFEEE8", "#774D00", "#90FB92", "#0076FF", "#D5FF00", "#FF937E", "#6A826C", "#FF029D", "#FE8900", "#7A4782", "#7E2DD2", "#85A900", "#FF0056", "#A42400", "#00AE7E", "#683D3B", "#BDC6FF", "#263400", "#BDD393", "#00B917", "#9E008E", "#001544", "#C28C9F", "#FF74A3", "#01D0FF", "#004754", "#E56FFE", "#788231", "#0E4CA1", "#91D0CB", "#BE9970", "#968AE8", "#BB8800", "#43002C", "#DEFF74", "#00FFC6", "#FFE502", "#620E00", "#008F9C", "#98FF52", "#7544B1", "#B500FF", "#00FF78", "#FF6E41", "#005F39", "#6B6882", "#5FAD4E", "#A75740", "#A5FFD2", "#FFB167", "#009BFF", "#E85EBE"]
+                    };
                 }
 
                 if (!instance.stringToColorHash[str]) {
