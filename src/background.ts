@@ -88,13 +88,18 @@ class SessionManager {
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const tabId = sender.tab?.id ?? null;
+      console.log("message received!");
       this.handleMessage(message as BackgroundMessage, tabId)
-        .then((response) => sendResponse(response))
+        .then((response) => {
+          console.log("sending response:", response);
+          sendResponse(response)})
         .catch((error) => {
           console.error("Error handling message:", error);
           const errorMessage = error instanceof Error ? error.message : String(error);
           sendResponse({ status: "Error", message: errorMessage });
         });
+      // Tell Chrome that sendResponse will be called asynchronously
+      return true;
     });
 
     chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
@@ -124,11 +129,14 @@ class SessionManager {
   private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<MessageResponse> {
     const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
 
+    console.log("handling message");
+
     switch (request.senderMethod) {
       case SenderMethod.InteractionDetection:
       case SenderMethod.NavigationDetection: {
         const doc = request.payload as ActivityDocument;
         await session.addActivityDocument(doc);
+        console.log("sending response");
         return { status: "Activity added to local session." };
       }
 
@@ -159,11 +167,12 @@ class SessionManager {
           console.error("highlightElements not found in storage, using default");
           highlightElements = true;
         }
-        console.log(`Highlight elements: ${highlightElements}}`)
+        console.log("sending response");
 
         return { status: "Session initialized", highlight: highlightElements};
       }
       default:{
+        console.log("sending response");
         return { status: `Unrecognized request type: ${request.senderMethod}` };
       }
     }
