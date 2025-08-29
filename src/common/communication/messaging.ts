@@ -1,10 +1,10 @@
 import {DBDocument } from "../dbdocument";
 import { SenderMethod } from "./sender";
-export {BackgroundMessage, MessageResponse};
+export {MessageToBackground, MessageResponse};
 /**
  * A class used to send messages from the content to the background script in a consistent format.
  */
-class BackgroundMessage {
+class MessageToBackground {
     senderMethod: SenderMethod;
     payload: DBDocument;
     /**

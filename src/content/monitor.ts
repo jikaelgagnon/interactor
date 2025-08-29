@@ -1,4 +1,4 @@
-import { BackgroundMessage, MessageResponse} from "../common/communication/backgroundmessage";
+import {MessageToBackground, MessageResponse} from "../common/communication/messaging";
 import {DBDocument, ActivityDocument, SessionDocument, ExtractedMetadata} from "../common/dbdocument";
 import {ConfigLoader, ExtractorList} from "./config";
 import { PageData } from "./pagedata";
@@ -202,7 +202,7 @@ export class Monitor {
                 throw new Error('Extension context invalidated');
             }
 
-            const message : BackgroundMessage = new BackgroundMessage(senderMethod, payload);
+            const message : MessageToBackground = new MessageToBackground(senderMethod, payload);
             const response : MessageResponse = await chrome.runtime.sendMessage(message);
             
             // Chrome returns undefined if no listeners, check if that's expected
