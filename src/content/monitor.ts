@@ -147,33 +147,18 @@ export class Monitor {
 
     /**
    * Sends a message to the background script.
+   * @param activityType -  the type of activity (self loop or state change)
    * @param event - the HTML event that occured
-   * @returns A document describing the state change
-   */
-
-    private createStateChangeRecord(event: Event): DBDocument {
-        console.log("Detected state change event");
-        const metadata: ExtractedMetadata = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.NavigationDetection);
-        console.log("printing metadata");
-        console.log(metadata);
-
-        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.currentURL, document.title);
-    }
-
-    /**
-   * Sends a message to the background script.
-   * @param event - the HTML event that occured
-   * @param urlChange - indicates whether the self-loop resulted in a url change
    * 
    * @returns A document describing self loop
    */
 
-    private createSelfLoopRecord(event: Event): DBDocument {
+    private createNavigationRecord(activityType: ActivityType, event: Event): DBDocument {
         console.log("Detected self loop change event");
         const metadata = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
-        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.currentURL, document.title);
+        return new ActivityDocument(activityType, event, metadata, this.currentPageData.currentURL, document.title);
     }
 
     /**
@@ -186,13 +171,14 @@ export class Monitor {
 
     private createInteractionRecord(element: Element, name: string, event: Event): DBDocument {
         console.log("Detected interaction event");
-        let metadata: {html: string, elementName: string; id?: string} = {
+        const pageSpecificData: object = {
             html: element.getHTML(),
             elementName: name,
         };
-        const extractedData = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.InteractionDetection);
+        const extractedData = this.extractorList.extract(this.currentPageData.currentURL, 
+            SenderMethod.InteractionDetection);
 
-        metadata = {... metadata, ... extractedData as object};
+        const metadata: ExtractedMetadata = {... pageSpecificData, ... extractedData as object} as ExtractedMetadata;
 
         console.log("printing metadata");
         console.log(metadata);
@@ -203,7 +189,7 @@ export class Monitor {
 
     /**
    * Sends a message to the background script.
-   * @param sender - the name of the function that's sending the message to the background script
+   * @param senderMethod - the name of the function that's sending the message to the background script
    * @param payload - the data being sent to the background script
    * 
    * @returns Response indicating whether the message succeeded
@@ -233,7 +219,7 @@ export class Monitor {
 
     /**
    * Callback that creates a payload describing the interaction that occured and sends it to the background script
-   * @param e - the event that triggered the callback
+   * @param element - the event that triggered the callback
    * @param name - the name of the element that triggered the callback (as defined in the config)
    */
 
@@ -243,15 +229,14 @@ export class Monitor {
         console.log(`Event triggered by`, element);
         // console.log(element.innerHTML);
         // console.log(element.getHTML());
-        const record = this.createInteractionRecord(element, name, e);
+        const record: DBDocument = this.createInteractionRecord(element, name, e);
         this.sendMessageToBackground(SenderMethod.InteractionDetection, record)
         .catch(error => {
             console.error('Failed to send interaction data:', error);
-            // Maybe queue for retry, or just log and continue
         });
     }
 
-    private isNewBaseURL(url: string | null){
+    private isNewBaseURL(url: string | null): boolean{
         return url && this.currentPageData.currentURL
             ? url.split(".")[1] !== this.currentPageData.currentURL.split(".")[1]
             : false;
@@ -259,44 +244,36 @@ export class Monitor {
 
     /**
      * Callback that creates a payload describing the navigation that occured and sends it to the background script
-     * @param e - the event that triggered the callback
-     * @param name - the name of the element that triggered the callback (as defined in the config)
+     * @param navEvent - the event that triggered the callback
      */
     private onNavigationDetection(navEvent: NavigationEvent): void {
-        const destUrl = navEvent.destination.url;
-        const baseURLChange = this.isNewBaseURL(destUrl);
-        // const urlChange = !(navEvent.destination.url === this.currentPageData.url);
-        // let sourceState = this.getCleanStateName();
-        // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
-        if (destUrl){
-            this.currentPageData.currentURL = navEvent.destination.url;
-        }
-        else {
-            console.log("No destination URL found in navigate event. Setting to empty string");
-            this.currentPageData.currentURL = "NO URL FOUND";
-
-        }
-        // let destState = this.getCleanStateName();
+        const destUrl: string | null = navEvent.destination.url;
+        const baseURLChange: boolean = this.isNewBaseURL(destUrl);
+        let record: DBDocument | undefined = undefined;
+        let sender: SenderMethod | undefined = undefined;
+        this.currentPageData.currentURL = navEvent.destination.url ?? "NO URL FOUND";
 
         console.log(`Navigation detected with event type: ${navEvent.type}`)
         if (baseURLChange){
             console.log("URL base change detected. Closing program.");
-            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.currentURL, document.title)).catch(error => {
-            console.error('Failed to send interaction data:', error);
-            });
+            record = new DBDocument(this.currentPageData.currentURL, document.title)
+            sender = SenderMethod.CloseSession;
         }
         else if (navEvent.navigationType === "push") {
             console.log("Push event detected.");
-            const record = this.createStateChangeRecord(navEvent);
-            this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
-            console.error('Failed to send interaction data:', error);
-            });
+            record = this.createNavigationRecord(ActivityType.StateChange ,navEvent);
+            sender = SenderMethod.NavigationDetection;
             this.currentPageData.update(document.location.href);
         } else if (navEvent.navigationType === "replace") {
             console.log("Replace event detected.");
-            const record = this.createSelfLoopRecord(navEvent);
-            this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
-            console.error('Failed to send interaction data:', error);
+            
+            record = this.createNavigationRecord(ActivityType.SelfLoop ,navEvent);
+            sender = SenderMethod.NavigationDetection;
+        }
+
+        if (typeof(record) !== "undefined" && typeof(sender) !== "undefined"){
+            this.sendMessageToBackground(sender, record).catch(error => {
+                console.error('Failed to send interaction data:', error);
             });
         }
     }

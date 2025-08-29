@@ -33,6 +33,8 @@ This class takes as input a `ConfigLoader`, which itself contains a `Config` and
 Subsequentlyy, the class goes through the following steps:
 
 1. Upon initialization, `Monitor` creates an instance of `PageData`; this class stores the current URL and CSS selectors being applied to the page. When the user navigates to a new page, this data is updated.
-2. It sends a message to background script to get the user's settings. This message is contained in a 
+2. It sends a message to background script to get the user's settings. This message is contained in a `DBDocument`. This class is used as a wrapper for all data sent to the database.
+3. It attaches event listeners to all monitored HTML elements, creates a `MutationObserver` that looks for new elements and attaches elements to them, and adds a listener for navigations.
+4. Whenever the user interacts with the page / navigates, a message is sent to the background script. This runs continuously until the user closes the tab / changes to a new website.
 
 
