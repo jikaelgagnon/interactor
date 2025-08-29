@@ -1,7 +1,7 @@
-import { db } from "./database/firebase";
+import { db } from "./background/database/firebase";
 import { collection, query, where, getDocs, doc, writeBatch} from "firebase/firestore";
 import { utils, writeFile } from "xlsx";
-import { ActivityDocument } from "./database/dbdocument";
+import { ActivityDocument } from "./common/dbdocument";
 
 
 interface SessionData {

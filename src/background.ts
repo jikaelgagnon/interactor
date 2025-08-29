@@ -1,8 +1,8 @@
 import { collection, addDoc, updateDoc, doc, arrayUnion } from "firebase/firestore";
-import { db } from "./database/firebase";
-import { ActivityDocument, SessionDocument } from "./database/dbdocument";
-import { BackgroundMessage, MessageResponse } from "./communication/backgroundmessage";
-import { SenderMethod } from "./communication/sender";
+import { db } from "./background/database/firebase";
+import { ActivityDocument, SessionDocument } from "./common/dbdocument";
+import { BackgroundMessage, MessageResponse } from "./common/communication/backgroundmessage";
+import { SenderMethod } from "./common/communication/sender";
 
 let USE_DB = false;
 

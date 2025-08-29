@@ -15,6 +15,10 @@ This Chrome extension works by communicating back and forth between a content sc
 1. Sending data to the database
 2. Reading the user's settings for the extension (more generally, it can access the Chrome local storage)
 
-Note: Under the [./diagrams folder](./diagrams/), you can find a UML diagram 
+Note: A UML diagram can be found in [./diagrams folder](./diagrams/mermaid_readme.md) alongside the Mermaid code used to generate it.
+
+All code can be found in the [src](./src/) folder.
 
 ## Content Script Code
+
+The bulk of the code used in the [content script](./src/content.ts) can be found in [monitor.ts](./src/monitoring/config.ts)

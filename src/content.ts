@@ -1,10 +1,10 @@
-import { Monitor } from "./interactions/monitor";
-import ytConfig from './configs/youtube_config.json';
+import { Monitor } from "./content/monitor";
+import ytConfig from './content/configs/youtube_config.json';
 // import tiktokConfig from './configs/tiktok_config.json';
 // import linkedinConfig from './configs/linkedin_config.json';
-import { ConfigLoader, ExtractorData } from "./interactions/config";
+import { ConfigLoader, ExtractorData } from "./content/config";
 // import { ActivityType } from "./communication/activity";
-import { SenderMethod } from "./communication/sender";
+import { SenderMethod } from "./common/communication/sender";
 
 
 const getHomepageVideos = (): object => {
