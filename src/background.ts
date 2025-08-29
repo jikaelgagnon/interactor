@@ -1,7 +1,7 @@
 import { collection, addDoc, updateDoc, doc, arrayUnion } from "firebase/firestore";
 import { db } from "./background/database/firebase";
 import { ActivityDocument, SessionDocument } from "./common/dbdocument";
-import { BackgroundMessage, MessageResponse } from "./common/communication/backgroundmessage";
+import { MessageToBackground, MessageResponse } from "./common/communication/messaging";
 import { SenderMethod } from "./common/communication/sender";
 
 let USE_DB = false;
@@ -89,7 +89,7 @@ class SessionManager {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const tabId = sender.tab?.id ?? null;
       console.log("message received!");
-      this.handleMessage(message as BackgroundMessage, tabId)
+      this.handleMessage(message as MessageToBackground, tabId)
         .then((response) => {
           console.log("sending response:", response);
           sendResponse(response)})
@@ -126,7 +126,7 @@ class SessionManager {
    * @returns 
    */
 
-  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<MessageResponse> {
+  private async handleMessage(request: MessageToBackground, tabId: number | null): Promise<MessageResponse> {
     const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
 
     console.log("handling message");
