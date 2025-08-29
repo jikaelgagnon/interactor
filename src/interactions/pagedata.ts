@@ -41,7 +41,6 @@ export class PageData {
         // Get a list of all the paths that match the current URL
         const matches = Object.keys(patterns).filter((path) => {
             // console.log(path);
-            // @ts-ignore: Ignoring TypeScript error for URLPattern not found
             const p = new URLPattern(path, baseURL);
             const match = p.test(this.url);
             // Closest match is the longest pattern that matches the current URL

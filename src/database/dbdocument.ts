@@ -19,13 +19,13 @@ class DBDocument {
 
 class ActivityDocument extends DBDocument{
     // The type of activity being logged. Either "state_chage", "self_loop", or "interaction"
-    activityType: ActivityType;
+    activityType: ActivityType | string;
     // Timestamp for when the document was created
-    createdAt: Date;
+    createdAt: Date | string;
     // Event type (eg. click, scroll, etc...)
     eventType: string
     // Metadata about the event
-    metadata: object;
+    metadata?: object;
     constructor(type: ActivityType, event: Event, metadata: object, url: string, title: string) {
         super(url, title);
         this.activityType = type;

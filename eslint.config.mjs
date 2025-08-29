@@ -8,7 +8,9 @@ const config = tseslint.config(
     ...tseslint.configs.recommendedTypeChecked,
     ...tseslint.configs.stylisticTypeChecked,
     {
-        ignores: ["dist/**/*", "eslint.config.mjs", "coverage/**/*"],
+        ignores: ["dist/**/*", "eslint.config.mjs", "coverage/**/*", "src/types/*",
+            "src/content.ts"
+        ],
     },
     {
         languageOptions: {
