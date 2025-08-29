@@ -1,30 +1,11 @@
 import { SenderMethod } from "../common/communication/sender";
 
-export {SelectorNamePair, Config, ConfigLoader, PatternData, PatternSelectorMap, ExtractorData, ExtractorList};
+export {Config, ConfigLoader, URLPatternToSelectors, SelectorNamePair, ExtractorData, ExtractorList};
 
-interface SelectorNamePair{
-    /**
-     * An interface to map CSS selectors to human readable names
-     */
-    // The CSS selector
-    selector: string;
-    // The human readable name for the CSS selector
-    name: string;
-}
 
-type PatternSelectorMap = Record<string, PatternData>;
+type SelectorNamePair = { selector: string; name: string };
+type URLPatternToSelectors = Record<string, SelectorNamePair[]>;
 
-interface PatternData {
-    /**
-     * An interface to bundle together data in the Config for a given path pattern.
-     * It contains a list of CSS selectors for the path pattern and optionally
-     * an idSelector function that extracts an ID from pages with the corresponding URL
-     */
-    // A list of selectors and names for the page
-    selectors?: SelectorNamePair[];
-    // A function that extracts metadata from the page
-    dataExtractor?: () => object;
-}
 
 interface Config {
     /**
@@ -35,7 +16,7 @@ interface Config {
     // A mapping of URL patterns to path data. The URL Pattern should follow the 
     // URL Pattern API syntax. These are appended to the baseURL when checking for matches
     // Ex: baseURL: www.youtube.com, path: /shorts/:id -> www.youtube.com/shorts/:id
-    paths: PatternSelectorMap;
+    paths: URLPatternToSelectors;
     // Indicates whether the Monitor should be in debug mode. If true, add coloured boxes
     // around selected HTML elements
     debug?: boolean;
