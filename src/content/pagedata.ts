@@ -1,4 +1,4 @@
-import {SelectorNamePair, PatternData, PatternSelectorMap } from "./config";
+import {URLPatternToSelectors, SelectorNamePair, Config} from "./config";
 /**
  * A class responsible for tracking the state of the page that the user is currently on.
  */
@@ -11,18 +11,22 @@ export class PageData {
     // for the pattern that most closely matches this.url
     // Ex: If the url is www.youtube.com/shorts/ABC and the patterns are /* and /shorts/:id, then 
     // matchPathData would contain the PathData for /shorts/:id, since its a closer match to the URL.
-    matchPathData!: PatternData; 
     currentPattern!: string;
+    baseURL: string;
+    urlPatternToSelectorData: URLPatternToSelectors;
+
+    constructor(config: Config){
+        this.urlPatternToSelectorData = config.paths;
+        this.baseURL = config.baseURL;
+    }
     /**
      * Updates the state of the PageData
-     * @param baseURL: The base url for the page (eg. www.youtube.com)
-     * @param url: The full url of the current page
-     * @param paths: A list of all the paths defined in a config
+     * @param newURL: The full url of the current page
      */
-    update(baseURL: string, url: string, paths: PatternSelectorMap){
-        this.url = url;
-        const matches = this.updateMatchData(baseURL, paths);
-        this.selectors = this.getSelectors(matches, paths);
+    update(newURL: string){
+        this.url = newURL;
+        const matches = this.updateMatchData();
+        this.selectors = this.getSelectorNamePairs(matches);
     }
     /**
      * Sets `matchPathData` to be the PathData for the URL pattern with the closet match to `baseURL`
@@ -34,14 +38,14 @@ export class PageData {
      * @returns A list of all patterns in the config that match `baseURL`
      */
 
-    private updateMatchData(baseURL: string, patterns: PatternSelectorMap): string[]{
+    private updateMatchData(): string[]{
         console.log("updating page data");
         let closestMatch = ""; // the pattern that most closely matches the current URL
 
         // Get a list of all the paths that match the current URL
-        const matches = Object.keys(patterns).filter((path) => {
+        const matches = Object.keys(this.urlPatternToSelectorData).filter((path) => {
             // console.log(path);
-            const p = new URLPattern(path, baseURL);
+            const p = new URLPattern(path, this.baseURL);
             const match = p.test(this.url);
             // Closest match is the longest pattern that matches the current URL
             if (match && path.length > closestMatch.length) {
@@ -56,28 +60,23 @@ export class PageData {
             console.log("no matches found");
         }
 
-        // this.urlUsesId = closestMatch.endsWith(":id");
-        this.matchPathData = patterns[closestMatch];
         return matches;
     }
 
     /**
-     * @param matches: A list of all matching paths to the current url
-     * @param paths: A list of all the paths defined in a config
+     * @param matchingPaths: A list of all matching paths to the current url
      * 
      * @returns A list of all selectors for the matching paths
      */
 
-    private getSelectors(matches: string[], paths: PatternSelectorMap): SelectorNamePair[] {
-        const currentSelectors = [];
-        for (const path of matches) {
-            const pathData = paths[path];
-            if (pathData.selectors) {
-                for (const selector of pathData.selectors) {
-                    currentSelectors.push(selector);
-                }
+    private getSelectorNamePairs(matchingPaths: string[]): SelectorNamePair[] {
+        const currentSelectorNamePairs = [];
+        for (const path of matchingPaths) {
+            const selectorNamePairs = this.urlPatternToSelectorData[path];
+            for (const pair of selectorNamePairs) {
+                currentSelectorNamePairs.push(pair);
             }
         }
-        return currentSelectors;
+        return currentSelectorNamePairs;
     }
 }

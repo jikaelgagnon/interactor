@@ -21,4 +21,12 @@ All code can be found in the [src](./src/) folder.
 
 ## Content Script Code
 
-The bulk of the code used in the [content script](./src/content.ts) can be found in [monitor.ts](./src/monitoring/config.ts)
+The first place to look to understand the content-related code is in [content.ts itself](./src/content.ts). Most of the code here won't make sense right away. The key takeaway is that this file is used to instantiate an instance of the `Monitor` class, who's constructor takes as input a `ConfigLoader`. `Monitor` does the bulk of the work on the content; the code is found in [monitor.ts](./src/content/monitor.ts).
+
+### `Monitor`
+
+This class takes as input a `ConfigLoader`, which itself contains a `Config` and an `ExtractorList`.
+- `Config`: Contains the base URL to be *monitored*. Additionally, it contains list of all the URL patterns, HTML elements, and events that will be monitored and logged.
+- `ExtractorList`: Contains a list of `ExtractorData` objects. These objects are used to extract additional metadata from a specified URL.
+
+Upon initialization, `Monitor` creates an instance of the `PageData`; this class stores information about the 

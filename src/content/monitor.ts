@@ -1,6 +1,6 @@
 import { BackgroundMessage, MessageResponse} from "../common/communication/backgroundmessage";
 import {DBDocument, ActivityDocument, SessionDocument} from "../common/dbdocument";
-import {ConfigLoader, ExtractorList, PatternSelectorMap} from "./config";
+import {ConfigLoader, ExtractorList, URLPatternToSelectors} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../common/communication/activity";
 import {SenderMethod} from "../common/communication/sender"
@@ -24,7 +24,7 @@ export class Monitor {
     highlight: boolean;
     // An object mapping path patterns to their corresponding CSS selectors
     // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-    paths: PatternSelectorMap;
+    paths: URLPatternToSelectors;
     // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
     baseURL: string;
     // Contains data relevant to the current page.
@@ -40,7 +40,7 @@ export class Monitor {
         this.highlight = true;
         this.paths = config.paths;
         this.baseURL = config.baseURL;
-        this.currentPageData = new PageData();
+        this.currentPageData = new PageData(config);
         this.interactionAttribute = "monitoring-interactions"
         this.extractorList = configLoader.extractorList; 
 
@@ -91,8 +91,8 @@ export class Monitor {
    * Updates the page data whenever a new page is detected
    * @param url - the url of the new page
    */
-    private updateCurrentPageData(url: string){
-        this.currentPageData.update(this.baseURL, url, this.paths);
+    private updateCurrentPageData(newURL: string){
+        this.currentPageData.update(newURL);
     }
 
     /**

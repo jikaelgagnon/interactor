@@ -2,8 +2,7 @@
     "baseURL": "https://www.youtube.com",
     "events": ["click"],
     "paths": {
-        "/*": {
-            "selectors":[
+        "/*": [
                 {"selector": "#logo-icon", "name": "YouTube Logo"},
                 {"selector": "ytm-shorts-lockup-view-model-v2", "name": "Shorts on Miniplayer"},
                 {"selector": "div#chip-shape-container, yt-tab-shape[tab-title]", "name": "Category Button"},
@@ -13,21 +12,17 @@
                 {"selector": "yt-icon-button#guide-button", "name": "Guide Button"},
                 {"selector": "ytd-video-renderer, ytd-rich-item-renderer", "name": "Video"},
                 {"selector": "yt-lockup-view-model", "name": "Content Collection"}
-            ]
-        },
-        "/": {},
-        "/feed/*": {
-            "selectors": [
+            ],
+        "/": [],
+        "/feed/*":  [
                 {"selector": "ytd-video-renderer[is-history]", "name": "History Video"},
                 {"selector": "ytd-grid-movie-renderer", "name": "Movie Thumbnail"}
 
-            ]
-        },
-        "/channel/*":{ "selectors": [
+            ],
+        "/channel/*": [
             {"selector": "ytd-default-promo-panel-renderer", "name": "Promo Video"}
-        ]},
-        "/@:id{/*}?": {
-            "selectors": [
+        ],
+        "/@:id{/*}?":  [
                 {"selector": "yt-tab-shape[tab-title=\"Home\"]" , "name": "Creator Home"},
                 {"selector": "yt-tab-shape[tab-title=\"Videos\"]" , "name": "Creator Videos"},
                 {"selector": "yt-tab-shape[tab-title=\"Playlists\"]" , "name": "Creator Playlists"},
@@ -37,26 +32,20 @@
                 {"selector": "div.yt-subscribe-button-view-model-wiz__container", "name": "Creator Subscribe Button"},
                 {"selector": "ytd-video-renderer.style-scope.ytd-channel-featured-content-renderer", "name": "Creator Featured Video"},
                 {"selector": "ytd-grid-video-renderer.style-scope.yt-horizontal-list-renderer", "name": "Creator Video"}
-            ]
-        },
-        "/playlist?list=*": {
-            "selectors": [
+            ],
+        "/playlist?list=*":  [
                 {
                     "selector": "div#content.style-scope.ytd-playlist-video-renderer",
                     "name": "Video Inside Playlist"
                 }
-            ]
-        },
-        "/shorts/:id": {
-            "selectors": [
+            ],
+        "/shorts/:id":  [
                 {"selector": "#like-button[is-shorts]", "name": "Shorts Like Button"},
                 {"selector": "#dislike-button[is-shorts]", "name": "Shorts Dislike Button"},
                 {"selector": "div#comments-button", "name": "Comments Button"},
                 {"selector": "ytd-player#player", "name": "Shorts Video Player"}
-            ]
-        },
-        "/watch?v=*": {
-            "selectors": [
+            ],
+        "/watch?v=*":  [
                 {"selector": "ytd-compact-video-renderer.style-scope.ytd-item-section-renderer", "name": "Watch Page Recommended Video"},
                 {"selector": "ytd-toggle-button-renderer#dislike-button", "name": "Comment Dislike Button"},
                 {"selector": "ytd-toggle-button-renderer#like-button", "name": "Comment Like Button"},
@@ -66,14 +55,11 @@
                 {"selector": "div#subscribe-button", "name": "Subscribe Button"},
                 {"selector": "div#player","name": "Video Player"},
                 {"selector": "button[title='Share']", "name": "Share Button"}
-            ]
-        },
-        "/results?search_query=*": {
-            "selectors": [
+            ],
+        "/results?search_query=*":  [
                 {"selector": "ytd-video-renderer.style-scope.ytd-vertical-list-renderer", "name": "Top Search Page Video"},
                 {"selector": "ytd-video-renderer.style-scope.ytd-item-section-renderer", "name": "Search Page Video"},
                 {"selector": "yt-lockup-view-model.ytd-item-section-renderer", "name": "Playlist"}
             ]
         }
-    }
 }
