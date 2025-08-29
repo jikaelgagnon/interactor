@@ -407,7 +407,7 @@ class DataManager {
             </div>
         `;
 
-        if (activity.metadata && 'html' in activity.metadata) {
+        if (activity.metadata && 'html' in( activity.metadata as object)) {
             delete (activity.metadata as Record<string, unknown>).html;
         }
         

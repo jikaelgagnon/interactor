@@ -1,6 +1,6 @@
 import { BackgroundMessage, MessageResponse} from "../common/communication/backgroundmessage";
-import {DBDocument, ActivityDocument, SessionDocument} from "../common/dbdocument";
-import {ConfigLoader, ExtractorList, URLPatternToSelectors} from "./config";
+import {DBDocument, ActivityDocument, SessionDocument, ExtractedMetadata} from "../common/dbdocument";
+import {ConfigLoader, ExtractorList} from "./config";
 import { PageData } from "./pagedata";
 import { ActivityType } from "../common/communication/activity";
 import {SenderMethod} from "../common/communication/sender"
@@ -19,65 +19,64 @@ import {SenderMethod} from "../common/communication/sender"
  */
 export class Monitor {
     // A list of the type of events we want to monitor as interactions (eg. click, scroll, etc.). Default is click
-    interactionEvents: string[];
+    htmlEventsToMonitor: string[];
     // If true, highlight all selected HTML elements with coloured boxes
-    highlight: boolean;
-    // An object mapping path patterns to their corresponding CSS selectors
-    // Path patterns are consistent with the URL Pattern API Syntax: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
-    paths: URLPatternToSelectors;
-    // Base url for the page (eg. www.youtube.com). All paths are appended to this when matching URls
-    baseURL: string;
+    enableHighlighting: boolean;
     // Contains data relevant to the current page.
     currentPageData: PageData;
     // Attribute added to all elements being monitored
-    interactionAttribute: string;
+    htmlMonitoringAttribute: string;
 
     extractorList: ExtractorList;
 
     constructor(configLoader: ConfigLoader) {
         const config = configLoader.config;
-        this.interactionEvents = config.events ?? ['click'];
-        this.highlight = true;
-        this.paths = config.paths;
-        this.baseURL = config.baseURL;
+        this.htmlEventsToMonitor = config.events ?? ['click'];
+        this.enableHighlighting = true;
         this.currentPageData = new PageData(config);
-        this.interactionAttribute = "monitoring-interactions"
-        this.extractorList = configLoader.extractorList; 
-
-        if (window.location.origin === this.baseURL) {
-            const runWhenVisible = () => {  // Remove async here
-                if (document.visibilityState === 'visible') {
-                    // Wrap the async call and handle errors
-                    this.initializeMonitor()
-                        .then(() => {
-                            document.removeEventListener('visibilitychange', runWhenVisible);
-                        })
-                        .catch(error => {
-                            console.error('Error initializing monitor:', error);
-                            // Still remove listener even if there's an error
-                            document.removeEventListener('visibilitychange', runWhenVisible);
-                        });
-                }
-            };
-
-            if (document.readyState === 'complete') {
-                runWhenVisible(); // This will now be synchronous
-            } else {
-                window.addEventListener('load', () => {  // Remove async here
-                    runWhenVisible();
-                });
-            }
-
-            document.addEventListener('visibilitychange', runWhenVisible);
-        }  
+        this.htmlMonitoringAttribute = "monitoring-interactions"
+        this.extractorList = configLoader.extractorList;
+        // Only initialize monitor if the URL matches and 
+        // the content of the page is visible
+        if (window.location.origin === config.baseURL) {
+            this.intitializeWhenVisible();
+        }
     }
 
+    private intitializeWhenVisible(): void{
+        const runWhenVisible = () => { 
+            if (document.visibilityState === 'visible') {
+                this.initializeMonitor()
+                    .then(() => {
+                        document.removeEventListener('visibilitychange', runWhenVisible);
+                    })
+                    .catch(error => {
+                        console.error('Error initializing monitor:', error);
+                        // Still remove listener even if there's an error
+                        document.removeEventListener('visibilitychange', runWhenVisible);
+                    });
+            }
+        };
+
+        if (document.readyState === 'complete') {
+            runWhenVisible(); // This will now be synchronous
+        } else {
+            window.addEventListener('load', () => {
+                runWhenVisible();
+            });
+        }
+
+        document.addEventListener('visibilitychange', runWhenVisible);
+    }
+
+
     /**
-     * Initializes the monitor if base URL matches the current URL
+     * Initializes the monitor
      */
     private async initializeMonitor() {
         console.log("initializing monitor");
-        this.updateCurrentPageData(document.location.href);
+        const currentURL: string = document.location.href;
+        this.currentPageData.update(currentURL);
         try {
             // Creates a new entry in the DB describing the state at the start of the session
             await this.initializeSession();
@@ -87,25 +86,18 @@ export class Monitor {
             console.error("Failed to initialize session:", err);
         }
 }
-    /**
-   * Updates the page data whenever a new page is detected
-   * @param url - the url of the new page
-   */
-    private updateCurrentPageData(newURL: string){
-        this.currentPageData.update(newURL);
-    }
 
     /**
    * Creates a new entry in the DB describing the state at the start of the session
    */
     private async initializeSession(): Promise<void> {
-        const currentState = new SessionDocument(this.currentPageData.url, document.title);
+        const currentState: DBDocument = new SessionDocument(this.currentPageData.currentURL, document.title);
         console.log("Checking highlight");
-        const response = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
-        if (response?.status === "Session initialized" && response.highlight) {
-            this.highlight = response.highlight; // TypeScript knows highlight exists here
+        const response: MessageResponse | null = await this.sendMessageToBackground(SenderMethod.InitializeSession, currentState);
+        if (response && response?.status === "Session initialized" && response.highlight) {
+            this.enableHighlighting = response.highlight;
         }
-        console.log(`Highlight is set to ${this.highlight}`)
+        console.log(`Highlight is set to ${this.enableHighlighting}`)
     }
 
     /**
@@ -114,7 +106,7 @@ export class Monitor {
 
     private bindEvents(): void {
         // Whenever new content is loaded, attach observers to each HTML element that matches the selectors in the configs
-        const observer = new MutationObserver(() => this.addListenersToNewMatches());
+        const observer: MutationObserver = new MutationObserver(() => this.addListenersToNewMatches());
         // Make the mutation observer observe the entire document for changes
         observer.observe(document.body, {
             childList: true,
@@ -135,14 +127,16 @@ export class Monitor {
         // console.log(`Value of highlight: ${this.highlight}`);
         // console.log("Current page data:");
         // console.log(this.currentPageData);
-        this.currentPageData.selectors.forEach(interaction => {
-            const elements = document.querySelectorAll(`:is(${interaction.selector}):not([${this.interactionAttribute}])`);
-            const name = interaction.name;
+        this.currentPageData.selectorNamePairs.forEach(selectorNamePair => {
+            const elements: NodeListOf<HTMLElement> = document.querySelectorAll(`:is(${selectorNamePair.selector}):not([${this.htmlMonitoringAttribute}])`);
+            const name: string = selectorNamePair.name;
             for (const element of elements){
-                if (this.highlight) (element as HTMLElement).style.border = `2px solid ${this.StringToColor.next(name)}`;
-                element.setAttribute(this.interactionAttribute, 'true');
+                if (this.enableHighlighting){
+                    element.style.border = `2px solid ${this.StringToColor.next(name)}`;
+                }
+                element.setAttribute(this.htmlMonitoringAttribute, 'true');
 
-                for (const ie of this.interactionEvents) {
+                for (const ie of this.htmlEventsToMonitor) {
                     element.addEventListener(ie, (e: Event) => {
                         this.onInteractionDetection(element, e, name);
                     }, true);
@@ -159,11 +153,11 @@ export class Monitor {
 
     private createStateChangeRecord(event: Event): DBDocument {
         console.log("Detected state change event");
-        const metadata = this.extractorList.extract(this.currentPageData.url, SenderMethod.NavigationDetection);
+        const metadata: ExtractedMetadata = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
 
-        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.url, document.title);
+        return new ActivityDocument(ActivityType.StateChange, event, metadata, this.currentPageData.currentURL, document.title);
     }
 
     /**
@@ -176,10 +170,10 @@ export class Monitor {
 
     private createSelfLoopRecord(event: Event): DBDocument {
         console.log("Detected self loop change event");
-        const metadata = this.extractorList.extract(this.currentPageData.url, SenderMethod.NavigationDetection);
+        const metadata = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.NavigationDetection);
         console.log("printing metadata");
         console.log(metadata);
-        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.url, document.title);
+        return new ActivityDocument(ActivityType.SelfLoop, event, metadata, this.currentPageData.currentURL, document.title);
     }
 
     /**
@@ -196,15 +190,15 @@ export class Monitor {
             html: element.getHTML(),
             elementName: name,
         };
-        const extractedData = this.extractorList.extract(this.currentPageData.url, SenderMethod.InteractionDetection);
+        const extractedData = this.extractorList.extract(this.currentPageData.currentURL, SenderMethod.InteractionDetection);
 
-        metadata = {... metadata, ... extractedData};
+        metadata = {... metadata, ... extractedData as object};
 
         console.log("printing metadata");
         console.log(metadata);
 
 
-        return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.url, document.title);
+        return new ActivityDocument(ActivityType.Interaction, event, metadata, this.currentPageData.currentURL, document.title);
     }
 
     /**
@@ -222,7 +216,7 @@ export class Monitor {
                 throw new Error('Extension context invalidated');
             }
 
-            const message = new BackgroundMessage(senderMethod, payload);
+            const message : BackgroundMessage = new BackgroundMessage(senderMethod, payload);
             const response : MessageResponse = await chrome.runtime.sendMessage(message);
             
             // Chrome returns undefined if no listeners, check if that's expected
@@ -257,6 +251,12 @@ export class Monitor {
         });
     }
 
+    private isNewBaseURL(url: string | null){
+        return url && this.currentPageData.currentURL
+            ? url.split(".")[1] !== this.currentPageData.currentURL.split(".")[1]
+            : false;
+    }
+
     /**
      * Callback that creates a payload describing the navigation that occured and sends it to the background script
      * @param e - the event that triggered the callback
@@ -264,18 +264,16 @@ export class Monitor {
      */
     private onNavigationDetection(navEvent: NavigationEvent): void {
         const destUrl = navEvent.destination.url;
-        const baseURLChange = destUrl && this.currentPageData.url
-            ? destUrl.split(".")[1] !== this.currentPageData.url.split(".")[1]
-            : false;
+        const baseURLChange = this.isNewBaseURL(destUrl);
         // const urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
         if (destUrl){
-            this.currentPageData.url = navEvent.destination.url;
+            this.currentPageData.currentURL = navEvent.destination.url;
         }
         else {
             console.log("No destination URL found in navigate event. Setting to empty string");
-            this.currentPageData.url = "NO URL FOUND";
+            this.currentPageData.currentURL = "NO URL FOUND";
 
         }
         // let destState = this.getCleanStateName();
@@ -283,7 +281,7 @@ export class Monitor {
         console.log(`Navigation detected with event type: ${navEvent.type}`)
         if (baseURLChange){
             console.log("URL base change detected. Closing program.");
-            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.url, document.title)).catch(error => {
+            this.sendMessageToBackground(SenderMethod.CloseSession, new DBDocument(this.currentPageData.currentURL, document.title)).catch(error => {
             console.error('Failed to send interaction data:', error);
             });
         }
@@ -293,7 +291,7 @@ export class Monitor {
             this.sendMessageToBackground(SenderMethod.NavigationDetection, record).catch(error => {
             console.error('Failed to send interaction data:', error);
             });
-            this.updateCurrentPageData(this.currentPageData.url);
+            this.currentPageData.update(document.location.href);
         } else if (navEvent.navigationType === "replace") {
             console.log("Replace event detected.");
             const record = this.createSelfLoopRecord(navEvent);

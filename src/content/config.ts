@@ -1,9 +1,12 @@
 import { SenderMethod } from "../common/communication/sender";
+import {ExtractedMetadata} from "../common/dbdocument"
 
 export {Config, ConfigLoader, URLPatternToSelectors, SelectorNamePair, ExtractorData, ExtractorList};
 
 
-type SelectorNamePair = { selector: string; name: string };
+interface SelectorNamePair { 
+    selector: string; name: string 
+}
 type URLPatternToSelectors = Record<string, SelectorNamePair[]>;
 
 
@@ -27,8 +30,8 @@ interface Config {
 class ExtractorData {
     eventType: SenderMethod;
     urlPattern: string;
-    extractor: () => object;
-    constructor(activityType: SenderMethod, urlPattern: string, extractor: () => object){
+    extractor: () => ExtractedMetadata;
+    constructor(activityType: SenderMethod, urlPattern: string, extractor: () => ExtractedMetadata){
         this.eventType = activityType;
         this.urlPattern = urlPattern;
         this.extractor = extractor;
@@ -43,16 +46,16 @@ class ExtractorList {
         this.baseURL = baseURL;
     }
 
-    public extract(currentURL: string, eventType: SenderMethod){
+    public extract(currentURL: string, eventType: SenderMethod): ExtractedMetadata{
         console.log(`Attempting extraction for url: ${currentURL} and event type ${eventType}`);
-        let extractedData: object = {};
+        let extractedData: ExtractedMetadata = {};
         this.extractors.filter(e => {
-                const isCorrectActivity = (e.eventType == eventType || e.eventType == SenderMethod.Any);
-                const p = new URLPattern(e.urlPattern, this.baseURL);
-                const isURLMatch = p.test(currentURL);
-                return isCorrectActivity && isURLMatch;
+                const isCorrectActivity: boolean = (e.eventType == eventType || e.eventType == SenderMethod.Any);
+                const p: URLPattern = new URLPattern(e.urlPattern, this.baseURL);
+                const isURLMatch: boolean = p.test(currentURL);
+                return (isCorrectActivity && isURLMatch);
             }).forEach(e =>
-                extractedData = {... extractedData, ... e.extractor()}
+                extractedData = {... extractedData as object, ... e.extractor() as object}
             )
         return extractedData;
     }

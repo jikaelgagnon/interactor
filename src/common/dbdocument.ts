@@ -13,6 +13,16 @@ class DBDocument {
     }
 }
 
+interface ExtractedMetadataObject {
+    [key: string]: ExtractedMetadata;
+}
+
+type ExtractedMetadata =
+    | string
+    | ExtractedMetadata[]
+    | ExtractedMetadataObject
+    | Record<string, string>; // explicitly allow objects with string values
+
 /**
  * A child of DBDocument that represents activities
  */
@@ -25,8 +35,8 @@ class ActivityDocument extends DBDocument{
     // Event type (eg. click, scroll, etc...)
     eventType: string
     // Metadata about the event
-    metadata?: object;
-    constructor(type: ActivityType, event: Event, metadata: object, url: string, title: string) {
+    metadata?: ExtractedMetadata;
+    constructor(type: ActivityType, event: Event, metadata: ExtractedMetadata, url: string, title: string) {
         super(url, title);
         this.activityType = type;
         this.createdAt = new Date();
@@ -52,4 +62,4 @@ class SessionDocument extends DBDocument{
     }
 }
 
-export {DBDocument, ActivityDocument, SessionDocument};
+export {DBDocument, ActivityDocument, SessionDocument, ExtractedMetadata};

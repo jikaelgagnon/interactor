@@ -26,7 +26,13 @@ The first place to look to understand the content-related code is in [content.ts
 ### `Monitor`
 
 This class takes as input a `ConfigLoader`, which itself contains a `Config` and an `ExtractorList`.
-- `Config`: Contains the base URL to be *monitored*. Additionally, it contains list of all the URL patterns, HTML elements, and events that will be monitored and logged.
+
+- `Config`: Contains the base URL to be *monitored*. Additionally, it contains list of all the URL patterns, HTML elements, and events that will be monitored and logged. 
 - `ExtractorList`: Contains a list of `ExtractorData` objects. These objects are used to extract additional metadata from a specified URL.
 
-Upon initialization, `Monitor` creates an instance of the `PageData`; this class stores information about the 
+Subsequentlyy, the class goes through the following steps:
+
+1. Upon initialization, `Monitor` creates an instance of `PageData`; this class stores the current URL and CSS selectors being applied to the page. When the user navigates to a new page, this data is updated.
+2. It sends a message to background script to get the user's settings. This message is contained in a 
+
+
