@@ -67,7 +67,6 @@ class ExtractorList {
         let extractedData: object = {};
         this.extractors.filter(e => {
                 const isCorrectActivity = (e.eventType == eventType || e.eventType == SenderMethod.Any);
-                // @ts-ignore: Ignoring TypeScript error for URLPattern not found
                 const p = new URLPattern(e.urlPattern, this.baseURL);
                 const isURLMatch = p.test(currentURL);
                 return isCorrectActivity && isURLMatch;

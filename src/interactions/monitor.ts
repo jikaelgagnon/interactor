@@ -122,8 +122,7 @@ export class Monitor {
         });
 
         // Add an event listener to detect navigations on the page
-        // @ts-ignore: Ignoring TypeScript error for navigation not found
-        navigation.addEventListener("navigate", (e: Event) => this.onNavigationDetection(e));
+        navigation.addEventListener("navigate", (e: NavigationEvent) => this.onNavigationDetection(e));
     }
 
     /**
@@ -247,7 +246,7 @@ export class Monitor {
     private onInteractionDetection(element: Element, e: Event, name: string): void {
         console.log("interaction event detected");
         console.log(`Event detected with event type: ${e.type}`);
-        console.log(`Event triggered by ${element}`);
+        console.log(`Event triggered by`, element);
         // console.log(element.innerHTML);
         // console.log(element.getHTML());
         const record = this.createInteractionRecord(element, name, e);
@@ -263,14 +262,22 @@ export class Monitor {
      * @param e - the event that triggered the callback
      * @param name - the name of the element that triggered the callback (as defined in the config)
      */
-    // @ts-ignore: Ignoring TypeScript error for NavigateEvent not found
-    private onNavigationDetection(navEvent: any): void {
-        const baseURLChange = navEvent.destination.url.split(".")[1] != this.currentPageData.url.split(".")[1]
+    private onNavigationDetection(navEvent: NavigationEvent): void {
+        const destUrl = navEvent.destination.url;
+        const baseURLChange = destUrl && this.currentPageData.url
+            ? destUrl.split(".")[1] !== this.currentPageData.url.split(".")[1]
+            : false;
         // const urlChange = !(navEvent.destination.url === this.currentPageData.url);
         // let sourceState = this.getCleanStateName();
         // let match = this.currentPageData.checkForMatch(navEvent.destination.url);
+        if (destUrl){
+            this.currentPageData.url = navEvent.destination.url;
+        }
+        else {
+            console.log("No destination URL found in navigate event. Setting to empty string");
+            this.currentPageData.url = "NO URL FOUND";
 
-        this.currentPageData.url = navEvent.destination.url;
+        }
         // let destState = this.getCleanStateName();
 
         console.log(`Navigation detected with event type: ${navEvent.type}`)
@@ -313,13 +320,11 @@ export class Monitor {
 
         return {
             next: function stringToColor(str: string): string {
-                if (instance === null) {
-                    instance = {
-                        stringToColorHash: {},
-                        nextVeryDifferntColorIdx: 0,
-                        veryDifferentColors: ["#00FF00", "#0000FF", "#FF0000", "#01FFFE", "#FFA6FE", "#FFDB66", "#006401", "#010067", "#95003A", "#007DB5", "#FF00F6", "#FFEEE8", "#774D00", "#90FB92", "#0076FF", "#D5FF00", "#FF937E", "#6A826C", "#FF029D", "#FE8900", "#7A4782", "#7E2DD2", "#85A900", "#FF0056", "#A42400", "#00AE7E", "#683D3B", "#BDC6FF", "#263400", "#BDD393", "#00B917", "#9E008E", "#001544", "#C28C9F", "#FF74A3", "#01D0FF", "#004754", "#E56FFE", "#788231", "#0E4CA1", "#91D0CB", "#BE9970", "#968AE8", "#BB8800", "#43002C", "#DEFF74", "#00FFC6", "#FFE502", "#620E00", "#008F9C", "#98FF52", "#7544B1", "#B500FF", "#00FF78", "#FF6E41", "#005F39", "#6B6882", "#5FAD4E", "#A75740", "#A5FFD2", "#FFB167", "#009BFF", "#E85EBE"]
-                    };
-                }
+                instance ??= {
+                    stringToColorHash: {},
+                    nextVeryDifferntColorIdx: 0,
+                    veryDifferentColors: ["#00FF00", "#0000FF", "#FF0000", "#01FFFE", "#FFA6FE", "#FFDB66", "#006401", "#010067", "#95003A", "#007DB5", "#FF00F6", "#FFEEE8", "#774D00", "#90FB92", "#0076FF", "#D5FF00", "#FF937E", "#6A826C", "#FF029D", "#FE8900", "#7A4782", "#7E2DD2", "#85A900", "#FF0056", "#A42400", "#00AE7E", "#683D3B", "#BDC6FF", "#263400", "#BDD393", "#00B917", "#9E008E", "#001544", "#C28C9F", "#FF74A3", "#01D0FF", "#004754", "#E56FFE", "#788231", "#0E4CA1", "#91D0CB", "#BE9970", "#968AE8", "#BB8800", "#43002C", "#DEFF74", "#00FFC6", "#FFE502", "#620E00", "#008F9C", "#98FF52", "#7544B1", "#B500FF", "#00FF78", "#FF6E41", "#005F39", "#6B6882", "#5FAD4E", "#A75740", "#A5FFD2", "#FFB167", "#009BFF", "#E85EBE"]
+                };
 
                 if (!instance.stringToColorHash[str]) {
                     instance.stringToColorHash[str] = instance.veryDifferentColors[instance.nextVeryDifferntColorIdx++];
