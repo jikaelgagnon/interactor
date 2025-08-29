@@ -1,6 +1,6 @@
 import {DBDocument } from "../database/dbdocument";
 import { SenderMethod } from "./sender";
-export {BackgroundMessage};
+export {BackgroundMessage, MessageResponse};
 /**
  * A class used to send messages from the content to the background script in a consistent format.
  */
@@ -15,4 +15,9 @@ class BackgroundMessage {
         this.senderMethod = senderMethod;
         this.payload = payload;
     }
+}
+
+interface MessageResponse {
+  status: string;
+  highlight?: boolean;
 }

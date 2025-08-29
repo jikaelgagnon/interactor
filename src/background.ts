@@ -1,7 +1,7 @@
 import { collection, addDoc, updateDoc, doc, arrayUnion } from "firebase/firestore";
 import { db } from "./database/firebase";
 import { ActivityDocument, SessionDocument } from "./database/dbdocument";
-import { BackgroundMessage } from "./communication/backgroundmessage";
+import { BackgroundMessage, MessageResponse } from "./communication/backgroundmessage";
 import { SenderMethod } from "./communication/sender";
 
 let USE_DB = false;
@@ -95,7 +95,6 @@ class SessionManager {
           const errorMessage = error instanceof Error ? error.message : String(error);
           sendResponse({ status: "Error", message: errorMessage });
         });
-      return true;
     });
 
     chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
@@ -122,7 +121,7 @@ class SessionManager {
    * @returns 
    */
 
-  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<object> {
+  private async handleMessage(request: BackgroundMessage, tabId: number | null): Promise<MessageResponse> {
     const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
 
     switch (request.senderMethod) {

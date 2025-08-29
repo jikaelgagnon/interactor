@@ -1,9 +1,9 @@
 import { Monitor } from "./interactions/monitor";
 import ytConfig from './configs/youtube_config.json';
-import tiktokConfig from './configs/tiktok_config.json';
-import linkedinConfig from './configs/linkedin_config.json';
+// import tiktokConfig from './configs/tiktok_config.json';
+// import linkedinConfig from './configs/linkedin_config.json';
 import { ConfigLoader, ExtractorData } from "./interactions/config";
-import { ActivityType } from "./communication/activity";
+// import { ActivityType } from "./communication/activity";
 import { SenderMethod } from "./communication/sender";
 
 
@@ -19,8 +19,8 @@ const getHomepageVideos = (): object => {
     
     const videos = contentDivs.map(contentDiv => {
         // Get the direct anchor child
-        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a')! as HTMLAnchorElement;
-        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string')!;
+        const anchor = contentDiv.querySelector(':scope > yt-lockup-view-model a') as HTMLAnchorElement;
+        const span = contentDiv.querySelector('h3 a span.yt-core-attributed-string');
         
         return {
             link: anchor?.href ?? '',
@@ -61,7 +61,7 @@ const extractors = [new ExtractorData(SenderMethod.InteractionDetection, "/", ge
 
 const ytConfigLoader = new ConfigLoader(ytConfig, extractors);
 
-const ytInteractor = new Monitor(ytConfigLoader);
+new Monitor(ytConfigLoader);
 
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
