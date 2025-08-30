@@ -13582,9 +13582,9 @@
                       (function __PRIVATE_targetGetSegmentCount(e) {
                         let t = new SortedSet(FieldPath$1.comparator),
                           n = !1
+                        // __name__ is not an explicit segment of any index, so we don't need to
+                        // count it.
                         for (const r of e.filters)
-                          // __name__ is not an explicit segment of any index, so we don't need to
-                          // count it.
                           for (const e of r.getFlattenedFilters())
                             e.field.isKeyField() ||
                               // ARRAY_CONTAINS or ARRAY_CONTAINS_ANY filters must be counted separately.
@@ -22376,9 +22376,8 @@
                       const r = e.K_.get(t)
                       if (!r)
                         // A watched target might have been removed already.
-                        return
-                      // Clear the resume token for the target, since we're in a known mismatch
-                      // state.
+                        return // Clear the resume token for the target, since we're in a known mismatch
+                        // state.
                       ;(e.K_.set(
                         t,
                         r.withResumeToken(
@@ -23197,7 +23196,7 @@
                 : !s.na() &&
                   t.ra() &&
                   // The removed listener is the last one that sourced from watch.
-                  (i = 2) /* ListenerRemovalAction.RequireWatchDisconnectionOnly */)
+                  (i = 2)) /* ListenerRemovalAction.RequireWatchDisconnectionOnly */
           }
           switch (i) {
             case 0 /* ListenerRemovalAction.TerminateLocalListenAndRequireWatchDisconnection */:
@@ -23249,9 +23248,10 @@
           })
         }
 
-        var jt, Ht
+        var jt,
+          Ht
 
-        /** Listen to both cache and server changes */
+          /** Listen to both cache and server changes */
         ;(((Ht = jt || (jt = {}))._a = "default"),
           /** Listen to changes in cache only */
           (Ht.Cache = "cache"))
@@ -25225,10 +25225,12 @@
          * @param bundleReader - Bundle to load into the SDK.
          * @param task - LoadBundleTask used to update the loading progress to public API.
          */ function __PRIVATE_syncEngineLoadBundle(e, t, n) {
-          const r = __PRIVATE_debugCast(e)
+          const r =
+            __PRIVATE_debugCast(
+              e,
+            ) /** Loads a bundle and returns the list of affected collection groups. */
           // eslint-disable-next-line @typescript-eslint/no-floating-promises
-          ;/** Loads a bundle and returns the list of affected collection groups. */
-          (async function __PRIVATE_loadBundleImpl(e, t, n) {
+          ;(async function __PRIVATE_loadBundleImpl(e, t, n) {
             try {
               const r = await t.getMetadata()
               if (
@@ -39844,7 +39846,8 @@ SPDX-License-Identifier: Apache-2.0
   })()
   /******/
   /******/ /* webpack/runtime/global */
-  /******/ ;(() => {
+  /******/
+  ;(() => {
     /******/ __webpack_require__.g = (function () {
       /******/ if (typeof globalThis === "object") return globalThis
       /******/ try {
@@ -39860,14 +39863,16 @@ SPDX-License-Identifier: Apache-2.0
   })()
   /******/
   /******/ /* webpack/runtime/hasOwnProperty shorthand */
-  /******/ ;(() => {
+  /******/
+  ;(() => {
     /******/ __webpack_require__.o = (obj, prop) =>
       Object.prototype.hasOwnProperty.call(obj, prop)
     /******/
   })()
   /******/
   /******/ /* webpack/runtime/make namespace object */
-  /******/ ;(() => {
+  /******/
+  ;(() => {
     /******/ // define __esModule on exports
     /******/ __webpack_require__.r = (exports) => {
       /******/ if (typeof Symbol !== "undefined" && Symbol.toStringTag) {

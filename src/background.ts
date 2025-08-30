@@ -237,7 +237,7 @@ class SessionManager {
   private onMessageReceived(
     message: MessageToBackground,
     sender: chrome.runtime.MessageSender,
-    sendResponse: (response: any) => void,
+    sendResponse: (response: object) => void,
   ): boolean {
     const tabId = sender.tab?.id ?? -1
     console.log("message received!")
@@ -311,9 +311,9 @@ class SessionManager {
     session.sessionInfo = payload
     session.sessionInfo.email = email
     session.setBaseUrl(session.sessionInfo.sourceURL)
-    session.setTabId(tabId!)
+    session.setTabId(tabId)
     await session.createEntryInDB()
-    await this.createSessionChromeStorage(tabId!, session)
+    await this.createSessionChromeStorage(tabId, session)
     await chrome.action.setPopup({ popup: "popup.html" })
 
     try {
