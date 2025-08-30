@@ -13,12 +13,126 @@ interface StoredSessionData {
   baseUrl?: string;
 }
 
+class TabSessionData {
+  sessionInfo: SessionDocument;
+  sessionId = "";
+  activityList: ActivityDocument[] = [];
+  baseUrl = "";
+  private tabId: number | null = null;
+
+  constructor() {
+    this.sessionInfo = new SessionDocument("", "");
+  }
+
+  /**
+   * Sets the tab ID this session belongs to, so it can self-persist.
+   */
+  setTabId(tabId: number): void {
+    this.tabId = tabId;
+  }
+
+  getHostname(url: string): string {
+    return new URL(url).hostname;
+  }
+
+  setBaseUrl(url: string): void {
+    try {
+      this.baseUrl = this.getHostname(url);
+    } catch {
+      console.error("Could not parse base URL:", url);
+    }
+  }
+
+  hasSameBaseUrl(url: string): boolean {
+    try {
+      return this.baseUrl === this.getHostname(url);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Adds a document to memory and persists the session to chrome.storage.local.
+   */
+  async appendToActivityList(document: ActivityDocument): Promise<void> {
+    this.activityList.push(document);
+    await this.addToChromeLocalStorage();
+  }
+
+  private async addToChromeLocalStorage(): Promise<void> {
+    if (this.tabId === null) return;
+
+    const data = {
+      sessionId: this.sessionId,
+      sessionInfo: this.sessionInfo,
+      documents: this.activityList,
+    };
+
+    await chrome.storage.local.set({ [this.tabId]: data });
+  }
+  
+
+  async flushActivitiesListToDB(): Promise<void> {
+    if (!USE_DB || !this.sessionId || this.activityList.length === 0) return;
+    if (!this.tabId){
+      console.error("Trying to flush a session with no tab ID");
+      return;
+    }
+
+    try {
+      const sessionDocRef = doc(db, "userData", this.sessionId);
+      await updateDoc(sessionDocRef, {
+        documents: arrayUnion(...this.activityList),
+      });
+      console.log(`Flushed ${this.activityList.length} activities to session:`, this.sessionId);
+      this.activityList = [];
+      await this.addToChromeLocalStorage(); // deletes from local storage
+    } catch (e) {
+      console.error("Error flushing activities:", e);
+    }
+  }
+
+  async createEntryInDB(): Promise<string | null> {
+    if (!USE_DB) return null;
+
+    try {
+      const sessionData = {
+        sessionInfo: this.sessionInfo,
+        documents: [],
+      };
+
+      const docRef = await addDoc(collection(db, "userData"), sessionData);
+      this.sessionId = docRef.id;
+      return docRef.id;
+    } catch (e) {
+      console.error("Error creating session:", e);
+      return null;
+    }
+  }
+
+  async setSessionEndTimeInDB(): Promise<void> {
+    if (!USE_DB || !this.sessionId) return;
+
+    try {
+      const sessionDocRef = doc(db, "userData", this.sessionId);
+      await updateDoc(sessionDocRef, {
+        "sessionInfo.endTime": new Date().toISOString(),
+      });
+      console.log(`Session ${this.sessionId} closed`);
+    } catch (e) {
+      console.error("Error closing session:", e);
+    }
+  }
+}
+
+
 class SessionManager {
   private static instance: SessionManager;
-  private sessionCache: Map<number, SessionData>;
+  // Maps tab ID to the tab's session data
+  private cachedTabSessions: Map<number, TabSessionData>;
 
   private constructor() {
-    this.sessionCache = new Map();
+    this.cachedTabSessions = new Map();
   }
 
   /**
@@ -59,12 +173,12 @@ class SessionManager {
    * to the database
    * @param tabId - the unique ID for the related tab
    */
-  private async closeSession(tabId: number): Promise<void> {
+  private async flushCloseAndRemoveSession(tabId: number): Promise<void> {
     const session = await this.loadSession(tabId);
     if (session) {
-      await session.flushAllActivitiesToDb();
-      await session.closeSessionInDb();
-      await this.removeSession(tabId);
+      await session.flushActivitiesListToDB();
+      await session.setSessionEndTimeInDB();
+      await this.removeSessionFromCache(tabId);
     }
   }
 
@@ -81,41 +195,47 @@ class SessionManager {
 
   private setupListeners(): void {
     chrome.tabs.onRemoved.addListener((tabId: number) => {
-      this.closeSession(tabId).catch(error => {
+      this.flushCloseAndRemoveSession(tabId).catch(error => {
         console.error("Error closing session:", error);
       });
     });
 
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      const tabId = sender.tab?.id ?? null;
-      console.log("message received!");
-      this.handleMessage(message as MessageToBackground, tabId)
-        .then((response) => {
-          console.log("sending response:", response);
-          sendResponse(response)})
-        .catch((error) => {
-          console.error("Error handling message:", error);
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          sendResponse({ status: "Error", message: errorMessage });
-        });
-      // Tell Chrome that sendResponse will be called asynchronously
-      return true;
-    });
+    chrome.runtime.onMessage.addListener(this.onMessageReceived.bind(this));
 
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
-      if (changeInfo.url) {
+    chrome.tabs.onUpdated.addListener(this.onTabUpdate.bind(this));
+  }
+
+  private onTabUpdate(tabId: number, changeInfo: chrome.tabs.TabChangeInfo): void{
+    if (changeInfo.url) {
         this.loadSession(tabId)
           .then(session => {
             if (session && !session.hasSameBaseUrl(changeInfo.url!)) {
               console.log("URL CHANGED... CLOSING SESSION");
-              return this.closeSession(tabId);
+              return this.flushCloseAndRemoveSession(tabId);
             }
           })
           .catch(error => {
             console.error("Error handling tab update:", error);
           });
       }
-    });
+  }
+
+  private onMessageReceived(message: MessageToBackground, 
+    sender: chrome.runtime.MessageSender, 
+    sendResponse: (response:any) => void): boolean{
+    const tabId = sender.tab?.id ?? -1;
+    console.log("message received!");
+    this.handleMessage(message, tabId)
+      .then((response) => {
+        console.log("sending response:", response);
+        sendResponse(response)})
+      .catch((error) => {
+        console.error("Error handling message:", error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        sendResponse({ status: "Error", message: errorMessage });
+      });
+    // Tell Chrome that sendResponse will be called asynchronously
+    return true;
   }
 
   /**
@@ -126,27 +246,39 @@ class SessionManager {
    * @returns 
    */
 
-  private async handleMessage(request: MessageToBackground, tabId: number | null): Promise<MessageResponse> {
-    const session = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new SessionData();
-
+  private async handleMessage(request: MessageToBackground, tabId: number): Promise<MessageResponse> {
+    const session: TabSessionData = tabId !== null ? await this.getOrCreateSessionForTab(tabId) : new TabSessionData();
+    let response: MessageResponse;
     console.log("handling message");
 
     switch (request.senderMethod) {
       case SenderMethod.InteractionDetection:
       case SenderMethod.NavigationDetection: {
         const doc = request.payload as ActivityDocument;
-        await session.addActivityDocument(doc);
-        console.log("sending response");
-        return { status: "Activity added to local session." };
+        await session.appendToActivityList(doc);
+        response = { status: "Activity added to local session." };
+        break;
       }
 
       case SenderMethod.InitializeSession:{
+        console.log("initializing session from background");
+        response = await this.initializeSessionInfo(session, request.payload as SessionDocument, tabId);
+        break;
+      }
+      default:{
+        response =  { status: `Unrecognized request type: ${request.senderMethod}` };
+      }
+    }
+    return response;
+  }
+
+  private async initializeSessionInfo(session: TabSessionData, payload: SessionDocument, tabId: number): Promise<MessageResponse>{
         const email = await this.getUserEmail();
-        session.sessionInfo = request.payload as SessionDocument;
+        session.sessionInfo = payload;
         session.sessionInfo.email = email;
         session.setBaseUrl(session.sessionInfo.sourceURL);
         session.setTabId(tabId!);
-        await session.createSessionInDb();
+        await session.createEntryInDB();
         await this.createSessionChromeStorage(tabId!, session);
         await chrome.action.setPopup({ popup: "popup.html" });
   
@@ -169,13 +301,7 @@ class SessionManager {
         }
         console.log("sending response");
 
-        return { status: "Session initialized", highlight: highlightElements};
-      }
-      default:{
-        console.log("sending response");
-        return { status: `Unrecognized request type: ${request.senderMethod}` };
-      }
-    }
+        return {status: "Session initialized", highlight: highlightElements};
   }
 
   /**
@@ -184,12 +310,12 @@ class SessionManager {
    * @param tabId - unique ID for the tab
    * @returns 
    */
-  private async getOrCreateSessionForTab(tabId: number): Promise<SessionData> {
+  private async getOrCreateSessionForTab(tabId: number): Promise<TabSessionData> {
     let session = await this.loadSession(tabId);
     if (!session) {
-      session = new SessionData();
+      session = new TabSessionData();
       session.setTabId(tabId);
-      this.sessionCache.set(tabId, session);
+      this.cachedTabSessions.set(tabId, session);
     }
     return session;
   }
@@ -199,11 +325,11 @@ class SessionManager {
    * @param tabId - the unique tab ID 
    * @param session - initial data for the session
    */
-  private async createSessionChromeStorage(tabId: number, session: SessionData): Promise<void> {
+  private async createSessionChromeStorage(tabId: number, session: TabSessionData): Promise<void> {
     const data = {
       sessionId: session.sessionId,
       sessionInfo: session.sessionInfo,
-      documents: session.documents,
+      documents: session.activityList,
     };
     await chrome.storage.local.set({ [tabId]: data });
   }
@@ -212,9 +338,9 @@ class SessionManager {
    * Removes session data from cache and Chrome local storage
    * @param tabId - unique ID for the tab
    */
-  private async removeSession(tabId: number): Promise<void> {
+  private async removeSessionFromCache(tabId: number): Promise<void> {
     await chrome.storage.local.remove(String(tabId));
-    this.sessionCache.delete(tabId);
+    this.cachedTabSessions.delete(tabId);
   }
 
   /**
@@ -224,21 +350,23 @@ class SessionManager {
    * @param tabId 
    * @returns 
    */
-  private async loadSession(tabId: number): Promise<SessionData | null> {
-    if (this.sessionCache.has(tabId)) return this.sessionCache.get(tabId)!;
+  public async loadSession(tabId: number): Promise<TabSessionData | null> {
+    if (this.cachedTabSessions.has(tabId)) return this.cachedTabSessions.get(tabId)!;
 
     const result = await chrome.storage.local.get(String(tabId));
-    if (!result[tabId]) return null;
+    if (!result[tabId]) {
+      console.error("Tried to load a session that doesn't exist in local storage");
+      return null};
     const typedResult = result as Record<number, StoredSessionData>;
     const storedData = typedResult[tabId];
 
-    const session = new SessionData();
+    const session = new TabSessionData();
     session.sessionId = storedData.sessionId;
     session.sessionInfo = storedData.sessionInfo;
-    session.documents = storedData.documents ?? [];
+    session.activityList = storedData.documents ?? [];
     session.baseUrl = storedData.baseUrl ?? "";
     session.setTabId(tabId);
-    this.sessionCache.set(tabId, session);
+    this.cachedTabSessions.set(tabId, session);
     return session;
   }
 
@@ -269,113 +397,6 @@ class SessionManager {
         }
       });
     });
-  }
-}
-
-class SessionData {
-  sessionInfo: SessionDocument;
-  sessionId = "NO ID SET";
-  documents: ActivityDocument[] = [];
-  baseUrl = "";
-  private tabId: number | null = null;
-
-  constructor() {
-    this.sessionInfo = new SessionDocument("", "");
-  }
-
-  /**
-   * Sets the tab ID this session belongs to, so it can self-persist.
-   */
-  setTabId(tabId: number): void {
-    this.tabId = tabId;
-  }
-
-  getHostname(url: string): string {
-    return new URL(url).hostname;
-  }
-
-  setBaseUrl(url: string): void {
-    try {
-      this.baseUrl = this.getHostname(url);
-    } catch {
-      console.error("Could not parse base URL:", url);
-    }
-  }
-
-  hasSameBaseUrl(url: string): boolean {
-    try {
-      return this.baseUrl === this.getHostname(url);
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Adds a document to memory and persists the session to chrome.storage.local.
-   */
-  async addActivityDocument(document: ActivityDocument): Promise<void> {
-    this.documents.push(document);
-    await this.addToChromeLocalStorage();
-  }
-
-  private async addToChromeLocalStorage(): Promise<void> {
-    if (this.tabId === null) return;
-
-    const data = {
-      sessionId: this.sessionId,
-      sessionInfo: this.sessionInfo,
-      documents: this.documents,
-    };
-
-    await chrome.storage.local.set({ [this.tabId]: data });
-  }
-
-  async flushAllActivitiesToDb(): Promise<void> {
-    if (!USE_DB || !this.sessionId || this.documents.length === 0) return;
-
-    try {
-      const sessionDocRef = doc(db, "userData", this.sessionId);
-      await updateDoc(sessionDocRef, {
-        documents: arrayUnion(...this.documents),
-      });
-      console.log(`Flushed ${this.documents.length} activities to session:`, this.sessionId);
-      this.documents = [];
-      await this.addToChromeLocalStorage(); // persist cleared docs
-    } catch (e) {
-      console.error("Error flushing activities:", e);
-    }
-  }
-
-  async createSessionInDb(): Promise<string | null> {
-    if (!USE_DB) return null;
-
-    try {
-      const sessionData = {
-        sessionInfo: this.sessionInfo,
-        documents: [],
-      };
-
-      const docRef = await addDoc(collection(db, "userData"), sessionData);
-      this.sessionId = docRef.id;
-      return docRef.id;
-    } catch (e) {
-      console.error("Error creating session:", e);
-      return null;
-    }
-  }
-
-  async closeSessionInDb(): Promise<void> {
-    if (!USE_DB || !this.sessionId) return;
-
-    try {
-      const sessionDocRef = doc(db, "userData", this.sessionId);
-      await updateDoc(sessionDocRef, {
-        "sessionInfo.endTime": new Date().toISOString(),
-      });
-      console.log(`Session ${this.sessionId} closed`);
-    } catch (e) {
-      console.error("Error closing session:", e);
-    }
   }
 }
 
