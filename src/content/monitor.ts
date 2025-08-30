@@ -208,14 +208,9 @@ export class Monitor {
    * @returns A document interaction self loop
    */
 
-  private createInteractionRecord(
-    element: Element,
-    name: string,
-    event: Event,
-  ): DBDocument {
+  private createInteractionRecord(name: string, event: Event): DBDocument {
     console.log("Detected interaction event")
     const pageSpecificData: object = {
-      html: element.getHTML(),
       elementName: name,
     }
     const extractedData = this.extractorList.extract(
@@ -285,15 +280,15 @@ export class Monitor {
 
   private onInteractionDetection(
     element: Element,
-    e: Event,
+    event: Event,
     name: string,
   ): void {
     console.log("interaction event detected")
-    console.log(`Event detected with event type: ${e.type}`)
+    console.log(`Event detected with event type: ${event.type}`)
     console.log(`Event triggered by`, element)
     // console.log(element.innerHTML);
     // console.log(element.getHTML());
-    const record: DBDocument = this.createInteractionRecord(element, name, e)
+    const record: DBDocument = this.createInteractionRecord(name, event)
     this.sendMessageToBackground(
       SenderMethod.InteractionDetection,
       record,
