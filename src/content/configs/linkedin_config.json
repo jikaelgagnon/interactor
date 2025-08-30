@@ -1,23 +1,60 @@
 {
-    "baseURL": "https://www.linkedin.com",
-    "events": ["pause", "play", "seeked", "seeking", "scroll", "click", "ended", "keypress"],
-    "paths": {
-        "/*": {"selectors": [
-            {"selector": "button[aria-label^='React']", "name": "React Button"},
-            {"selector": "button[aria-label='Comment']", "name": "Comment Button"},
-            {"selector": "button[aria-label='Send in a private message']", "name": "Send Button"},
-            {"selector": "button.social-reshare-button", "name": "Repost Button"},
-            {"selector": "button.follow", "name": "Follow Button"},
-            {"selector": "div.update-components-actor__container", "name": "Profile Header"},
-            {"selector": "button[aria-label$='to connect']", "name": "Connect Button"},
-            {"selector": "button[aria-label^='Message']", "name": "Message Button"},
-            {"selector": ":has(> span[title^='Home'])", "name": "Home Button"},
-            {"selector": ":has(> span[title^='My network'])", "name": "My Network Button"},
-            {"selector": ":has(> span[title^='Jobs'])", "name": "Jobs Button"},
-            {"selector": ":has(> span[title^='Messaging'])", "name": "Messaging Button"},
-            {"selector": ":has(> span[title^='Notifications'])", "name": "Notifications Button"},
-            {"selector": "div.feed-shared-update-v2__content", "name": "Post Content"}            
-        ]
+  "baseURL": "https://www.linkedin.com",
+  "events": [
+    "pause",
+    "play",
+    "seeked",
+    "seeking",
+    "scroll",
+    "click",
+    "ended",
+    "keypress"
+  ],
+  "paths": {
+    "/*": {
+      "selectors": [
+        { "selector": "button[aria-label^='React']", "name": "React Button" },
+        {
+          "selector": "button[aria-label='Comment']",
+          "name": "Comment Button"
+        },
+        {
+          "selector": "button[aria-label='Send in a private message']",
+          "name": "Send Button"
+        },
+        { "selector": "button.social-reshare-button", "name": "Repost Button" },
+        { "selector": "button.follow", "name": "Follow Button" },
+        {
+          "selector": "div.update-components-actor__container",
+          "name": "Profile Header"
+        },
+        {
+          "selector": "button[aria-label$='to connect']",
+          "name": "Connect Button"
+        },
+        {
+          "selector": "button[aria-label^='Message']",
+          "name": "Message Button"
+        },
+        { "selector": ":has(> span[title^='Home'])", "name": "Home Button" },
+        {
+          "selector": ":has(> span[title^='My network'])",
+          "name": "My Network Button"
+        },
+        { "selector": ":has(> span[title^='Jobs'])", "name": "Jobs Button" },
+        {
+          "selector": ":has(> span[title^='Messaging'])",
+          "name": "Messaging Button"
+        },
+        {
+          "selector": ":has(> span[title^='Notifications'])",
+          "name": "Notifications Button"
+        },
+        {
+          "selector": "div.feed-shared-update-v2__content",
+          "name": "Post Content"
+        }
+      ]
     }
-    }
+  }
 }

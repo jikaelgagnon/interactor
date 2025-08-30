@@ -1,35 +1,41 @@
-/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/*!************************!*\
+/******/ ;(() => {
+  // webpackBootstrap
+  /******/ "use strict"
+  /*!************************!*\
   !*** ./src/options.ts ***!
   \************************/
 
-// Saves options to chrome.storage
-const saveOptions = () => {
-    const highlightElements = document.getElementById('highlightElements').checked;
-    const useDB = document.getElementById('useDB').checked;
+  // Saves options to chrome.storage
+  const saveOptions = () => {
+    const highlightElements =
+      document.getElementById("highlightElements").checked
+    const useDB = document.getElementById("useDB").checked
     chrome.storage.sync.set({ highlightElements, useDB }, () => {
-        // Update status to let user know options were saved.
-        const status = document.getElementById('status');
-        if (status) {
-            status.textContent = 'Options saved.';
-            setTimeout(() => {
-                status.textContent = '';
-            }, 750);
-        }
-    });
-};
-// Restores select box and checkbox state using the preferences
-// stored in chrome.storage.
-const restoreOptions = () => {
-    chrome.storage.sync.get({ highlightElements: true, useDB: false }, (items) => {
-        document.getElementById('highlightElements').checked = items.highlightElements;
-        document.getElementById('useDB').checked = items.useDB;
-    });
-};
-document.addEventListener('DOMContentLoaded', restoreOptions);
-(document.getElementById('save')).addEventListener('click', saveOptions);
+      // Update status to let user know options were saved.
+      const status = document.getElementById("status")
+      if (status) {
+        status.textContent = "Options saved."
+        setTimeout(() => {
+          status.textContent = ""
+        }, 750)
+      }
+    })
+  }
+  // Restores select box and checkbox state using the preferences
+  // stored in chrome.storage.
+  const restoreOptions = () => {
+    chrome.storage.sync.get(
+      { highlightElements: true, useDB: false },
+      (items) => {
+        document.getElementById("highlightElements").checked =
+          items.highlightElements
+        document.getElementById("useDB").checked = items.useDB
+      },
+    )
+  }
+  document.addEventListener("DOMContentLoaded", restoreOptions)
+  document.getElementById("save").addEventListener("click", saveOptions)
 
-/******/ })()
-;
+  /******/
+})()
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3B0aW9ucy5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxrQ0FBa0M7QUFDbEMsTUFBTSxXQUFXLEdBQUcsR0FBUyxFQUFFO0lBQzdCLE1BQU0saUJBQWlCLEdBQUksUUFBUSxDQUFDLGNBQWMsQ0FBQyxtQkFBbUIsQ0FBc0IsQ0FBQyxPQUFPLENBQUM7SUFDckcsTUFBTSxLQUFLLEdBQUksUUFBUSxDQUFDLGNBQWMsQ0FBQyxPQUFPLENBQXNCLENBQUMsT0FBTyxDQUFDO0lBRTdFLE1BQU0sQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FDckIsRUFBRSxpQkFBaUIsRUFBRSxLQUFLLEVBQUUsRUFDNUIsR0FBRyxFQUFFO1FBQ0gscURBQXFEO1FBQ3JELE1BQU0sTUFBTSxHQUFHLFFBQVEsQ0FBQyxjQUFjLENBQUMsUUFBUSxDQUFFLENBQUM7UUFDbEQsSUFBSSxNQUFNLEVBQUUsQ0FBQztZQUNYLE1BQU0sQ0FBQyxXQUFXLEdBQUcsZ0JBQWdCLENBQUM7WUFDdEMsVUFBVSxDQUFDLEdBQUcsRUFBRTtnQkFDZCxNQUFNLENBQUMsV0FBVyxHQUFHLEVBQUUsQ0FBQztZQUMxQixDQUFDLEVBQUUsR0FBRyxDQUFDLENBQUM7UUFDVixDQUFDO0lBQ0gsQ0FBQyxDQUNGLENBQUM7QUFDSixDQUFDLENBQUM7QUFFRiwrREFBK0Q7QUFDL0QsNEJBQTRCO0FBQzVCLE1BQU0sY0FBYyxHQUFHLEdBQVMsRUFBRTtJQUNoQyxNQUFNLENBQUMsT0FBTyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQ3JCLEVBQUUsaUJBQWlCLEVBQUUsSUFBSSxFQUFFLEtBQUssRUFBRSxLQUFLLEVBQUUsRUFDekMsQ0FBQyxLQUFxRCxFQUFFLEVBQUU7UUFDdkQsUUFBUSxDQUFDLGNBQWMsQ0FBQyxtQkFBbUIsQ0FBc0IsQ0FBQyxPQUFPLEdBQUcsS0FBSyxDQUFDLGlCQUFpQixDQUFDO1FBQ3BHLFFBQVEsQ0FBQyxjQUFjLENBQUMsT0FBTyxDQUFzQixDQUFDLE9BQU8sR0FBRyxLQUFLLENBQUMsS0FBSyxDQUFDO0lBQy9FLENBQUMsQ0FDRixDQUFDO0FBQ0osQ0FBQyxDQUFDO0FBRUYsUUFBUSxDQUFDLGdCQUFnQixDQUFDLGtCQUFrQixFQUFFLGNBQWMsQ0FBQyxDQUFDO0FBRTlELENBQUMsUUFBUSxDQUFDLGNBQWMsQ0FBQyxNQUFNLENBQUUsQ0FBQyxDQUFDLGdCQUFnQixDQUFDLE9BQU8sRUFBRSxXQUFXLENBQUMsQ0FBQyIsInNvdXJjZXMiOlsid2VicGFjazovL2ludGVyYWN0b3IvLi9zcmMvb3B0aW9ucy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBTYXZlcyBvcHRpb25zIHRvIGNocm9tZS5zdG9yYWdlXG5jb25zdCBzYXZlT3B0aW9ucyA9ICgpOiB2b2lkID0+IHtcbiAgY29uc3QgaGlnaGxpZ2h0RWxlbWVudHMgPSAoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2hpZ2hsaWdodEVsZW1lbnRzJykgYXMgSFRNTElucHV0RWxlbWVudCkuY2hlY2tlZDtcbiAgY29uc3QgdXNlREIgPSAoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3VzZURCJykgYXMgSFRNTElucHV0RWxlbWVudCkuY2hlY2tlZDtcblxuICBjaHJvbWUuc3RvcmFnZS5zeW5jLnNldChcbiAgICB7IGhpZ2hsaWdodEVsZW1lbnRzLCB1c2VEQiB9LFxuICAgICgpID0+IHtcbiAgICAgIC8vIFVwZGF0ZSBzdGF0dXMgdG8gbGV0IHVzZXIga25vdyBvcHRpb25zIHdlcmUgc2F2ZWQuXG4gICAgICBjb25zdCBzdGF0dXMgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc3RhdHVzJykhO1xuICAgICAgaWYgKHN0YXR1cykge1xuICAgICAgICBzdGF0dXMudGV4dENvbnRlbnQgPSAnT3B0aW9ucyBzYXZlZC4nO1xuICAgICAgICBzZXRUaW1lb3V0KCgpID0+IHtcbiAgICAgICAgICBzdGF0dXMudGV4dENvbnRlbnQgPSAnJztcbiAgICAgICAgfSwgNzUwKTtcbiAgICAgIH1cbiAgICB9XG4gICk7XG59O1xuXG4vLyBSZXN0b3JlcyBzZWxlY3QgYm94IGFuZCBjaGVja2JveCBzdGF0ZSB1c2luZyB0aGUgcHJlZmVyZW5jZXNcbi8vIHN0b3JlZCBpbiBjaHJvbWUuc3RvcmFnZS5cbmNvbnN0IHJlc3RvcmVPcHRpb25zID0gKCk6IHZvaWQgPT4ge1xuICBjaHJvbWUuc3RvcmFnZS5zeW5jLmdldChcbiAgICB7IGhpZ2hsaWdodEVsZW1lbnRzOiB0cnVlLCB1c2VEQjogZmFsc2UgfSxcbiAgICAoaXRlbXM6IHsgaGlnaGxpZ2h0RWxlbWVudHM6IGJvb2xlYW47IHVzZURCOiBib29sZWFuIH0pID0+IHtcbiAgICAgIChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnaGlnaGxpZ2h0RWxlbWVudHMnKSBhcyBIVE1MSW5wdXRFbGVtZW50KS5jaGVja2VkID0gaXRlbXMuaGlnaGxpZ2h0RWxlbWVudHM7XG4gICAgICAoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3VzZURCJykgYXMgSFRNTElucHV0RWxlbWVudCkuY2hlY2tlZCA9IGl0ZW1zLnVzZURCO1xuICAgIH1cbiAgKTtcbn07XG5cbmRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoJ0RPTUNvbnRlbnRMb2FkZWQnLCByZXN0b3JlT3B0aW9ucyk7XG5cbihkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnc2F2ZScpISkuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLCBzYXZlT3B0aW9ucyk7XG4iXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=
