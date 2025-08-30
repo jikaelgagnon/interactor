@@ -40,7 +40,9 @@ jobs:
         run: |
           npm run format-check
           npm run lint
-
       - name: Build
         run: |
           npm run build
+      - name: Unit Tets
+        run: |
+          npm run test
