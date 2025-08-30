@@ -241,7 +241,7 @@ class DataManager {
       const flattenedActivities = activities.map((activity) => {
         const metadata = activity.metadata ?? {}
         const metadataSummary = Object.entries(metadata)
-          .map(([key, value]) => `${key}=${String(value)}`)
+          .map(([key, value]) => `${key}=${JSON.stringify(value)}}`)
           .join(", ")
 
         return {
