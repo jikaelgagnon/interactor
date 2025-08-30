@@ -40,7 +40,7 @@ class StoredSessionData {
 +sessionInfo: SessionDocument
 +documents?: ActivityDocument[]
 +baseUrl?: string
-            
+
         }
 SessionManager  --  SessionManager
 SessionData  --  SessionDocument
@@ -80,14 +80,14 @@ class SessionData {
             +id: string
 +sessionInfo: #123; email: string; startTime: string; endTime?: string; sourceURL: string; sourceDocumentTitle: string; #125;
 +activities: ActivityDocument[]
-            
+
         }
 class FirebaseSessionData {
             <<interface>>
             +id: string
 +sessionInfo?: #123; email: string; startTime: string; endTime?: string; sourceURL: string; sourceDocumentTitle: string; #125;
 +documents?: ActivityDocument[]
-            
+
         }
 DataManager  -- "0..*" SessionData
 SessionData  -- "0..*" ActivityDocument
@@ -102,13 +102,13 @@ Both
 class BackgroundMessage{
             +senderMethod: SenderMethod
 +payload: DBDocument
-            
+
         }
 class MessageResponse {
             <<interface>>
             +status: string
 +highlight?: boolean
-            
+
         }
 BackgroundMessage  --  SenderMethod
 BackgroundMessage  --  DBDocument
@@ -123,14 +123,14 @@ Any
 class DBDocument{
             +sourceURL: string
 +sourceDocumentTitle: string
-            
+
         }
 class ActivityDocument{
             +activityType: string
 +createdAt: string | Date
 +eventType: string
 +metadata?: object
-            
+
         }
 class SessionDocument{
             +startTime: Date
@@ -144,7 +144,7 @@ class ExtractorData{
             +eventType: SenderMethod
 +urlPattern: string
 +extractor: () =~ object
-            
+
         }
 class ExtractorList{
             -extractors: ExtractorData[]
@@ -154,19 +154,19 @@ class ExtractorList{
 class ConfigLoader{
             +config: Config
 +extractorList: ExtractorList
-            
+
         }
 class SelectorNamePair {
             <<interface>>
             +selector: string
 +name: string
-            
+
         }
 class PatternData {
             <<interface>>
             +selectors?: SelectorNamePair[]
 +dataExtractor?: () =~ object
-            
+
         }
 class Config {
             <<interface>>
@@ -174,7 +174,7 @@ class Config {
 +paths: PatternSelectorMap
 +debug?: boolean
 +events?: string[]
-            
+
         }
 ExtractorData  --  SenderMethod
 ExtractorList  -- "0..*" ExtractorData

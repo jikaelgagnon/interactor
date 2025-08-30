@@ -18,15 +18,15 @@
 //   ]
 // }
 {
- "extends": "@tsconfig/recommended/tsconfig.json",
- "compilerOptions": {
-  "sourceMap": true,
-  "resolveJsonModule": true,
-  "module": "commonjs",
-  "esModuleInterop": true,
-  "typeRoots": ["node_modules/@types", "src/types/global.d.ts"]
- },
-    "paths": {
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "typeRoots": ["node_modules/@types", "src/types/global.d.ts"]
+  },
+  "paths": {
     "firebase/*": ["src/database/firebase/*"]
-},
+  }
 }

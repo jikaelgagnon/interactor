@@ -9,7 +9,9 @@
     "test": "jest",
     "build": "webpack --config webpack.prod.ts",
     "start": "webpack --watch --config webpack.dev.ts",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format-check": "prettier --check ."
   },
   "repository": {
     "type": "git",
@@ -46,6 +48,7 @@
     "eslint": "^9.34.0",
     "jest": "^30.1.1",
     "jest-environment-jsdom": "^30.1.1",
+    "prettier": "3.6.2",
     "ts-jest": "^29.4.1",
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",

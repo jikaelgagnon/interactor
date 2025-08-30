@@ -1,4 +1,5 @@
 # Info
+
 - `Node.js` is a JavaScript runtime environment (ie. it lets you run JavaScript code)
 - `npm` is used to managed JavaScript packages
 - `package.json` contains the project and dependency info
@@ -8,10 +9,13 @@
 For info on how to run this code see: https://victoronsoftware.com/posts/add-webpack-and-typescript-to-chrome-extension/
 
 # Purpose
+
 This document goes into detail about how the code works and describes various tools used in this repo.
+
 # Overall Structure
 
 This Chrome extension works by communicating back and forth between a content script and a background script. The content script is responsible for interacting with the DOM, logging interactions/navigations, and extracting metadata. Each time the content script logs an activity, it sends a message to the background script, which, as the name suggests, runs in the background. The background script has two main roles:
+
 1. Sending data to the database
 2. Reading the user's settings for the extension (more generally, it can access the Chrome local storage)
 
@@ -27,7 +31,7 @@ The first place to look to understand the content-related code is in [content.ts
 
 This class takes as input a `ConfigLoader`, which itself contains a `Config` and an `ExtractorList`.
 
-- `Config`: Contains the base URL to be *monitored*. Additionally, it contains list of all the URL patterns, HTML elements, and events that will be monitored and logged. 
+- `Config`: Contains the base URL to be _monitored_. Additionally, it contains list of all the URL patterns, HTML elements, and events that will be monitored and logged.
 - `ExtractorList`: Contains a list of `ExtractorData` objects. These objects are used to extract additional metadata from a specified URL.
 
 Subsequentlyy, the class goes through the following steps:
@@ -43,7 +47,7 @@ Essentially all relevant code can be found in [background.ts](./src/background.t
 
 ### Case 1: Receiving a message
 
-Different types of messages can be received which will lead to different behaviour. 
+Different types of messages can be received which will lead to different behaviour.
 
 #### `InitializeSession`
 
@@ -51,15 +55,15 @@ When the first activity is recorded in a new tab, the content script sends the U
 
 #### `InteractionDetection / NavigationDetection`
 
-When activities are detected, both the `TabSessionData` object for that tab and chrome local storage are updated to include the new activity. The mirrored activity data in the background script and the chrome local storage act as safeguard against crashes. Think of the version in the background script as the "fast to access but possibly wrong" version and the Chrome local storage as the "slower to access but probably right" version. The key is the  `loadSession` method:
+When activities are detected, both the `TabSessionData` object for that tab and chrome local storage are updated to include the new activity. The mirrored activity data in the background script and the chrome local storage act as safeguard against crashes. Think of the version in the background script as the "fast to access but possibly wrong" version and the Chrome local storage as the "slower to access but probably right" version. The key is the `loadSession` method:
 
 ```ts
   /**
    * Tries to get data from cache. Otherwise, gets it from chrome local storage.
    * Note that by the way this program is constructed, sessionCache data != Chrome storage data <==> sessionCache data is empty.
    * Thus, we can be certain that the output of this function can be trusted.
-   * @param tabId 
-   * @returns 
+   * @param tabId
+   * @returns
    */
   public async loadSession(tabId: number): Promise<TabSessionData | null> {
     if (this.cachedTabSessions.has(tabId)) return this.cachedTabSessions.get(tabId)!;
@@ -84,11 +88,12 @@ When activities are detected, both the `TabSessionData` object for that tab and 
 
 This is used whenever we are about flush to the DB.
 
-Note: Activities *are not immediately sent to the DB*; this will be done later.
+Note: Activities _are not immediately sent to the DB_; this will be done later.
 
 #### Cases 2/3: Tab close / tab update
 
-If the tab is updated and the base URL changes or the tab is closed, then we 
+If the tab is updated and the base URL changes or the tab is closed, then we
+
 1. Flush all the cached activities to the DB
 2. Set the end time in the DB
 3. Delete from the cache

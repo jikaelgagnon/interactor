@@ -1,41 +1,121 @@
 {
-    "baseURL": "https://www.tiktok.com",
-    "events": ["pause", "play", "seeked", "seeking", "scroll", "click", "ended", "keypress"],
-    "paths": {
-        "/*": {
-            "selectors": [
-                {"selector": "a[data-e2e=\"tiktok-logo\"]", "name": "TikTok Logo"},
-                {"selector": "span[data-e2e=\"like-icon\"]", "name": "Like Button"},
-                {"selector": "span[data-e2e=\"comment-icon\"]", "name": "Comment Button"},
-                {"selector": "span[data-e2e=\"share-icon\"]", "name": "Share Button"},
-                {"selector": "button[aria-label^=\"Add to Favorites.\"]", "name": "Share Button"},
-                {"selector": "button[aria-label=\"For You\"]", "name": "Home Button"},
-                {"selector": "button[aria-label=\"Explore\"]", "name": "Explore Button"},
-                {"selector": "button[aria-label=\"Following\"]", "name": "Following Button"},
-                {"selector": "button[aria-label=\"Upload\"]", "name": "Upload Button"},
-                {"selector": "button[aria-label=\"LIVE\"]", "name": "LIVE Button"},
-                {"selector": "button[aria-label=\"Profile\"]", "name": "Profile Button"},
-                {"selector": "button[aria-label=\"Search\"]", "name": "Search Button"},
-                {"selector": "button[aria-label=\"Friends\"]", "name": "Friends Button"},
-                {"selector": "button[aria-label=\"Activity\"]", "name": "Activity Button"},
-                {"selector": "button[aria-label=\"Messages\"]", "name": "Messages Button"},
-                {"selector": "video", "name": "Video"},
-                {"selector": "div[data-e2e=\"recommend-card\"]", "name": "Profile Recommendation"},
-                {"selector": "button[data-e2e=\"card-followbutton\"]", "name": "Profile Recommendation Follow Button"},
-                {"selector": "a[data-e2e=\"video-author-avatar\"]", "name": "Author Avatar"},
-                {"selector": "button[data-e2e=\"feed-follow\"]", "name": "Feed Follow Button"},
-                {"selector": "button[data-e2e=\"follow-button\"]", "name": "Profile Follow Button"},
-                {"selector": "button[data-e2e=\"message-button\"]", "name": "Profile Message Button"},
-                {"selector": "button[data-e2e=\"share-btn\"]", "name": "Profile Share Button"},
-                {"selector": "button[aria-label=\"Latest\"]", "name": "Profile Latest Button"},
-                {"selector": "button[aria-label=\"Popular\"]", "name": "Profile Popular Button"},
-                {"selector": "button[aria-label=\"Oldest\"]", "name": "Profile Oldest Button"},
-                {"selector": "button[aria-label*=\"Likes\"]", "name": "Profile Video Like Button"},
-                {"selector": "div[data-e2e*=\"comment-like-icon\"], div[aria-label^=\"Like video\"]", "name": "Comment Like Button"},
-                {"selector": "a[data-e2e=\"video-music\"]", "name": "Video Music Button"},
-                {"selector": "button.css-189kgrc-ButtonCategoryItemContainer.e13i6o248, button.css-qexeba-ButtonCategoryItemContainer.e13i6o248", "name": "Category Button"}
-
-            ]
+  "baseURL": "https://www.tiktok.com",
+  "events": [
+    "pause",
+    "play",
+    "seeked",
+    "seeking",
+    "scroll",
+    "click",
+    "ended",
+    "keypress"
+  ],
+  "paths": {
+    "/*": {
+      "selectors": [
+        { "selector": "a[data-e2e=\"tiktok-logo\"]", "name": "TikTok Logo" },
+        { "selector": "span[data-e2e=\"like-icon\"]", "name": "Like Button" },
+        {
+          "selector": "span[data-e2e=\"comment-icon\"]",
+          "name": "Comment Button"
+        },
+        { "selector": "span[data-e2e=\"share-icon\"]", "name": "Share Button" },
+        {
+          "selector": "button[aria-label^=\"Add to Favorites.\"]",
+          "name": "Share Button"
+        },
+        { "selector": "button[aria-label=\"For You\"]", "name": "Home Button" },
+        {
+          "selector": "button[aria-label=\"Explore\"]",
+          "name": "Explore Button"
+        },
+        {
+          "selector": "button[aria-label=\"Following\"]",
+          "name": "Following Button"
+        },
+        {
+          "selector": "button[aria-label=\"Upload\"]",
+          "name": "Upload Button"
+        },
+        { "selector": "button[aria-label=\"LIVE\"]", "name": "LIVE Button" },
+        {
+          "selector": "button[aria-label=\"Profile\"]",
+          "name": "Profile Button"
+        },
+        {
+          "selector": "button[aria-label=\"Search\"]",
+          "name": "Search Button"
+        },
+        {
+          "selector": "button[aria-label=\"Friends\"]",
+          "name": "Friends Button"
+        },
+        {
+          "selector": "button[aria-label=\"Activity\"]",
+          "name": "Activity Button"
+        },
+        {
+          "selector": "button[aria-label=\"Messages\"]",
+          "name": "Messages Button"
+        },
+        { "selector": "video", "name": "Video" },
+        {
+          "selector": "div[data-e2e=\"recommend-card\"]",
+          "name": "Profile Recommendation"
+        },
+        {
+          "selector": "button[data-e2e=\"card-followbutton\"]",
+          "name": "Profile Recommendation Follow Button"
+        },
+        {
+          "selector": "a[data-e2e=\"video-author-avatar\"]",
+          "name": "Author Avatar"
+        },
+        {
+          "selector": "button[data-e2e=\"feed-follow\"]",
+          "name": "Feed Follow Button"
+        },
+        {
+          "selector": "button[data-e2e=\"follow-button\"]",
+          "name": "Profile Follow Button"
+        },
+        {
+          "selector": "button[data-e2e=\"message-button\"]",
+          "name": "Profile Message Button"
+        },
+        {
+          "selector": "button[data-e2e=\"share-btn\"]",
+          "name": "Profile Share Button"
+        },
+        {
+          "selector": "button[aria-label=\"Latest\"]",
+          "name": "Profile Latest Button"
+        },
+        {
+          "selector": "button[aria-label=\"Popular\"]",
+          "name": "Profile Popular Button"
+        },
+        {
+          "selector": "button[aria-label=\"Oldest\"]",
+          "name": "Profile Oldest Button"
+        },
+        {
+          "selector": "button[aria-label*=\"Likes\"]",
+          "name": "Profile Video Like Button"
+        },
+        {
+          "selector": "div[data-e2e*=\"comment-like-icon\"], div[aria-label^=\"Like video\"]",
+          "name": "Comment Like Button"
+        },
+        {
+          "selector": "a[data-e2e=\"video-music\"]",
+          "name": "Video Music Button"
+        },
+        {
+          "selector": "button.css-189kgrc-ButtonCategoryItemContainer.e13i6o248, button.css-qexeba-ButtonCategoryItemContainer.e13i6o248",
+          "name": "Category Button"
         }
+      ]
     }
+  }
 }

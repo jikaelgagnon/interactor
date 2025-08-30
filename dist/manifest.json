@@ -5,7 +5,11 @@
   "description": "Logs user interactions for selected websites",
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*", "https://www.tiktok.com/*", "https://www.linkedin.com/*"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://www.tiktok.com/*",
+        "https://www.linkedin.com/*"
+      ],
       "js": ["content.js"]
     }
   ],
@@ -13,14 +17,9 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": [
-    "identity",
-    "identity.email",
-    "storage",
-    "tabs"
-  ],
+  "permissions": ["identity", "identity.email", "storage", "tabs"],
   "icons": {
-  "128": "markov_logger_logo.png"
+    "128": "markov_logger_logo.png"
   },
   "action": {
     "default_icon": "markov_logger_logo.png",
@@ -29,7 +28,7 @@
   },
   "options_page": "options.html",
   "options_ui": {
-  "page": "options.html",
-  "open_in_tab": false
+    "page": "options.html",
+    "open_in_tab": false
   }
 }
