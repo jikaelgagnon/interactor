@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths: # We only run the workflow if the code in these files/directories changes
-      - '.github/workflows/lint-and-format.yml' # This file
-      - 'src/**' 
+      - ".github/workflows/lint-and-format.yml" # This file
+      - "src/**"
   pull_request:
     paths:
-      - '.github/workflows/lint-and-format.yml'
-      - 'src/**'
+      - ".github/workflows/lint-and-format.yml"
+      - "src/**"
 
 # This allows a subsequently queued workflow run to interrupt previous runs
 concurrency:
@@ -21,7 +21,6 @@ defaults:
   run:
     shell: bash
     working-directory: ./src
-
 
 permissions:
   contents: read
