@@ -42,7 +42,7 @@ const getHomepageVideos = (): ExtractedMetadata => {
 }
 
 const getRecommendedVideos = (): ExtractedMetadata => {
-  console.log("---- EXTRACTING RECOMMENDED LINKS ---")
+  console.log("---- EXTRACTING RECOMMENDED LINKS ----")
   const contentDivs = Array.from(
     document.querySelectorAll("yt-lockup-view-model"),
   ).filter((div) => {
