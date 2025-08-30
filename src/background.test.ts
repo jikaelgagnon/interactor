@@ -9,9 +9,7 @@ describe("SessionManager.getInstance useDB behavior", () => {
   })
 
   it("sets useDB = true when chrome.storage.sync.get returns true", async () => {
-    (chrome.storage.sync.get as jest.Mock).mockImplementation(async (key) => {
-        return { useDB: true };
-    });
+    (chrome.storage.sync.get as jest.Mock).mockResolvedValue({ useDB: true })
 
     const instance = await SessionManager.getInstance()
 
@@ -45,6 +43,3 @@ describe("SessionManager.getInstance useDB behavior", () => {
     expect((instance as any).useDB).toBe(false)
   })
 })
-
-
-
