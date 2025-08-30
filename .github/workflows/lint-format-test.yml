@@ -9,7 +9,7 @@ on:
       - "src/**"
   pull_request:
     paths:
-      - ".github/workflows/lint-and-format.yml"
+      - ".github/workflows/*"
       - "src/**"
 
 # This allows a subsequently queued workflow run to interrupt previous runs
