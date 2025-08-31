@@ -14,6 +14,8 @@ const config = tseslint.config(
       "coverage/**/*",
       "src/types/*",
       "src/content.ts",
+      "src/*test.ts",
+
     ],
   },
   {

@@ -138,7 +138,7 @@ class SessionManager {
   private static instance: SessionManager
   // Maps tab ID to the tab's session data
   private cachedTabSessions: Map<number, TabSessionData>
-  private useDB: boolean = false;
+  private useDB = false
 
   private constructor() {
     this.cachedTabSessions = new Map()
@@ -154,14 +154,14 @@ class SessionManager {
         await chrome.storage.sync.get("useDB")
       if (useDB !== undefined) {
         // console.log("After loading, useDB =", useDB)
-        return useDB;
+        return useDB
       } else {
         console.error("useDB not found in storage, using default of false")
-        return false;
+        return false
       }
     } catch (error) {
       console.error("Error detected when trying to load USE_DB:", error)
-      return false;
+      return false
     }
   }
 
@@ -391,7 +391,7 @@ class SessionManager {
    * @returns
    */
   public async loadSession(tabId: number): Promise<TabSessionData | null> {
-    console.log("attempting to load session for tab ID:", tabId);
+    console.log("attempting to load session for tab ID:", tabId)
     if (this.cachedTabSessions.has(tabId))
       return this.cachedTabSessions.get(tabId)!
 
@@ -442,4 +442,4 @@ class SessionManager {
   }
 }
 
-export {TabSessionData, SessionManager}
+export { TabSessionData, SessionManager }

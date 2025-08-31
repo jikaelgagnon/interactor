@@ -1,5 +1,5 @@
-import { SessionManager } from "./background/sessionmanagement";
-import { describe, expect, it } from "@jest/globals";
+import { SessionManager } from "./background/sessionmanagement"
+import { describe, expect, it } from "@jest/globals"
 
 describe("SessionManager.getInstance useDB behavior", () => {
   beforeEach(() => {
@@ -9,7 +9,7 @@ describe("SessionManager.getInstance useDB behavior", () => {
   })
 
   it("sets useDB = true when chrome.storage.sync.get returns true", async () => {
-    (chrome.storage.sync.get as jest.Mock).mockResolvedValue({ useDB: true })
+    ;(chrome.storage.sync.get as jest.Mock).mockResolvedValue({ useDB: true })
 
     const instance = await SessionManager.getInstance()
 
@@ -18,7 +18,7 @@ describe("SessionManager.getInstance useDB behavior", () => {
   })
 
   it("sets useDB = false when chrome.storage.sync.get returns false", async () => {
-    (chrome.storage.sync.get as jest.Mock).mockResolvedValue({ useDB: false })
+    ;(chrome.storage.sync.get as jest.Mock).mockResolvedValue({ useDB: false })
 
     const instance = await SessionManager.getInstance()
 
@@ -26,7 +26,7 @@ describe("SessionManager.getInstance useDB behavior", () => {
   })
 
   it("sets useDB = false when chrome.storage.sync.get returns undefined", async () => {
-    (chrome.storage.sync.get as jest.Mock).mockResolvedValue({})
+    ;(chrome.storage.sync.get as jest.Mock).mockResolvedValue({})
 
     const instance = await SessionManager.getInstance()
 
@@ -34,7 +34,7 @@ describe("SessionManager.getInstance useDB behavior", () => {
   })
 
   it("sets useDB = false when chrome.storage.sync.get throws", async () => {
-    (chrome.storage.sync.get as jest.Mock).mockRejectedValue(
+    ;(chrome.storage.sync.get as jest.Mock).mockRejectedValue(
       new Error("storage unavailable"),
     )
 
