@@ -59,11 +59,14 @@ class TabSessionData {
    * Adds a document to memory and persists the session to chrome.storage.local.
    */
   async appendToActivityList(document: ActivityDocument): Promise<void> {
+    console.log("appending to activity list. printing document")
+    console.log(document)
     this.activityList.push(document)
     await this.addToChromeLocalStorage()
   }
 
   private async addToChromeLocalStorage(): Promise<void> {
+    console.log("adding to chrome local storage")
     if (this.tabId === null) return
 
     const data = {

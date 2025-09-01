@@ -9,6 +9,7 @@ jest.setTimeout(30000) // 30 seconds
 const EXTENSION_PATH = path.resolve(__dirname, "../dist")
 
 let browser: Browser
+let worker: WebWorker | null
 let extensionId: string
 
 async function getServiceWorker(browser: Browser): Promise<WebWorker | null> {
@@ -43,9 +44,23 @@ beforeAll(async () => {
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
-      '--disable-features=site-per-process'
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--disable-gpu",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
+      // '--disable-web-security', //Don't enforce the same-origin policy.
     ],
   })
+
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  worker = await getServiceWorker(browser)
 })
 
 afterAll(async () => {
@@ -58,16 +73,14 @@ test("applies selectors to specified elements", async () => {
 })
 
 test("service worker is created", async () => {
-  const worker = await getServiceWorker(browser)
   expect(worker).not.toBeNull()
 })
 
 test("entry created in local storage when accessing monitored tab", async () => {
-  const page = await goToLink(browser, "https://jikaelgagnon.github.io/")
-  // await page.click(".nav-link[href='/blog/']")
-  const worker = await getServiceWorker(browser)
 
   expect(worker).not.toBeNull()
+  const page = await goToLink(browser, "https://jikaelgagnon.github.io/")
+
   if (worker){
     const storage = await worker.evaluate(() => {
       return chrome.storage.local.get(null);
@@ -85,10 +98,6 @@ test("entry created in local storage when accessing monitored tab", async () => 
 })
 
 test("no entry created in local storage when accessing monitored tab", async () => {
-  const page = await goToLink(browser, "https://en.wikipedia.org/wiki/Beer")
-  // await page.click(".nav-link[href='/blog/']")
-  const worker = await getServiceWorker(browser)
-
   expect(worker).not.toBeNull()
   if (worker){
     const storage = await worker.evaluate(() => {
@@ -109,23 +118,39 @@ test("no entry created in local storage when accessing monitored tab", async () 
 // cant get this to work!!!!!!!!!!!!!!!!!!!
 // works in manual tests but cant seem to automate it... very annoying
 
-// test.only("anchor navigations added to local storage", async () => {
-//   const page = await goToLink(browser, "https://jikaelgagnon.github.io/");
-//   const worker = await getServiceWorker(browser);
+test.only("anchor navigations added to local storage", async () => {
+  // const extensionsPage = await browser.newPage();
+  // await extensionsPage.goto("chrome://extensions/");
+  // await extensionsPage.click("#devMode");
+  // await extensionsPage.click("a[title='service worker']")
+  // const page = browser.go
+  // const page = await goToLink(browser, "https://jikaelgagnon.github.io/");
+  const page = await goToLink(browser, "about:blank");
+  
+  await page.goto("https://jikaelgagnon.github.io", { waitUntil: "networkidle0" });
+  await page.bringToFront();
 
-//   page.click(".nav-link[href='/blog/']")
+  console.log('Current URL before click:', page.url());
 
-//   expect(worker).not.toBeNull();
-//   if (worker) {
-//     const tabId = await worker.evaluate(() => {
-//       return chrome.tabs.query({ active: true, currentWindow: true })
-//         .then(([tab]) => tab.id);
-//     });
+  // Click and wait for SPA navigation (pushState change)
+  await Promise.all([
+    page.click(".nav-link[href='/blog/']"),
+    page.waitForFunction(() => location.pathname === "/blog/", { timeout: 10000 })
+  ]);
 
-//     const storage = await worker.evaluate(() => chrome.storage.local.get(null));
-//     const tabData = storage?.[String(tabId)] ?? null;
+  console.log('Current URL after click:', page.url());
 
-//     console.log(tabData);
-//     expect(tabData["documents"].length).not.toBe(0);
-//   }
-// });
+  expect(worker).not.toBeNull();
+  if (worker) {
+    const tabId = await worker.evaluate(() => {
+      return chrome.tabs.query({ active: true, currentWindow: true })
+        .then(([tab]) => tab.id);
+    });
+
+    const storage = await worker.evaluate(() => chrome.storage.local.get(null));
+    const tabData = storage?.[String(tabId)] ?? null;
+
+    console.log(tabData);
+    expect(tabData["documents"].length).not.toBe(0);
+  }
+});

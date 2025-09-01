@@ -1,2 +1,37 @@
-(()=>{"use strict";document.addEventListener("DOMContentLoaded",(()=>{chrome.storage.sync.get({highlightElements:!0,useDB:!1},(e=>{document.getElementById("highlightElements").checked=e.highlightElements,document.getElementById("useDB").checked=e.useDB}))})),document.getElementById("save").addEventListener("click",(()=>{const e=document.getElementById("highlightElements").checked,t=document.getElementById("useDB").checked;chrome.storage.sync.set({highlightElements:e,useDB:t},(()=>{const e=document.getElementById("status");e&&(e.textContent="Options saved.",setTimeout((()=>{e.textContent=""}),750))}))}))})();
-//# sourceMappingURL=options.js.map
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/*!************************!*\
+  !*** ./src/options.ts ***!
+  \************************/
+
+// Saves options to chrome.storage
+const saveOptions = () => {
+    const highlightElements = document.getElementById("highlightElements").checked;
+    const useDB = document.getElementById("useDB").checked;
+    chrome.storage.sync.set({ highlightElements, useDB }, () => {
+        // Update status to let user know options were saved.
+        const status = document.getElementById("status");
+        if (status) {
+            status.textContent = "Options saved.";
+            setTimeout(() => {
+                status.textContent = "";
+            }, 750);
+        }
+    });
+};
+// Restores select box and checkbox state using the preferences
+// stored in chrome.storage.
+const restoreOptions = () => {
+    chrome.storage.sync.get({ highlightElements: true, useDB: false }, (items) => {
+        ;
+        document.getElementById("highlightElements").checked = items.highlightElements;
+        document.getElementById("useDB").checked =
+            items.useDB;
+    });
+};
+document.addEventListener("DOMContentLoaded", restoreOptions);
+document.getElementById("save").addEventListener("click", saveOptions);
+
+/******/ })()
+;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoib3B0aW9ucy5qcyIsIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxrQ0FBa0M7QUFDbEMsTUFBTSxXQUFXLEdBQUcsR0FBUyxFQUFFO0lBQzdCLE1BQU0saUJBQWlCLEdBQ3JCLFFBQVEsQ0FBQyxjQUFjLENBQUMsbUJBQW1CLENBQzVDLENBQUMsT0FBTztJQUNULE1BQU0sS0FBSyxHQUFJLFFBQVEsQ0FBQyxjQUFjLENBQUMsT0FBTyxDQUFzQixDQUFDLE9BQU87SUFFNUUsTUFBTSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLEVBQUUsaUJBQWlCLEVBQUUsS0FBSyxFQUFFLEVBQUUsR0FBRyxFQUFFO1FBQ3pELHFEQUFxRDtRQUNyRCxNQUFNLE1BQU0sR0FBRyxRQUFRLENBQUMsY0FBYyxDQUFDLFFBQVEsQ0FBRTtRQUNqRCxJQUFJLE1BQU0sRUFBRSxDQUFDO1lBQ1gsTUFBTSxDQUFDLFdBQVcsR0FBRyxnQkFBZ0I7WUFDckMsVUFBVSxDQUFDLEdBQUcsRUFBRTtnQkFDZCxNQUFNLENBQUMsV0FBVyxHQUFHLEVBQUU7WUFDekIsQ0FBQyxFQUFFLEdBQUcsQ0FBQztRQUNULENBQUM7SUFDSCxDQUFDLENBQUM7QUFDSixDQUFDO0FBRUQsK0RBQStEO0FBQy9ELDRCQUE0QjtBQUM1QixNQUFNLGNBQWMsR0FBRyxHQUFTLEVBQUU7SUFDaEMsTUFBTSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUNyQixFQUFFLGlCQUFpQixFQUFFLElBQUksRUFBRSxLQUFLLEVBQUUsS0FBSyxFQUFFLEVBQ3pDLENBQUMsS0FBcUQsRUFBRSxFQUFFO1FBQ3hELENBQUM7UUFDQyxRQUFRLENBQUMsY0FBYyxDQUFDLG1CQUFtQixDQUM1QyxDQUFDLE9BQU8sR0FBRyxLQUFLLENBQUMsaUJBQWlCLENBQ2xDO1FBQUMsUUFBUSxDQUFDLGNBQWMsQ0FBQyxPQUFPLENBQXNCLENBQUMsT0FBTztZQUM3RCxLQUFLLENBQUMsS0FBSztJQUNmLENBQUMsQ0FDRjtBQUNILENBQUM7QUFFRCxRQUFRLENBQUMsZ0JBQWdCLENBQUMsa0JBQWtCLEVBQUUsY0FBYyxDQUFDO0FBRTdELFFBQVEsQ0FBQyxjQUFjLENBQUMsTUFBTSxDQUFFLENBQUMsZ0JBQWdCLENBQUMsT0FBTyxFQUFFLFdBQVcsQ0FBQyIsInNvdXJjZXMiOlsid2VicGFjazovL2ludGVyYWN0b3IvLi9zcmMvb3B0aW9ucy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBTYXZlcyBvcHRpb25zIHRvIGNocm9tZS5zdG9yYWdlXG5jb25zdCBzYXZlT3B0aW9ucyA9ICgpOiB2b2lkID0+IHtcbiAgY29uc3QgaGlnaGxpZ2h0RWxlbWVudHMgPSAoXG4gICAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoXCJoaWdobGlnaHRFbGVtZW50c1wiKSBhcyBIVE1MSW5wdXRFbGVtZW50XG4gICkuY2hlY2tlZFxuICBjb25zdCB1c2VEQiA9IChkb2N1bWVudC5nZXRFbGVtZW50QnlJZChcInVzZURCXCIpIGFzIEhUTUxJbnB1dEVsZW1lbnQpLmNoZWNrZWRcblxuICBjaHJvbWUuc3RvcmFnZS5zeW5jLnNldCh7IGhpZ2hsaWdodEVsZW1lbnRzLCB1c2VEQiB9LCAoKSA9PiB7XG4gICAgLy8gVXBkYXRlIHN0YXR1cyB0byBsZXQgdXNlciBrbm93IG9wdGlvbnMgd2VyZSBzYXZlZC5cbiAgICBjb25zdCBzdGF0dXMgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZChcInN0YXR1c1wiKSFcbiAgICBpZiAoc3RhdHVzKSB7XG4gICAgICBzdGF0dXMudGV4dENvbnRlbnQgPSBcIk9wdGlvbnMgc2F2ZWQuXCJcbiAgICAgIHNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgICBzdGF0dXMudGV4dENvbnRlbnQgPSBcIlwiXG4gICAgICB9LCA3NTApXG4gICAgfVxuICB9KVxufVxuXG4vLyBSZXN0b3JlcyBzZWxlY3QgYm94IGFuZCBjaGVja2JveCBzdGF0ZSB1c2luZyB0aGUgcHJlZmVyZW5jZXNcbi8vIHN0b3JlZCBpbiBjaHJvbWUuc3RvcmFnZS5cbmNvbnN0IHJlc3RvcmVPcHRpb25zID0gKCk6IHZvaWQgPT4ge1xuICBjaHJvbWUuc3RvcmFnZS5zeW5jLmdldChcbiAgICB7IGhpZ2hsaWdodEVsZW1lbnRzOiB0cnVlLCB1c2VEQjogZmFsc2UgfSxcbiAgICAoaXRlbXM6IHsgaGlnaGxpZ2h0RWxlbWVudHM6IGJvb2xlYW47IHVzZURCOiBib29sZWFuIH0pID0+IHtcbiAgICAgIDsoXG4gICAgICAgIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKFwiaGlnaGxpZ2h0RWxlbWVudHNcIikgYXMgSFRNTElucHV0RWxlbWVudFxuICAgICAgKS5jaGVja2VkID0gaXRlbXMuaGlnaGxpZ2h0RWxlbWVudHNcbiAgICAgIDsoZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoXCJ1c2VEQlwiKSBhcyBIVE1MSW5wdXRFbGVtZW50KS5jaGVja2VkID1cbiAgICAgICAgaXRlbXMudXNlREJcbiAgICB9LFxuICApXG59XG5cbmRvY3VtZW50LmFkZEV2ZW50TGlzdGVuZXIoXCJET01Db250ZW50TG9hZGVkXCIsIHJlc3RvcmVPcHRpb25zKVxuXG5kb2N1bWVudC5nZXRFbGVtZW50QnlJZChcInNhdmVcIikhLmFkZEV2ZW50TGlzdGVuZXIoXCJjbGlja1wiLCBzYXZlT3B0aW9ucylcbiJdLCJuYW1lcyI6W10sInNvdXJjZVJvb3QiOiIifQ==
