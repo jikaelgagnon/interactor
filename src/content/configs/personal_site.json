@@ -1,0 +1,7 @@
+{
+  "baseURL": "https://jikaelgagnon.github.io",
+  "events": ["click"],
+  "paths": {
+    "/*": [{ "selector": ".nav-link[href='/blog/']", "name": "Blog Link" }]
+  }
+}

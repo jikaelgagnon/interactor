@@ -21,15 +21,11 @@ interface StoredSessionData {
 }
 
 class TabSessionData {
-  sessionInfo: SessionDocument
-  sessionId = ""
+  sessionInfo: SessionDocument | null = null
+  sessionId: string | null = null
   activityList: ActivityDocument[] = []
-  baseUrl = ""
+  baseUrl: string | null = null
   private tabId: number | null = null
-
-  constructor() {
-    this.sessionInfo = new SessionDocument("", "")
-  }
 
   /**
    * Sets the tab ID this session belongs to, so it can self-persist.
@@ -86,16 +82,18 @@ class TabSessionData {
     }
 
     try {
-      const sessionDocRef = doc(db, "userData", this.sessionId)
-      await updateDoc(sessionDocRef, {
-        documents: arrayUnion(...this.activityList),
-      })
-      console.log(
-        `Flushed ${this.activityList.length} activities to session:`,
-        this.sessionId,
-      )
-      this.activityList = []
-      await this.addToChromeLocalStorage() // deletes from local storage
+      if (this.sessionId !== null) {
+        const sessionDocRef = doc(db, "userData", this.sessionId)
+        await updateDoc(sessionDocRef, {
+          documents: arrayUnion(...this.activityList),
+        })
+        console.log(
+          `Flushed ${this.activityList.length} activities to session:`,
+          this.sessionId,
+        )
+        this.activityList = []
+        await this.addToChromeLocalStorage() // deletes from local storage
+      }
     } catch (e) {
       console.error("Error flushing activities:", e)
     }
@@ -225,6 +223,9 @@ class SessionManager {
         .then((session) => {
           if (session && !session.hasSameBaseUrl(changeInfo.url!)) {
             console.log("URL CHANGED... CLOSING SESSION")
+            console.log(
+              `old url was: ${session.baseUrl} new url is ${changeInfo.url}`,
+            )
             return this.flushCloseAndRemoveSession(tabId)
           }
         })
@@ -307,24 +308,32 @@ class SessionManager {
     payload: SessionDocument,
     tabId: number,
   ): Promise<MessageResponse> {
-    const email = await this.getUserEmail()
-    session.sessionInfo = payload
-    session.sessionInfo.email = email
-    session.setBaseUrl(session.sessionInfo.sourceURL)
-    session.setTabId(tabId)
-    await session.createEntryInDB(this.useDB)
-    await this.createSessionChromeStorage(tabId, session)
-    await chrome.action.setPopup({ popup: "popup.html" })
+    console.log("printing session info")
+    console.log(session.sessionInfo)
+    if (session.sessionInfo === null) {
+      console.log("initializing new session info")
+      const email = await this.getUserEmail()
+      session.sessionInfo = payload
+      session.sessionInfo.email = email
+      session.setTabId(tabId)
+      console.log()
+      session.setBaseUrl(payload.sourceURL)
+      await session.createEntryInDB(this.useDB)
+      await this.createSessionChromeStorage(tabId, session)
+      await chrome.action.setPopup({ popup: "popup.html" })
 
-    try {
-      await chrome.action.openPopup()
-    } catch (error) {
-      if (error instanceof Error) {
-        console.warn("Could not open popup:", error.message)
-      } else {
-        console.warn("Could not open popup:", error)
+      try {
+        await chrome.action.openPopup()
+      } catch (error) {
+        if (error instanceof Error) {
+          console.warn("Could not open popup:", error.message)
+        } else {
+          console.warn("Could not open popup:", error)
+        }
+        // Optionally, you could try to open in a new window or handle differently
       }
-      // Optionally, you could try to open in a new window or handle differently
+    } else {
+      console.log("Session already initialized")
     }
     let { highlightElements }: { highlightElements?: boolean } =
       await chrome.storage.sync.get("highlightElements")
@@ -392,21 +401,25 @@ class SessionManager {
    */
   public async loadSession(tabId: number): Promise<TabSessionData | null> {
     console.log("attempting to load session for tab ID:", tabId)
-    if (this.cachedTabSessions.has(tabId))
+    if (this.cachedTabSessions.has(tabId)) {
+      console.log("cached session found")
       return this.cachedTabSessions.get(tabId)!
-
+    }
     const result = await chrome.storage.local.get(String(tabId))
     if (!result[tabId]) {
+      console.log("no session found in local storage. creating new session")
       return null
     }
+    console.log("loading data from local storage")
     const typedResult = result as Record<number, StoredSessionData>
     const storedData = typedResult[tabId]
 
     const session = new TabSessionData()
+
     session.sessionId = storedData.sessionId
     session.sessionInfo = storedData.sessionInfo
     session.activityList = storedData.documents ?? []
-    session.baseUrl = storedData.baseUrl ?? ""
+    session.setBaseUrl(storedData.baseUrl ?? "")
     session.setTabId(tabId)
     this.cachedTabSessions.set(tabId, session)
     return session

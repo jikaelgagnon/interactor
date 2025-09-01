@@ -82,8 +82,7 @@ export class Monitor {
    */
   private async initializeMonitor() {
     console.log("initializing monitor")
-    const currentURL: string = document.location.href
-    this.currentPageData.update(currentURL)
+    this.currentPageData.update(document.location.href)
     try {
       // Creates a new entry in the DB describing the state at the start of the session
       await this.initializeSession()
@@ -184,9 +183,8 @@ export class Monitor {
     activityType: ActivityType,
     event: Event,
   ): DBDocument {
-    console.log("Detected self loop change event")
     const metadata = this.extractorList.extract(
-      this.currentPageData.currentURL,
+      this.currentPageData.currentURL, // runs for "prev page"
       SenderMethod.NavigationDetection,
     )
     console.log("printing metadata")
@@ -297,10 +295,19 @@ export class Monitor {
     })
   }
 
-  private isNewBaseURL(url: string | null): boolean {
-    return url && this.currentPageData.currentURL
-      ? url.split(".")[1] !== this.currentPageData.currentURL.split(".")[1]
-      : false
+  private isNewBaseURL(newURL: string | null): boolean {
+    console.log("checking if url updated")
+    if (newURL === null) {
+      console.log("new url is null")
+      return false
+    }
+    const currentHostname = new URL(this.currentPageData.currentURL).hostname
+    const newHostname = new URL(newURL).hostname
+
+    console.log("current hostname", currentHostname)
+    console.log("new hostname", newHostname)
+
+    return currentHostname !== newHostname
   }
 
   /**
@@ -312,9 +319,10 @@ export class Monitor {
     const baseURLChange: boolean = this.isNewBaseURL(destUrl)
     let record: DBDocument | undefined = undefined
     let sender: SenderMethod | undefined = undefined
-    this.currentPageData.currentURL = navEvent.destination.url ?? "NO URL FOUND"
 
-    console.log(`Navigation detected with event type: ${navEvent.type}`)
+    console.log(
+      `before creating nav record, current URL is ${this.currentPageData.currentURL}`,
+    )
     if (baseURLChange) {
       console.log("URL base change detected. Closing program.")
       record = new DBDocument(this.currentPageData.currentURL, document.title)
@@ -323,13 +331,23 @@ export class Monitor {
       console.log("Push event detected.")
       record = this.createNavigationRecord(ActivityType.StateChange, navEvent)
       sender = SenderMethod.NavigationDetection
-      this.currentPageData.update(document.location.href)
     } else if (navEvent.navigationType === "replace") {
       console.log("Replace event detected.")
-
       record = this.createNavigationRecord(ActivityType.SelfLoop, navEvent)
       sender = SenderMethod.NavigationDetection
     }
+
+    console.log(
+      `after creating nav record, current URL is ${this.currentPageData.currentURL}`,
+    )
+
+    if (destUrl) {
+      this.currentPageData.update(destUrl)
+    }
+
+    console.log(
+      `at end of on nav detect, current URL is ${this.currentPageData.currentURL}`,
+    )
 
     if (typeof record !== "undefined" && typeof sender !== "undefined") {
       this.sendMessageToBackground(sender, record).catch((error) => {

@@ -7,8 +7,7 @@
     {
       "matches": [
         "https://www.youtube.com/*",
-        "https://www.tiktok.com/*",
-        "https://www.linkedin.com/*"
+        "https://jikaelgagnon.github.io/*"
       ],
       "js": ["content.js"]
     }

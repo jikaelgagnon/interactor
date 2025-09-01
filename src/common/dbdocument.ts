@@ -56,11 +56,11 @@ class ActivityDocument extends DBDocument {
  */
 
 class SessionDocument extends DBDocument {
-  startTime: Date
-  endTime?: Date
-  email = "Email not set"
-  constructor(url: string, title: string) {
-    super(url, title)
+  startTime: Date | null
+  endTime?: Date | null
+  email: string | null = null
+  constructor(sourceURL: string, sourceDocumentTitle: string) {
+    super(sourceURL, sourceDocumentTitle)
     this.startTime = new Date()
   }
   setEmail(email: string) {

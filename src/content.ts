@@ -1,5 +1,6 @@
 import { Monitor } from "./content/monitor"
 import ytConfig from "./content/configs/youtube_config.json"
+import personalConfig from "./content/configs/personal_site.json"
 // import tiktokConfig from './configs/tiktok_config.json';
 // import linkedinConfig from './configs/linkedin_config.json';
 import { ConfigLoader, ExtractorData } from "./content/config"
@@ -90,6 +91,9 @@ const extractors = [
 const ytConfigLoader = new ConfigLoader(ytConfig, extractors)
 
 new Monitor(ytConfigLoader)
+
+const personalConfigLoader = new ConfigLoader(personalConfig, [])
+new Monitor(personalConfigLoader)
 
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
