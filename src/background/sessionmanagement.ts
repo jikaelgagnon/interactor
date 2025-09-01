@@ -39,6 +39,7 @@ class TabSessionData {
   }
 
   setBaseUrl(url: string): void {
+    console.log(`attempting to set base url to ${url}`)
     try {
       this.baseUrl = this.getHostname(url)
     } catch {
@@ -316,7 +317,7 @@ class SessionManager {
       session.sessionInfo = payload
       session.sessionInfo.email = email
       session.setTabId(tabId)
-      console.log()
+      console.log("setting base url")
       session.setBaseUrl(payload.sourceURL)
       await session.createEntryInDB(this.useDB)
       await this.createSessionChromeStorage(tabId, session)

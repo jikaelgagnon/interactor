@@ -2,9 +2,9 @@ import "jest-puppeteer"
 import "expect-puppeteer"
 import puppeteer, { Browser, WebWorker, Target, Page } from "puppeteer"
 import path from "path"
-import fs from "fs"
 
 jest.setTimeout(30000) // 30 seconds
+
 
 const EXTENSION_PATH = path.resolve(__dirname, "../dist")
 
@@ -29,6 +29,13 @@ async function goToLink(browser: Browser, link: string) {
 const youTubeWatchLink = "https://www.youtube.com/watch?v=l6cZ6zs7dTg&t=499s"
 const wikipediaLink = "https://en.wikipedia.org/wiki/Multilayer_perceptron"
 
+async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true };
+  // `tab` will either be a `tabs.Tab` instance or `undefined`.
+  let [tab] = await chrome.tabs.query(queryOptions);
+  return tab;
+}
+
 beforeAll(async () => {
   browser = await puppeteer.launch({
     headless: false, // can also set this to `new`
@@ -36,6 +43,7 @@ beforeAll(async () => {
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
+      '--disable-features=site-per-process'
     ],
   })
 })
@@ -54,15 +62,70 @@ test("service worker is created", async () => {
   expect(worker).not.toBeNull()
 })
 
-test.only("mirror of SessionManager exists in chrome local storage", async () => {
+test("entry created in local storage when accessing monitored tab", async () => {
   const page = await goToLink(browser, "https://jikaelgagnon.github.io/")
-  page.click(".nav-link[href='/blog/']")
+  // await page.click(".nav-link[href='/blog/']")
   const worker = await getServiceWorker(browser)
+
   expect(worker).not.toBeNull()
-  // if (worker){
-  //   const value = await worker.evaluate(() => {
-  //     chrome.storage.local.get(null);
-  //   });
-  //   console.log(value);
-  // }
+  if (worker){
+    const storage = await worker.evaluate(() => {
+      return chrome.storage.local.get(null);
+    });
+    const tabId = await worker.evaluate(() => {
+      const queryOptions = { active: true, currentWindow: true };
+      // Return the promise directly instead of awaiting
+      return chrome.tabs.query(queryOptions).then(([tab]) => tab.id);
+    })
+    const tabData = storage?.[String(tabId)] ?? null;
+    console.log(tabData)
+    expect(tabData).not.toBeNull()
+
+  }
 })
+
+test("no entry created in local storage when accessing monitored tab", async () => {
+  const page = await goToLink(browser, "https://en.wikipedia.org/wiki/Beer")
+  // await page.click(".nav-link[href='/blog/']")
+  const worker = await getServiceWorker(browser)
+
+  expect(worker).not.toBeNull()
+  if (worker){
+    const storage = await worker.evaluate(() => {
+      return chrome.storage.local.get(null);
+    });
+    const tabId = await worker.evaluate(() => {
+      const queryOptions = { active: true, currentWindow: true };
+      // Return the promise directly instead of awaiting
+      return chrome.tabs.query(queryOptions).then(([tab]) => tab.id);
+    })
+    const tabData = storage?.[String(tabId)] ?? null;
+    console.log(tabData)
+    expect(tabData).toBeNull()
+
+  }
+})
+
+// cant get this to work!!!!!!!!!!!!!!!!!!!
+// works in manual tests but cant seem to automate it... very annoying
+
+// test.only("anchor navigations added to local storage", async () => {
+//   const page = await goToLink(browser, "https://jikaelgagnon.github.io/");
+//   const worker = await getServiceWorker(browser);
+
+//   page.click(".nav-link[href='/blog/']")
+
+//   expect(worker).not.toBeNull();
+//   if (worker) {
+//     const tabId = await worker.evaluate(() => {
+//       return chrome.tabs.query({ active: true, currentWindow: true })
+//         .then(([tab]) => tab.id);
+//     });
+
+//     const storage = await worker.evaluate(() => chrome.storage.local.get(null));
+//     const tabData = storage?.[String(tabId)] ?? null;
+
+//     console.log(tabData);
+//     expect(tabData["documents"].length).not.toBe(0);
+//   }
+// });
