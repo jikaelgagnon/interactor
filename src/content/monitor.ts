@@ -47,6 +47,7 @@ export class Monitor {
     // Only initialize monitor if the URL matches and
     // the content of the page is visible
     if (window.location.origin === config.baseURL) {
+      console.log("initializing Monitor for", config.baseURL)
       this.intitializeWhenVisible()
     }
   }
@@ -81,7 +82,6 @@ export class Monitor {
    * Initializes the monitor
    */
   private async initializeMonitor() {
-    console.log("initializing monitor")
     this.currentPageData.update(document.location.href)
     try {
       // Creates a new entry in the DB describing the state at the start of the session
@@ -121,6 +121,8 @@ export class Monitor {
    */
 
   private bindEvents(): void {
+    console.log("binding events")
+    this.addListenersToNewMatches()
     // Whenever new content is loaded, attach observers to each HTML element that matches the selectors in the configs
     const observer: MutationObserver = new MutationObserver(() =>
       this.addListenersToNewMatches(),
@@ -130,7 +132,7 @@ export class Monitor {
       childList: true,
       subtree: true,
     })
-
+    console.log("adding navigation listener")
     // Add an event listener to detect navigations on the page
     navigation.addEventListener("navigate", (e: NavigationEvent) =>
       this.onNavigationDetection(e),
@@ -143,10 +145,9 @@ export class Monitor {
    */
 
   private addListenersToNewMatches(): void {
-    // console.log("adding selectors");
-    // console.log(`Value of highlight: ${this.highlight}`);
-    // console.log("Current page data:");
-    // console.log(this.currentPageData);
+    console.log("adding selectors");
+    console.log("Current page data:");
+    console.log(this.currentPageData);
     this.currentPageData.selectorNamePairs.forEach((selectorNamePair) => {
       const elements: NodeListOf<HTMLElement> = document.querySelectorAll(
         `:is(${selectorNamePair.selector}):not([${this.htmlMonitoringAttribute}])`,

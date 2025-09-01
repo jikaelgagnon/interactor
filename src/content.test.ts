@@ -39,7 +39,7 @@ beforeAll(async () => {
   BROWSER = await puppeteer.launch({
     headless: true, // can also set this to `new`
     pipe: true,
-    dumpio: true,
+    // dumpio: true,
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
@@ -75,17 +75,17 @@ test("service worker is created", async () => {
 })
 
 test("entry created in local storage when accessing monitored tab", async () => {
-  await goToLink(BROWSER, PERSONAL_SITE_LINK)
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
+  await page.bringToFront();
 
-  if (SERVICE_WORKER){
-    const storage = await SERVICE_WORKER.evaluate(() => {
-      return chrome.storage.local.get(null);
-    });
+
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
     const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
     const tabData = storage?.[String(tabId)] ?? null;
-    console.log(tabData)
-    expect(tabData).not.toBeNull()
-
+    console.log(tabData);
+    expect(tabData).not.toBeNull();
   }
 })
 
@@ -103,10 +103,31 @@ test("no entry created in local storage when accessing monitored tab", async () 
   }
 })
 
-// cant get this to work!!!!!!!!!!!!!!!!!!!
-// works in manual tests but cant seem to automate it... very annoying
+test("anchor navigations added to local storage", async () => {
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
+  await page.bringToFront();
 
-test.only("anchor navigations added to local storage", async () => {
+  console.log('Current URL before click:', page.url());
+
+  // Click and wait for SPA navigation (pushState change)
+  await Promise.all([
+    page.click(".nav-link[href='/blog/']"),
+    page.waitForFunction(() => location.pathname === "/blog/", { timeout: 10000 })
+  ]);
+
+  console.log('Current URL after click:', page.url());
+
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
+    const tabData = storage?.[String(tabId)] ?? null;
+    console.log(tabData);
+    expect(tabData["documents"].length).not.toBe(0);
+  }
+});
+
+test("anchor navigations added to local storage", async () => {
   const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
   await page.bringToFront();
 

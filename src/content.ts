@@ -94,7 +94,6 @@ new Monitor(ytConfigLoader)
 
 const personalConfigLoader = new ConfigLoader(personalConfig, [])
 new Monitor(personalConfigLoader)
-window.dispatchEvent(new CustomEvent('contentScriptReady'));
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
 //     if (!vid){
