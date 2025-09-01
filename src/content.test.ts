@@ -39,6 +39,7 @@ beforeAll(async () => {
   BROWSER = await puppeteer.launch({
     headless: true, // can also set this to `new`
     pipe: true,
+    dumpio: true,
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
