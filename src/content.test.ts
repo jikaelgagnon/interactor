@@ -61,7 +61,14 @@ beforeAll(async () => {
   SERVICE_WORKER = await getServiceWorker(BROWSER)
 })
 
+afterEach(async () => {
+  const pages = await BROWSER.pages();
+  await Promise.all(pages.map(page => page.close()));
+});
+
+
 afterAll(async () => {
+  await SERVICE_WORKER?.close();
   await BROWSER.close()
 })
 
@@ -127,7 +134,7 @@ test("anchor navigations added to local storage", async () => {
   }
 });
 
-test("anchor navigations added to local storage", async () => {
+test("anchor clicks and navigations added to local storage", async () => {
   const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
   await page.bringToFront();
 
@@ -148,5 +155,90 @@ test("anchor navigations added to local storage", async () => {
     const tabData = storage?.[String(tabId)] ?? null;
     console.log(tabData);
     expect(tabData["documents"].length).not.toBe(0);
+    expect(tabData["documents"][0]["activityType"]).toBe("Interaction")
+    expect(tabData["documents"][1]["activityType"]).toBe("State Change")
   }
 });
+
+test("session removed from local storage after tab close", async () => {
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
+  await page.bringToFront();
+
+  console.log('Current URL before click:', page.url());
+
+  // Click and wait for SPA navigation (pushState change)
+  await Promise.all([
+    page.click(".nav-link[href='/blog/']"),
+    page.waitForFunction(() => location.pathname === "/blog/", { timeout: 10000 })
+  ]);
+
+  console.log('Current URL after click:', page.url());
+
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    await page.close()
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
+    const tabData = storage?.[String(tabId)] ?? null;
+    expect(tabData).toBe(null)
+  }
+});
+
+test("session removed from local storage after changing to untracked page", async () => {
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
+  await page.bringToFront();
+
+  console.log('Current URL before click:', page.url());
+
+  // Click and wait for SPA navigation (pushState change)
+  await Promise.all([
+    page.click(".nav-link[href='/blog/']"),
+    page.waitForFunction(() => location.pathname === "/blog/", { timeout: 10000 })
+  ]);
+
+  console.log('Current URL after click:', page.url());
+
+  await page.goto(WIKIPEDIA_LINK, { waitUntil: "networkidle0" })
+
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
+    const tabData = storage?.[String(tabId)] ?? null;
+    expect(tabData).toBe(null)
+  }
+});
+
+test("browser back button button counts as navigation", async () => {
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
+  await page.bringToFront();
+
+  // Click and wait for SPA navigation (pushState change)
+  await Promise.all([
+    page.evaluate(() => history.pushState({}, "", "/teaching/")),
+    page.waitForFunction(() => location.pathname === "/teaching/", { timeout: 10000 })
+  ]);
+
+  console.log('Current URL after click:', page.url());
+
+  await Promise.all([
+    page.goBack(),
+    page.waitForFunction(() => location.pathname === "/", { timeout: 10000 })
+  ]);
+
+  console.log('Current URL after goBack:', page.url())
+
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
+    const tabData = storage?.[String(tabId)] ?? null;
+    console.log(tabData["documents"])
+    expect(tabData).not.toBe(null)
+    expect(tabData["documents"].length).toBe(3);
+    expect(tabData["documents"][0]["activityType"]).toBe("State Change")
+    expect(tabData["documents"][1]["activityType"]).toBe("Traversal")
+    expect(tabData["documents"][2]["activityType"]).toBe("State Change")
+  }
+});
+

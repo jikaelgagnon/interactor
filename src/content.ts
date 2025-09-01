@@ -92,8 +92,14 @@ const ytConfigLoader = new ConfigLoader(ytConfig, extractors)
 
 new Monitor(ytConfigLoader)
 
+history.pushState(null, document.title, location.href);
+window.addEventListener('popstate', function (event) {
+    history.pushState(null, document.title, location.href);
+});
+
 const personalConfigLoader = new ConfigLoader(personalConfig, [])
 new Monitor(personalConfigLoader)
+
 // const tiktokIDSelector = (): object => {
 //     let vid = document.querySelector("div.xgplayer-container.tiktok-web-player");
 //     if (!vid){

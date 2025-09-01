@@ -122,7 +122,7 @@ export class Monitor {
 
   private bindEvents(): void {
     console.log("binding events")
-    this.addListenersToNewMatches()
+    this.addListenersToNewMatches() // attach to all existing elements
     // Whenever new content is loaded, attach observers to each HTML element that matches the selectors in the configs
     const observer: MutationObserver = new MutationObserver(() =>
       this.addListenersToNewMatches(),
@@ -337,6 +337,18 @@ export class Monitor {
       record = this.createNavigationRecord(ActivityType.SelfLoop, navEvent)
       sender = SenderMethod.NavigationDetection
     }
+    else if (navEvent.navigationType === "traverse") {
+      console.log("Traverse event detected.")
+      record = this.createNavigationRecord(ActivityType.Traversal, navEvent)
+      console.log(record)
+      sender = SenderMethod.NavigationDetection
+    }
+    else {
+      console.log("matched none of the above")
+      console.log("event:")
+      console.log(navEvent)
+      console.log(navEvent.navigationType)
+    }
 
     console.log(
       `after creating nav record, current URL is ${this.currentPageData.currentURL}`,
@@ -354,6 +366,9 @@ export class Monitor {
       this.sendMessageToBackground(sender, record).catch((error) => {
         console.error("Failed to send interaction data:", error)
       })
+    }
+    else{
+      console.log("not sending due to undefined")
     }
   }
 
