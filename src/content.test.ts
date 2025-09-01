@@ -1,6 +1,6 @@
 import "jest-puppeteer"
 import "expect-puppeteer"
-import puppeteer, { Browser, WebWorker, Target, Page } from "puppeteer"
+import puppeteer, { Browser, WebWorker, GoToOptions } from "puppeteer"
 import path from "path"
 
 jest.setTimeout(30000) // 30 seconds
@@ -8,9 +8,11 @@ jest.setTimeout(30000) // 30 seconds
 
 const EXTENSION_PATH = path.resolve(__dirname, "../dist")
 
-let browser: Browser
-let worker: WebWorker | null
-let extensionId: string
+let BROWSER: Browser
+let SERVICE_WORKER: WebWorker | null
+const YOUTUBE_WATCH_LINK = "https://www.youtube.com/watch?v=l6cZ6zs7dTg&t=499s"
+const PERSONAL_SITE_LINK = "https://jikaelgagnon.github.io/"
+const WIKIPEDIA_LINK = "https://en.wikipedia.org/wiki/Multilayer_perceptron"
 
 async function getServiceWorker(browser: Browser): Promise<WebWorker | null> {
   const workerTarget = await browser.waitForTarget(
@@ -20,26 +22,22 @@ async function getServiceWorker(browser: Browser): Promise<WebWorker | null> {
   return worker
 }
 
-async function goToLink(browser: Browser, link: string) {
+async function goToLink(browser: Browser, link: string, options: GoToOptions = {}) {
   const page = await browser.newPage()
-  await page.goto(link)
+  await page.goto(link, options)
   await page.bringToFront()
   return page
 }
 
-const youTubeWatchLink = "https://www.youtube.com/watch?v=l6cZ6zs7dTg&t=499s"
-const wikipediaLink = "https://en.wikipedia.org/wiki/Multilayer_perceptron"
-
-async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
+function getCurrentTabId() {
+      const queryOptions = { active: true, currentWindow: true };
+      // Return the promise directly instead of awaiting
+      return chrome.tabs.query(queryOptions).then(([tab]) => tab.id);
 }
 
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    headless: false, // can also set this to `new`
+  BROWSER = await puppeteer.launch({
+    headless: true, // can also set this to `new`
     pipe: true,
     args: [
       `--disable-extensions-except=${EXTENSION_PATH}`,
@@ -54,42 +52,35 @@ beforeAll(async () => {
       "--disable-background-timer-throttling",
       "--disable-backgrounding-occluded-windows",
       "--disable-renderer-backgrounding",
-      // '--disable-web-security', //Don't enforce the same-origin policy.
     ],
   })
 
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  worker = await getServiceWorker(browser)
+  SERVICE_WORKER = await getServiceWorker(BROWSER)
 })
 
 afterAll(async () => {
-  // await browser.close()
+  await BROWSER.close()
 })
 
 test("applies selectors to specified elements", async () => {
-  const page = await goToLink(browser, youTubeWatchLink)
+  const page = await goToLink(BROWSER, YOUTUBE_WATCH_LINK)
   await page.waitForSelector("[monitoring-interactions]")
 })
 
 test("service worker is created", async () => {
-  expect(worker).not.toBeNull()
+  expect(SERVICE_WORKER).not.toBeNull()
 })
 
 test("entry created in local storage when accessing monitored tab", async () => {
+  await goToLink(BROWSER, PERSONAL_SITE_LINK)
 
-  expect(worker).not.toBeNull()
-  const page = await goToLink(browser, "https://jikaelgagnon.github.io/")
-
-  if (worker){
-    const storage = await worker.evaluate(() => {
+  if (SERVICE_WORKER){
+    const storage = await SERVICE_WORKER.evaluate(() => {
       return chrome.storage.local.get(null);
     });
-    const tabId = await worker.evaluate(() => {
-      const queryOptions = { active: true, currentWindow: true };
-      // Return the promise directly instead of awaiting
-      return chrome.tabs.query(queryOptions).then(([tab]) => tab.id);
-    })
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
     const tabData = storage?.[String(tabId)] ?? null;
     console.log(tabData)
     expect(tabData).not.toBeNull()
@@ -98,16 +89,12 @@ test("entry created in local storage when accessing monitored tab", async () => 
 })
 
 test("no entry created in local storage when accessing monitored tab", async () => {
-  expect(worker).not.toBeNull()
-  if (worker){
-    const storage = await worker.evaluate(() => {
+  await goToLink(BROWSER, WIKIPEDIA_LINK)
+  if (SERVICE_WORKER){
+    const storage = await SERVICE_WORKER.evaluate(() => {
       return chrome.storage.local.get(null);
     });
-    const tabId = await worker.evaluate(() => {
-      const queryOptions = { active: true, currentWindow: true };
-      // Return the promise directly instead of awaiting
-      return chrome.tabs.query(queryOptions).then(([tab]) => tab.id);
-    })
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId)
     const tabData = storage?.[String(tabId)] ?? null;
     console.log(tabData)
     expect(tabData).toBeNull()
@@ -119,15 +106,7 @@ test("no entry created in local storage when accessing monitored tab", async () 
 // works in manual tests but cant seem to automate it... very annoying
 
 test.only("anchor navigations added to local storage", async () => {
-  // const extensionsPage = await browser.newPage();
-  // await extensionsPage.goto("chrome://extensions/");
-  // await extensionsPage.click("#devMode");
-  // await extensionsPage.click("a[title='service worker']")
-  // const page = browser.go
-  // const page = await goToLink(browser, "https://jikaelgagnon.github.io/");
-  const page = await goToLink(browser, "about:blank");
-  
-  await page.goto("https://jikaelgagnon.github.io", { waitUntil: "networkidle0" });
+  const page = await goToLink(BROWSER, PERSONAL_SITE_LINK, { waitUntil: "networkidle0" });  
   await page.bringToFront();
 
   console.log('Current URL before click:', page.url());
@@ -140,16 +119,11 @@ test.only("anchor navigations added to local storage", async () => {
 
   console.log('Current URL after click:', page.url());
 
-  expect(worker).not.toBeNull();
-  if (worker) {
-    const tabId = await worker.evaluate(() => {
-      return chrome.tabs.query({ active: true, currentWindow: true })
-        .then(([tab]) => tab.id);
-    });
-
-    const storage = await worker.evaluate(() => chrome.storage.local.get(null));
+  expect(SERVICE_WORKER).not.toBeNull();
+  if (SERVICE_WORKER) {
+    const tabId = await SERVICE_WORKER.evaluate(getCurrentTabId);
+    const storage = await SERVICE_WORKER.evaluate(() => chrome.storage.local.get(null));
     const tabData = storage?.[String(tabId)] ?? null;
-
     console.log(tabData);
     expect(tabData["documents"].length).not.toBe(0);
   }
