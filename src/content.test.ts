@@ -8,7 +8,7 @@ jest.setTimeout(30000) // 30 seconds
 
 const EXTENSION_PATH = path.resolve(__dirname, "../dist")
 
-let BROWSER: Browser
+let BROWSER: Browser;
 let SERVICE_WORKER: WebWorker | null
 const YOUTUBE_WATCH_LINK = "https://www.youtube.com/watch?v=l6cZ6zs7dTg&t=499s"
 const PERSONAL_SITE_LINK = "https://jikaelgagnon.github.io/"

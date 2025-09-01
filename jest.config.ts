@@ -5,8 +5,7 @@ const config: JestConfigWithTsJest = {
   // testEnvironment: "jsdom",
   transform: {
     "^.+.ts$": ["ts-jest", {}],
-  },
-  preset: "jest-puppeteer"
+  }
 }
 
 export default config
