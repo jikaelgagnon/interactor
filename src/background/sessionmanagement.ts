@@ -20,6 +20,7 @@ interface StoredSessionData {
   baseUrl?: string
 }
 
+
 class TabSessionData {
   sessionInfo: SessionDocument | null = null
   sessionId: string | null = null
@@ -106,6 +107,8 @@ class TabSessionData {
   async createEntryInDB(useDB: boolean): Promise<string | null> {
     if (!useDB) return null
 
+    console.log("creating db entry")
+
     try {
       const sessionData = {
         sessionInfo: this.sessionInfo,
@@ -140,7 +143,7 @@ class SessionManager {
   private static instance: SessionManager
   // Maps tab ID to the tab's session data
   private cachedTabSessions: Map<number, TabSessionData>
-  private useDB = false
+  private useDB = true
 
   private constructor() {
     this.cachedTabSessions = new Map()
@@ -158,12 +161,12 @@ class SessionManager {
         // console.log("After loading, useDB =", useDB)
         return useDB
       } else {
-        console.error("useDB not found in storage, using default of false")
-        return false
+        console.error("useDB not found in storage, using default of true")
+        return true
       }
     } catch (error) {
       console.error("Error detected when trying to load USE_DB:", error)
-      return false
+      return true
     }
   }
 

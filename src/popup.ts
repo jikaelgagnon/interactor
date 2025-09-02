@@ -5,7 +5,7 @@ import {
   where,
   getDocs,
   doc,
-  writeBatch,
+  writeBatch
 } from "firebase/firestore"
 import { utils, writeFile } from "xlsx"
 import { ActivityDocument } from "./common/dbdocument"
